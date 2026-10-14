@@ -32,11 +32,11 @@ function cleanSearch(value) {
 
 function renderDock() {
   if (!dock.built) return;
-  dockNodes.title.textContent = gt('🗺️ Mapa', '🗺️ Map');
-  dockNodes.close.textContent = gt('Zamknij ✕', 'Close ✕');
-  dockNodes.size.textContent = dock.wide ? '⇥' : '⇤';
+  setLabel(dockNodes.title, 'map', gt('Mapa', 'Map'));
+  setLabel(dockNodes.close, 'x', gt('Zamknij', 'Close'));
+  dockNodes.size.replaceChildren(icon(dock.wide ? 'minimize-2' : 'maximize-2'));
   dockNodes.size.title = dock.wide ? gt('Węższy panel', 'Narrower panel') : gt('Szerszy panel', 'Wider panel');
-  dockNodes.launcher.textContent = gt('🗺️ Mapa', '🗺️ Map');
+  setLabel(dockNodes.launcher, 'map', gt('Mapa', 'Map'));
 
   dockNodes.hint.textContent = gt(
     'Wyszukaj znacznik po angielskiej nazwie, np. Cecilia. Puste pole pokazuje całą mapę. Kliknij znacznik, aby zobaczyć szczegóły.',
@@ -49,7 +49,7 @@ function renderDock() {
     'Mapa pochodzi z AppSample. Znaczniki w bazie kończą się na Sumeru – nowsze regiony mogą nie mieć ich wcale. Jeśli mapa się nie pokazuje, otwórz ją w nowej karcie.',
     'The map comes from AppSample. The marker database ends at Sumeru – newer regions may have no markers. If the map does not show, open it in a new tab.'
   );
-  dockNodes.open.textContent = gt('↗ Otwórz w nowej karcie', '↗ Open in a new tab');
+  setLabel(dockNodes.open, 'external-link', gt('Otwórz w nowej karcie', 'Open in a new tab'));
   dockNodes.open.href = mapUrl(dock.names);
 }
 
@@ -112,7 +112,7 @@ function toggleDockWidth() {
 
 function buildDockHeader() {
   const header = el('div', 'dock-header');
-  dockNodes.title = el('span');
+  dockNodes.title = el('span', 'dock-title');
   const actions = el('div', 'dock-actions');
   dockNodes.size = el('button', 'dock-size');
   dockNodes.size.type = 'button';

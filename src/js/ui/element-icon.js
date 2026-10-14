@@ -1,8 +1,8 @@
-/* Ikony żywiołów z gry (CDN Project Amber) zamiast emoji. Gdy ikona się nie wczyta, wraca emoji. */
+/* Ikony żywiołów z gry (CDN Project Amber). Gdy ikona się nie wczyta, pokazujemy ikonę zastępczą. */
 const ELEMENT_ICON_URL = 'https://gi.yatta.moe/assets/UI/UI_Buff_Element_';
 const ELEMENT_ORDER = ['Fire', 'Water', 'Grass', 'Electric', 'Ice', 'Wind', 'Rock'];
-const SIDE_LEFT = ['Fire', '✨', 'Water', '✨', 'Grass', '✨', 'Electric'];
-const SIDE_RIGHT = ['Ice', '✨', 'Wind', '✨', 'Rock', '✨', '⭐'];
+const SIDE_LEFT = ['Fire', 'sparkle', 'Water', 'sparkle', 'Grass', 'sparkle', 'Electric'];
+const SIDE_RIGHT = ['Ice', 'sparkle', 'Wind', 'sparkle', 'Rock', 'sparkle', 'star'];
 
 function isElement(name) {
   return Object.prototype.hasOwnProperty.call(ELEMENT_EMOJI, name);
@@ -10,13 +10,12 @@ function isElement(name) {
 
 function elementIcon(element) {
   if (!isElement(element)) return document.createTextNode('');
-  const emoji = ELEMENT_EMOJI[element];
   const img = document.createElement('img');
   img.className = 'element-icon';
-  img.alt = emoji;
+  img.alt = element;
   img.src = ELEMENT_ICON_URL + element + '.png';
   img.loading = 'lazy';
-  img.addEventListener('error', () => img.replaceWith(document.createTextNode(emoji)));
+  img.addEventListener('error', () => img.replaceWith(icon('sparkle')));
   return img;
 }
 
@@ -25,9 +24,9 @@ function renderElementRow() {
   if (!row) return;
   row.textContent = '';
   ELEMENT_ORDER.forEach((element, index) => {
-    const icon = elementIcon(element);
-    icon.style.setProperty('--i', String(index));
-    row.append(icon);
+    const node = elementIcon(element);
+    if (node.style) node.style.setProperty('--i', String(index));
+    row.append(node);
   });
 }
 
@@ -37,8 +36,7 @@ function renderSideColumn(id, tokens) {
   column.textContent = '';
   tokens.forEach((token) => {
     const slot = el('span');
-    if (isElement(token)) slot.append(elementIcon(token));
-    else slot.textContent = token;
+    slot.append(isElement(token) ? elementIcon(token) : icon(token));
     column.append(slot);
   });
 }

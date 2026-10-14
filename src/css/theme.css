@@ -1,0 +1,276 @@
+/* Motyw wizualny: czcionki, pasek górny, ikony, przycisk mapy i efekt kliknięcia.
+   Ładowany jako ostatni arkusz, więc nadpisuje wcześniejsze reguły. Czcionki: Fontsource (Cinzel, Nunito, licencja OFL). */
+:root {
+  --font-body: 'Nunito Variable', 'Nunito', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --font-display: 'Cinzel Variable', 'Cinzel', Georgia, 'Times New Roman', serif;
+}
+
+body {
+  font-family: var(--font-body);
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+h1,
+h2,
+.brand,
+h3.section-title,
+.detail-head h4,
+.dock-title,
+.map-launcher {
+  font-family: var(--font-display);
+}
+
+/* Ikony */
+.ico {
+  display: inline-block;
+  flex: none;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.2em;
+  background: currentColor;
+  -webkit-mask: var(--ico) center / contain no-repeat;
+  mask: var(--ico) center / contain no-repeat;
+}
+
+.controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dock-close,
+.dock-size,
+.guide-link,
+.dock-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dock-title .ico {
+  color: var(--accent);
+}
+
+.menu-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-panel {
+  z-index: 60;
+}
+
+.side .ico {
+  color: var(--accent);
+}
+
+/* Pasek górny: cienka złota linia zanikająca na brzegach i mały romb pośrodku */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 0;
+  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.topbar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--accent) 18%, var(--accent) 82%, transparent);
+  opacity: 0.6;
+}
+
+.topbar::before {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+  background: var(--accent);
+  transform: translateX(-50%) rotate(45deg);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.topbar .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  animation: none;
+}
+
+.brand-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--accent), 0 0 14px var(--glow);
+}
+
+.topbar .brand-text {
+  background: linear-gradient(90deg, var(--fg), var(--accent), var(--fg));
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Przycisk mapy: poziomo, z ikoną, przyklejony do prawej krawędzi */
+.map-launcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  writing-mode: horizontal-tb;
+  padding: 10px 14px 10px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 14px 0 0 14px;
+  background: linear-gradient(135deg, var(--card), var(--card-2));
+}
+
+.map-launcher:hover {
+  padding-right: 14px;
+}
+
+.map-launcher .ico {
+  color: var(--accent);
+}
+
+/* Wygląd kart i przycisków */
+h1 {
+  letter-spacing: 0.05em;
+}
+
+h3.section-title {
+  font-weight: 700;
+}
+
+form button[type='submit'] {
+  background: linear-gradient(180deg, #f3d88a, var(--accent));
+  box-shadow: 0 4px 14px var(--glow);
+}
+
+form button[type='submit']:hover {
+  filter: brightness(1.07);
+}
+
+.profile,
+.detail {
+  border-color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+}
+
+.profile::before,
+.detail::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--accent), var(--accent)) top left / 20px 2px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) top left / 2px 20px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom right / 20px 2px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom right / 2px 20px no-repeat;
+  opacity: 0.7;
+}
+
+.character.rarity-5 {
+  background: linear-gradient(180deg, rgba(224, 169, 59, 0.2), var(--card) 75%);
+}
+
+.character.rarity-4 {
+  background: linear-gradient(180deg, rgba(166, 122, 214, 0.2), var(--card) 75%);
+}
+
+.character.selected {
+  background: var(--card-2);
+}
+
+/* Efekt kliknięcia: pierścień i gwiazdki */
+@keyframes fx-burst-fly {
+  from { transform: translate(0, 0) scale(0.2) rotate(0deg); opacity: 1; }
+  to { transform: translate(var(--dx), var(--dy)) scale(var(--s)) rotate(var(--r)); opacity: 0; }
+}
+
+@keyframes fx-burst-ring {
+  from { transform: translate(-50%, -50%) scale(0.2); opacity: 0.8; }
+  to { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+}
+
+.fx-burst {
+  position: fixed;
+  z-index: 9999;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.fx-burst-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  animation: fx-burst-ring 0.6s ease-out forwards;
+}
+
+.fx-burst-star {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  animation: fx-burst-fly 0.7s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .topbar .brand-text {
+    animation: fx-shimmer 7s linear infinite;
+  }
+
+  .topbar::before {
+    animation: fx-glow 3.2s ease-in-out infinite;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar .brand {
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+  }
+
+  .brand-logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .map-launcher {
+    padding: 9px 12px 9px 10px;
+    font-size: 13px;
+  }
+}

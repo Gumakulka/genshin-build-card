@@ -1,4 +1,4 @@
-/* Efekty wizualne: delikatne tło, światło pod kursorem, fale po kliknięciu, liczniki i kolejność pojawiania.
+/* Efekty wizualne: delikatne tło, światło pod kursorem, fale i iskry po kliknięciu, liczniki i kolejność pojawiania.
    Wszystko wyłącza się przy ustawieniu systemowym „ogranicz ruch”. Na ekranach dotykowych pomijamy
    efekty zależne od kursora i iskry w tle, żeby oszczędzać baterię. */
 const fxReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -6,6 +6,7 @@ const fxTouch = !!(window.matchMedia && window.matchMedia('(hover: none)').match
 const FX_STAGGER = ['#result', '.characters', '.chips', '.namecards', '.artifacts', '.compare-box', '.recent', '.hero-icons', '.dock-chips', '.dock-tabs', '.guide-list', '.side'];
 const FX_SPOTLIGHT = '.panel, .artifact-card, .character, .profile, .guide, .detail';
 const FX_RIPPLE = '.action-button, .dock-chip, .dock-tab, .dock-size, .dock-close, .rv-toggle, .controls button, form button, .guide-link, .recent-chip';
+const FX_BURST_MAX = 8;
 
 function fxIndexChildren(container) {
   Array.from(container.children).forEach((child, index) => child.style.setProperty('--i', String(index)));
@@ -55,6 +56,32 @@ function fxRipple(event) {
   setTimeout(() => dot.remove(), 800);
 }
 
+/* Czteroramienne gwiazdki rozlatujące się z miejsca kliknięcia, w stylu efektów z gry. */
+function fxBurst(event) {
+  if (document.querySelectorAll('.fx-burst').length >= FX_BURST_MAX) return;
+  const box = document.createElement('div');
+  box.className = 'fx-burst';
+  box.setAttribute('aria-hidden', 'true');
+  box.style.left = event.clientX + 'px';
+  box.style.top = event.clientY + 'px';
+  box.append(document.createElement('span'));
+  box.firstChild.className = 'fx-burst-ring';
+  const count = fxTouch ? 5 : 7;
+  for (let i = 0; i < count; i += 1) {
+    const angle = ((360 / count) * i + Math.random() * 24) * (Math.PI / 180);
+    const distance = 26 + Math.random() * 30;
+    const star = document.createElement('span');
+    star.className = 'fx-burst-star';
+    star.style.setProperty('--dx', Math.cos(angle) * distance + 'px');
+    star.style.setProperty('--dy', Math.sin(angle) * distance + 'px');
+    star.style.setProperty('--s', String(0.7 + Math.random() * 0.8));
+    star.style.setProperty('--r', Math.round(Math.random() * 180) + 'deg');
+    box.append(star);
+  }
+  document.body.append(box);
+  setTimeout(() => box.remove(), 800);
+}
+
 let fxSpotFrame = 0;
 function fxSpotlight(event) {
   const target = event.target && typeof event.target.closest === 'function' ? event.target.closest(FX_SPOTLIGHT) : null;
@@ -95,9 +122,9 @@ function fxStart() {
     const roots = new Set();
     records.forEach((record) => {
       if (!record.addedNodes.length) return;
-      if (record.target.nodeType === 1) roots.add(record.target);
+      if (record.target.nodeType === 1 && !record.target.classList.contains('fx-burst')) roots.add(record.target);
       record.addedNodes.forEach((node) => {
-        if (node.nodeType === 1 && !node.classList.contains('fx-ripple')) roots.add(node);
+        if (node.nodeType === 1 && !node.classList.contains('fx-ripple') && !node.classList.contains('fx-burst')) roots.add(node);
       });
     });
     roots.forEach((root) => {
@@ -110,6 +137,7 @@ function fxStart() {
   fxAmbient();
   if (!fxTouch) document.addEventListener('pointermove', fxSpotlight, { passive: true });
   document.addEventListener('click', fxRipple);
+  document.addEventListener('click', fxBurst);
 }
 
 fxStart();

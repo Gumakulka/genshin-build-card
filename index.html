@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://enka.network https://gi.yatta.moe; frame-src https://genshin-impact-map.appsample.com; connect-src https://genshin-proxy.klaun970.workers.dev https://raw.githubusercontent.com; base-uri 'none'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' https://enka.network https://gi.yatta.moe https://cdn.jsdelivr.net; frame-src https://genshin-impact-map.appsample.com; connect-src https://genshin-proxy.klaun970.workers.dev https://raw.githubusercontent.com; base-uri 'none'; form-action 'self'">
   <title>Genshin Build Card</title>
   <link rel="icon" type="image/png" href="build/favicon.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/cinzel/index.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/nunito/index.css">
   <link rel="stylesheet" href="src/css/base.css?v=6">
   <link rel="stylesheet" href="src/css/components.css?v=1">
   <link rel="stylesheet" href="src/css/layout.css?v=3">
@@ -15,16 +17,20 @@
   <link rel="stylesheet" href="src/css/loading.css?v=1">
   <link rel="stylesheet" href="src/css/menu.css?v=1">
   <link rel="stylesheet" href="src/css/extras.css?v=1">
+  <link rel="stylesheet" href="src/css/theme.css?v=1">
 </head>
 <body>
   <aside id="side-left" class="side side-left" aria-hidden="true"></aside>
   <aside id="side-right" class="side side-right" aria-hidden="true"></aside>
 
   <header class="topbar">
-    <span class="brand">✨ Genshin Build Card</span>
+    <span class="brand">
+      <img class="brand-logo" src="build/favicon.png" alt="">
+      <span class="brand-text">Genshin Build Card</span>
+    </span>
     <div class="controls">
       <button id="lang-toggle" type="button">EN</button>
-      <button id="theme-toggle" type="button">☀️</button>
+      <button id="theme-toggle" type="button"></button>
     </div>
   </header>
 
@@ -54,11 +60,12 @@
 
   <script src="src/js/data/texts.js?v=1"></script>
   <script src="src/js/data/constants.js?v=1"></script>
-  <script src="src/js/core.js?v=3"></script>
+  <script src="src/js/core.js?v=4"></script>
+  <script src="src/js/ui/icons.js?v=1"></script>
   <script src="src/js/services/store.js?v=2"></script>
   <script src="src/js/services/player.js?v=2"></script>
   <script src="src/js/ui/helpers.js?v=1"></script>
-  <script src="src/js/ui/element-icon.js?v=1"></script>
+  <script src="src/js/ui/element-icon.js?v=2"></script>
   <script src="src/js/ui/lists.js?v=1"></script>
   <script src="src/js/ui/profile.js?v=1"></script>
   <script src="src/js/ui/characters.js?v=2"></script>
@@ -66,11 +73,11 @@
   <script src="src/js/ui/compare.js?v=3"></script>
   <script src="src/js/ui/export-card.js?v=1"></script>
   <script src="src/js/features/guide.js?v=1"></script>
-  <script src="src/js/features/map-dock.js?v=2"></script>
+  <script src="src/js/features/map-dock.js?v=3"></script>
   <script src="src/js/features/farm.js?v=1"></script>
   <script src="src/js/features/swipe.js?v=1"></script>
-  <script src="src/js/features/menu.js?v=2"></script>
-  <script src="src/js/features/fx.js?v=2"></script>
+  <script src="src/js/features/menu.js?v=3"></script>
+  <script src="src/js/features/fx.js?v=3"></script>
   <script src="src/js/app.js?v=4"></script>
 </body>
 </html>

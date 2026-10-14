@@ -116,7 +116,8 @@ function applyTexts() {
     node.title = t(node.dataset.i18nTitle);
   });
   langButton.textContent = state.lang === 'pl' ? 'EN' : 'PL';
-  themeButton.textContent = state.theme === 'dark' ? '☀️' : '🌙';
+  themeButton.replaceChildren(icon(state.theme === 'dark' ? 'sun' : 'moon'));
+  themeButton.setAttribute('aria-label', state.lang === 'pl' ? 'Zmień motyw' : 'Toggle theme');
   renderRecent();
   renderFavorites();
 }
