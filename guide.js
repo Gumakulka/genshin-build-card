@@ -41,7 +41,11 @@ function guideLink(label, url) {
   return link;
 }
 
-function guideBox(lines, tips, links) {
+function guideOpenMap(kind) {
+  if (typeof mapDockOpen === 'function') mapDockOpen(kind);
+}
+
+function guideBox(lines, tips, links, kind) {
   const box = el('details', 'guide');
   box.append(el('summary', '', gt('ℹ️ Gdzie zdobyć, koszty i wskazówki', 'ℹ️ Where to get, costs and tips')));
   const list = el('ul', 'guide-list');
@@ -54,6 +58,15 @@ function guideBox(lines, tips, links) {
     box.append(tipList);
   }
   const row = el('div', 'guide-links');
+  if (kind) {
+    const mapButton = el('button', 'guide-link guide-map-button', gt('🗺️ Pokaż na mapie', '🗺️ Show on the map'));
+    mapButton.type = 'button';
+    mapButton.addEventListener('click', () => guideOpenMap(kind));
+    row.append(mapButton);
+    box.addEventListener('toggle', () => {
+      if (box.open) guideOpenMap(kind);
+    });
+  }
   links.forEach(([label, url]) => row.append(guideLink(label, url)));
   box.append(row);
   return box;
@@ -115,8 +128,8 @@ function guideArtifact(item, store) {
   const mains = guideSlotMain(flat.equipType);
   if (mains) lines.push(gt('Możliwe statystyki główne tego slotu: ', 'Possible main stats for this slot: ') + mains + '.');
   lines.push(gt(
-    'Gdzie zdobyć: w domenach artefaktów (Domains of Blessing) – jedno przejście kosztuje 20 żywicy, a domena zwykle daje do wyboru dwa zestawy. Artefakty wypadają też z elitarnych wrogów i bossów, ze skrzyń oraz z wydarzeń i sklepów.',
-    'Where to get: artifact domains (Domains of Blessing) – one run costs 20 resin and a domain usually offers two sets. Artifacts also drop from elite enemies and bosses, chests, events and shops.'
+    'Gdzie zdobyć: w domenach artefaktów (Domains of Blessing) – jedno przejście kosztuje 20 żywicy, a domena zwykle daje do wyboru dwa zestawy. Artefakty wypadają też z elitarnych wrogów i bossów, ze skrzyń oraz z wydarzeń i sklepów. Domeny pokaże panel mapy.',
+    'Where to get: artifact domains (Domains of Blessing) – one run costs 20 resin and a domain usually offers two sets. Artifacts also drop from elite enemies and bosses, chests, events and shops. The map panel shows the domains.'
   ));
 
   if (level < max) {
@@ -137,7 +150,7 @@ function guideArtifact(item, store) {
   }
 
   const english = guideEnglishName(setHash, store);
-  return guideBox(lines, tips, guideLinks(english));
+  return guideBox(lines, tips, guideLinks(english), 'artifact');
 }
 
 function guideWeapon(item, store) {
@@ -162,8 +175,8 @@ function guideWeapon(item, store) {
     'Refinement R' + ((affix || 0) + 1) + ' of R5 – it strengthens the weapon passive. It usually needs duplicates of the same weapon; special or event weapons may need another material.'
   ));
   lines.push(gt(
-    'Ulepszanie poziomu: 10 EXP broni kosztuje 1 Morę. Wzniesienia wymagają materiałów z domen broni, dropu z wrogów i Mory.',
-    'Leveling: 10 weapon EXP costs 1 Mora. Ascensions need weapon domain materials, enemy drops and Mora.'
+    'Ulepszanie poziomu: 10 EXP broni kosztuje 1 Morę. Wzniesienia wymagają materiałów z domen broni, dropu z wrogów i Mory – domeny pokaże panel mapy.',
+    'Leveling: 10 weapon EXP costs 1 Mora. Ascensions need weapon domain materials, enemy drops and Mora – the map panel shows the domains.'
   ));
   if (rarity === 5) {
     lines.push(gt('Same wzniesienia 5★ broni od poziomu 1 do 80 kosztują około 225 000 Mory.', 'The ascensions of a 5★ weapon from level 1 to 80 cost around 225,000 Mora.'));
@@ -195,7 +208,7 @@ function guideWeapon(item, store) {
   }
 
   const english = guideEnglishName(flat.nameTextMapHash !== undefined ? flat.nameTextMapHash : flat.nameTextHashMap, store);
-  return guideBox(lines, tips, guideLinks(english));
+  return guideBox(lines, tips, guideLinks(english), 'weapon');
 }
 
 function guideCharacter(details, character, shown, store) {
@@ -251,8 +264,8 @@ function guideCharacter(details, character, shown, store) {
     ));
   }
   lines.push(gt(
-    'Materiały do rozwoju (lokalne specjalności, boss, drop z wrogów) znajdziesz na mapie poniżej.',
-    'Ascension materials (local specialties, bosses, enemy drops) can be found on the maps below.'
+    'Materiały do rozwoju (domeny, bossowie, lokalne specjalności) pokaże panel mapy – wysuwa się po wybraniu postaci.',
+    'Ascension materials (domains, bosses, local specialties) are shown in the map panel – it slides in when you pick a character.'
   ));
 
   if (cap && level < cap) tips.push(gt('Postać jest na poziomie ' + level + ' z limitu ' + cap + ' – możesz ją jeszcze podnieść bez wzniesienia.', 'The character is level ' + level + ' of the cap ' + cap + ' – you can still level without ascending.'));
@@ -293,5 +306,5 @@ function guideCharacter(details, character, shown, store) {
 
   let english = character ? guideEnglishName(character.NameTextMapHash, store) : null;
   if (!english && raw) english = NAME_FIX[raw] || raw;
-  return guideBox(lines, tips, guideLinks(english));
+  return guideBox(lines, tips, guideLinks(english), 'character');
 }

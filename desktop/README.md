@@ -8,7 +8,7 @@ Aplikacja w Electronie, która uruchamia tę samą stronę w osobnym oknie, bez 
 - Adres `http://127.0.0.1:5500` jest dopuszczony w Workerze na Cloudflare, więc zapytania o gracza działają bez zmian.
 - Jeśli port 5500 jest zajęty (np. przez Live Server w VS Code), aplikacja otwiera zamiast tego wersję z GitHub Pages.
 - Program pamięta rozmiar okna (plik `window.json` w folderze danych programu).
-- Linki zewnętrzne (wiki, mapy) otwierają się w domyślnej przeglądarce. Mapa w sekcji „Mapa Teyvatu” jest osadzona w ramce wewnątrz okna.
+- Linki zewnętrzne (wiki, pełne mapy) otwierają się w domyślnej przeglądarce. Panel mapy z prawej strony jest osadzony w ramce wewnątrz okna.
 
 ## Budowanie pliku .exe
 
