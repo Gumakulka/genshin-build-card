@@ -1,4 +1,6 @@
 /* Porównanie dwóch graczy i wspólnych postaci. */
+let compareSequence = 0;
+
 function buildCompareTable(first, second) {
   const rows = [
     [t('adventureRank'), (d) => d.playerInfo.level, true],
@@ -77,7 +79,9 @@ function buildCommonCharacters(first, second, store) {
 
 async function runCompare(uid) {
   const box = state.compareBox;
-  if (!box || !state.last) return;
+  const base = state.last;
+  if (!box || !base) return;
+  const requestId = ++compareSequence;
   if (!/^\d{9}$/.test(uid)) {
     box.textContent = t('uidLength');
     return;
@@ -85,11 +89,13 @@ async function runCompare(uid) {
   box.textContent = t('loading');
   try {
     const other = await fetchPlayer(uid);
+    if (requestId !== compareSequence) return;
     box.textContent = '';
-    box.append(buildCompareTable(state.last.data, other));
-    const common = buildCommonCharacters(state.last.data, other, state.last.store);
+    box.append(buildCompareTable(base.data, other));
+    const common = buildCommonCharacters(base.data, other, base.store);
     if (common) box.append(common);
   } catch (error) {
+    if (requestId !== compareSequence) return;
     console.error(error);
     box.textContent = error.network ? t('network') : error.message;
   }

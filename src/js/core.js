@@ -14,6 +14,14 @@ function sanitizeList(value, fallback) {
   return Array.isArray(value) ? value : fallback;
 }
 
+function sanitizePlayers(value) {
+  return sanitizeList(value, []).filter((item) => item && typeof item === 'object' && /^\d{9}$/.test(String(item.uid)));
+}
+
+function sanitizeObject(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
+
 function loadSetting(key, fallback) {
   try {
     return localStorage.getItem(key) || fallback;
@@ -51,13 +59,16 @@ function removeKey(key) {
   }
 }
 
+const savedLang = loadSetting('lang', navigator.language && navigator.language.startsWith('pl') ? 'pl' : 'en');
+const savedTheme = loadSetting('theme', window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+
 const state = {
-  lang: loadSetting('lang', navigator.language && navigator.language.startsWith('pl') ? 'pl' : 'en'),
-  theme: loadSetting('theme', window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'),
-  targets: Object.assign({}, DEFAULT_TARGETS, loadJsonSetting('targets', {})),
+  lang: Object.prototype.hasOwnProperty.call(TEXT, savedLang) ? savedLang : 'en',
+  theme: savedTheme === 'light' ? 'light' : 'dark',
+  targets: Object.assign({}, DEFAULT_TARGETS, sanitizeObject(loadJsonSetting('targets', {}))),
   rvStats: sanitizeList(loadJsonSetting('rvStats', DEFAULT_RV), DEFAULT_RV),
-  recent: sanitizeList(loadJsonSetting('recent', []), []),
-  favorites: sanitizeList(loadJsonSetting('favorites', []), []),
+  recent: sanitizePlayers(loadJsonSetting('recent', [])),
+  favorites: sanitizePlayers(loadJsonSetting('favorites', [])),
   diff: null,
   offline: null,
   last: null,

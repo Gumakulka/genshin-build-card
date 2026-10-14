@@ -1,6 +1,8 @@
 /* Efekty wizualne: delikatne tło, światło pod kursorem, fale po kliknięciu, liczniki i kolejność pojawiania.
-   Wszystko wyłącza się przy ustawieniu systemowym „ogranicz ruch”. */
+   Wszystko wyłącza się przy ustawieniu systemowym „ogranicz ruch”. Na ekranach dotykowych pomijamy
+   efekty zależne od kursora i iskry w tle, żeby oszczędzać baterię. */
 const fxReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const fxTouch = !!(window.matchMedia && window.matchMedia('(hover: none)').matches);
 const FX_STAGGER = ['#result', '.characters', '.chips', '.namecards', '.artifacts', '.compare-box', '.recent', '.hero-icons', '.dock-chips', '.dock-tabs', '.guide-list', '.side'];
 const FX_SPOTLIGHT = '.panel, .artifact-card, .character, .profile, .guide, .detail';
 const FX_RIPPLE = '.action-button, .dock-chip, .dock-tab, .dock-size, .dock-close, .rv-toggle, .controls button, form button, .guide-link, .recent-chip';
@@ -74,7 +76,8 @@ function fxAmbient() {
     orb.className = 'fx-orb fx-orb-' + i;
     box.append(orb);
   }
-  for (let i = 0; i < 14; i += 1) {
+  const sparks = fxTouch ? 0 : 14;
+  for (let i = 0; i < sparks; i += 1) {
     const spark = document.createElement('span');
     spark.className = 'fx-spark';
     spark.style.left = Math.random() * 100 + '%';
@@ -91,9 +94,10 @@ function fxStart() {
   const observer = new MutationObserver((records) => {
     const roots = new Set();
     records.forEach((record) => {
+      if (!record.addedNodes.length) return;
       if (record.target.nodeType === 1) roots.add(record.target);
       record.addedNodes.forEach((node) => {
-        if (node.nodeType === 1) roots.add(node);
+        if (node.nodeType === 1 && !node.classList.contains('fx-ripple')) roots.add(node);
       });
     });
     roots.forEach((root) => {
@@ -104,7 +108,7 @@ function fxStart() {
   observer.observe(document.body, { childList: true, subtree: true });
   if (fxReduced) return;
   fxAmbient();
-  document.addEventListener('pointermove', fxSpotlight, { passive: true });
+  if (!fxTouch) document.addEventListener('pointermove', fxSpotlight, { passive: true });
   document.addEventListener('click', fxRipple);
 }
 
