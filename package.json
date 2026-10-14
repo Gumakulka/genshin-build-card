@@ -1,0 +1,41 @@
+{
+  "name": "genshin-build-card",
+  "version": "1.0.0",
+  "description": "Genshin Build Card - desktop version",
+  "author": "Gumakulka",
+  "license": "MIT",
+  "main": "desktop/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --publish never"
+  },
+  "devDependencies": {
+    "electron": "latest",
+    "electron-builder": "latest"
+  },
+  "build": {
+    "appId": "com.gumakulka.genshinbuildcard",
+    "productName": "Genshin Build Card",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "index.html",
+      "app.js",
+      "style.css",
+      "features.css",
+      "desktop/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Genshin-Build-Card-${version}-portable.exe"
+    }
+  }
+}
