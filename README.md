@@ -10,21 +10,52 @@ Wersja online: https://gumakulka.github.io/genshin-build-card/ – gracza można
 
 ## Co potrafi
 
-Poza samym podglądem profilu są też: suma CV i RV artefaktów (substaty do RV wybierasz sam) z oznaczeniem najsłabszego artefaktu, paski postępu dla szansy i obrażeń kryt. oraz regeneracji energii względem własnych celów, porównanie dwóch graczy razem ze wspólnymi postaciami, link do wyniku i zapis karty postaci do PNG.
+- Profil gracza, wizytówki, postacie z gabloty z filtrem, szczegóły postaci: statystyki z paskami względem własnych celów, talenty, broń i artefakty z sumą CV i RV (substaty do RV wybierasz sam) oraz oznaczeniem najsłabszego artefaktu.
+- Porównanie dwóch graczy razem ze wspólnymi postaciami, link do wyniku i zapis karty postaci do PNG.
+- Pod postacią, bronią i każdym artefaktem rozwijana sekcja „Gdzie zdobyć, koszty i wskazówki”: limity poziomów i wzniesień, koszty EXP i Mory, możliwe statystyki główne slotu, ogólne źródła zdobycia, wskazówki wyliczone z danych gracza i linki do wiki.
+- Ulubieni gracze, historia konta („co się zmieniło od ostatniej wizyty”) i tryb offline z ostatnio zapisanymi danymi – wszystko w pamięci przeglądarki.
+- Jasny i ciemny motyw oraz polska i angielska wersja.
 
-Pod postacią, bronią i każdym artefaktem jest rozwijana sekcja „Gdzie zdobyć, koszty i wskazówki”: limity poziomów i wzniesień, koszty EXP i Mory, możliwe statystyki główne slotu, ogólne źródła zdobycia, wskazówki wyliczone z danych gracza oraz linki do wiki. Kod tych informacji jest w `guide.js`.
+### Panel mapy (split view)
 
-Panel mapy (`map.js`) wysuwa się z prawej strony po wybraniu postaci, a dla broni i artefaktów po rozwinięciu ich sekcji „Gdzie zdobyć” (albo przyciskiem „Pokaż na mapie”). Osadza mapę AppSample, która oficjalnie pozwala na osadzanie i przyjmuje w adresie listę typów znaczników, więc od razu widzisz tylko to, co ma znaczenie: domeny (talentów, broni, artefaktów), bossy albo dowolny materiał po wyszukaniu nazwy (np. Cecilia). Link do pełnej mapy i do HoYoLAB oraz Kongying Tavern jest na dole panelu.
+Po wybraniu postaci (a dla broni i artefaktów po rozwinięciu ich sekcji „Gdzie zdobyć” albo przyciskiem „Pokaż na mapie”) z prawej strony wysuwa się panel z mapą AppSample, która oficjalnie pozwala na osadzanie. Panel **nie zasłania strony**: na szerokich ekranach treść zwęża się płynnie do lewej kolumny, a na wąskich panel wysuwa się od dołu jak szuflada i podnosi stopkę. Przycisk w nagłówku przełącza panel między wąskim a szerokim.
 
-Interfejs ma warstwę animacji (`animations.css`): wjazd i pojawianie się sekcji, kart, chipów i artefaktów jedne po drugich, paski postępu wypełniające się od lewej, unoszenie kart po najechaniu, wysuwanie panelu mapy i pulsujący przycisk mapy przy prawej krawędzi. Animacje wyłączają się same, gdy system ma włączone „ogranicz ruch”.
+Mapa pokazuje tylko typy znaczników, które mają znaczenie: domeny, bossy, broń lub artefakty w świecie, albo dowolny materiał po wyszukaniu nazwy (np. Cecilia).
 
-Strona pamięta w przeglądarce ostatnio sprawdzane UID, ulubionych graczy i stan konta z poprzednich wizyt (pokazuje, co się zmieniło). Gdy nie ma połączenia, otwiera ostatnio zapisane dane gracza. Jest filtr postaci, jasny i ciemny motyw oraz polska i angielska wersja.
+### Animacje
+
+Sekcje, karty i chipy wjeżdżają kolejno, liczby w statystykach konta naliczają się od zera, pod kursorem pojawia się delikatne światło, przyciski mają falę po kliknięciu, a w tle dryfują poświaty i iskry. Wszystko wyłącza się samo, gdy system ma włączone „ogranicz ruch”.
+
+## Struktura projektu
+
+```
+index.html              strona i kolejność ładowania skryptów
+src/
+  css/
+    base.css            motywy, układ strony, profil, postacie, panele
+    components.css      przyciski, filtry, porównanie, sekcje informacyjne, panel mapy
+    layout.css          układ split view (dopasowanie strony do panelu mapy)
+    effects.css         animacje i efekty
+  js/
+    data/               teksty PL/EN oraz stałe
+    core.js             elementy strony, ustawienia, stan aplikacji
+    services/           dane statyczne Enki, zapytania o gracza, tryb offline, historia
+    ui/                 profil, listy graczy, postacie, broń i artefakty, porównanie, eksport PNG
+    features/           guide.js (gdzie zdobyć), map-dock.js (panel mapy), fx.js (efekty)
+    app.js              składanie widoku i start aplikacji (ładowany jako ostatni)
+desktop/                program na Windowsa (Electron)
+worker/                 Worker na Cloudflare (pośrednik do Enka.Network)
+build/                  logo, ikony
+.github/workflows/      budowanie pliku .exe
+```
+
+Frontend to zwykły HTML, CSS i JavaScript, bez bibliotek i bez budowania. Skrypty są zwykłymi plikami ładowanymi po kolei (kolejność jest w `index.html`) i dzielą wspólną przestrzeń nazw, więc nowy plik trzeba dopisać także w `index.html`.
 
 ## Jak to jest zrobione
 
-Frontend to zwykły HTML, CSS i JavaScript, bez bibliotek i bez budowania. Enka.Network nie wysyła nagłówków CORS, więc przeglądarka nie może pytać jej bezpośrednio. Pośredniczy w tym mały Worker na Cloudflare (`worker/index.js`): przyjmuje tylko adresy w formacie `/uid/123456789` i odpowiada wyłącznie stronom z listy `ALLOWED_ORIGINS`.
+Enka.Network nie wysyła nagłówków CORS, więc przeglądarka nie może pytać jej bezpośrednio. Pośredniczy w tym mały Worker na Cloudflare (`worker/index.js`): przyjmuje tylko adresy w formacie `/uid/123456789` i odpowiada wyłącznie stronom z listy `ALLOWED_ORIGINS`.
 
-Nazwy postaci, broni i zestawów oraz ikony biorę z danych Enki. Pliki z nazwami są przypięte do jednego commita ich repozytorium i zapamiętywane w przeglądarce, więc nowe postacie pojawią się dopiero po zmianie numeru w `STORE_URL` (`app.js`).
+Nazwy postaci, broni i zestawów oraz ikony biorę z danych Enki. Pliki z nazwami są przypięte do jednego commita ich repozytorium i zapamiętywane w przeglądarce, więc nowe postacie pojawią się dopiero po zmianie numeru w `STORE_URL` (`src/js/data/constants.js`).
 
 ## Uruchomienie lokalnie
 
@@ -32,7 +63,7 @@ Otwórz folder w VS Code i włącz `index.html` przez Live Server. Port 5500 jes
 
 ## Własny Worker
 
-Wklej `worker/index.js` do nowego Workera w Cloudflare i zmień `ALLOWED_ORIGINS` na adresy swojej strony. Adres Workera wpisz w `WORKER_URL` (`app.js`) oraz w polityce CSP w `index.html`.
+Wklej `worker/index.js` do nowego Workera w Cloudflare i zmień `ALLOWED_ORIGINS` na adresy swojej strony. Adres Workera wpisz w `WORKER_URL` (`src/js/data/constants.js`) oraz w polityce CSP w `index.html`.
 
 ## Wersja na Windowsa
 
@@ -42,9 +73,9 @@ Folder `desktop/` to opakowanie w Electronie. Plik `.exe` buduje GitHub Actions:
 
 - Szczegóły postaci są tylko wtedy, gdy gracz ma publiczną gablotę w grze.
 - Panel mapy nie wie, która konkretnie domena daje dany zestaw artefaktów ani jaki dokładnie materiał potrzebuje dana postać lub broń – pokazuje typy znaczników (np. wszystkie domeny, bossy). Konkretny materiał znajdziesz wyszukiwarką w panelu albo przez link do wiki.
-- Lista znaczników na stronie pomocy AppSample kończy się na Sumeru; nowsze regiony mogą nie mieć znaczników. Adres ramki jest w polityce CSP w `index.html` (`frame-src`) – trzeba go tam dopisać, jeśli dodasz inne źródło mapy w `map.js`.
+- Lista znaczników na stronie pomocy AppSample kończy się na Sumeru; nowsze regiony mogą nie mieć znaczników. Adres ramki jest w polityce CSP w `index.html` (`frame-src`) – trzeba go tam dopisać, jeśli dodasz inne źródło mapy w `src/js/features/map-dock.js`.
 - Informacje „gdzie zdobyć” są ogólne (wg rzadkości i typu); dokładne źródło konkretnej broni, postaci lub zestawu artefaktów sprawdzisz przez link do wiki.
-- Maksymalne rzuty do RV wpisałem ręcznie (`MAX_ROLLS` w `app.js`), więc wynik może się trochę różnić od innych kalkulatorów.
+- Maksymalne rzuty do RV wpisałem ręcznie (`MAX_ROLLS` w `src/js/data/constants.js`), więc wynik może się trochę różnić od innych kalkulatorów.
 - Etykiety „Stygian” i „Maks. przyjaźń” to moja interpretacja pól, których dokumentacja Enki nie opisuje.
 - Bonus do talentów z konstelacji (np. „10 (+3)”) pokazuje się tylko wtedy, gdy Enka zwraca odpowiednie pole; jeśli nie, widać poziom bazowy.
 - Historia konta i tryb offline działają tylko w przeglądarce, w której były zapisane.

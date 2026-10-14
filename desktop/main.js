@@ -7,7 +7,6 @@ const ROOT = path.join(__dirname, '..');
 const ASSETS = app.isPackaged ? path.join(process.resourcesPath, 'assets') : path.join(ROOT, 'build');
 const PORT = 5500;
 const HOSTED_URL = 'https://gumakulka.github.io/genshin-build-card/';
-const FILES = new Set(['index.html', 'app.js', 'guide.js', 'map.js', 'style.css', 'features.css', 'animations.css']);
 const ASSET_FILES = new Set(['logo.jpg', 'favicon.png']);
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -18,7 +17,9 @@ const TYPES = {
 };
 
 function resolveFile(name) {
-  if (FILES.has(name)) return path.join(ROOT, name);
+  if (name.includes('..') || name.includes('\\')) return null;
+  if (name === 'index.html') return path.join(ROOT, 'index.html');
+  if (name.startsWith('src/') && TYPES[path.extname(name)]) return path.join(ROOT, name);
   if (name.startsWith('build/') && ASSET_FILES.has(name.slice(6))) return path.join(ASSETS, name.slice(6));
   return null;
 }
