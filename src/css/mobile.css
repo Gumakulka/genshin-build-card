@@ -1,0 +1,292 @@
+/* Wersja mobilna. Ładowany jako ostatni arkusz, więc nadpisuje reguły z pozostałych plików.
+   Wszystkie zmiany są w media queries, więc widok na komputerze się nie zmienia. */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+img {
+  max-width: 100%;
+}
+
+body {
+  overflow-x: clip;
+}
+
+/* Ekrany dotykowe: hover zostaje „przyklejony” po dotknięciu, więc go wyłączamy. */
+@media (hover: none) {
+  .action-button:hover,
+  .guide-link:hover,
+  .recent-chip:hover,
+  .dock-chip:hover,
+  .dock-tab:hover,
+  .character:hover,
+  .namecard:hover,
+  .character:hover img {
+    transform: none;
+  }
+
+  .panel:hover,
+  .artifact-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .panel:hover::after,
+  .artifact-card:hover::after,
+  .character:hover::after,
+  .profile:hover::after,
+  .guide:hover::after,
+  .detail:hover::after {
+    opacity: 0;
+  }
+
+  .guide summary:hover {
+    letter-spacing: normal;
+  }
+
+  .map-launcher:hover {
+    padding-right: 10px;
+  }
+}
+
+/* Arkusz mapy ma sztywne 56vh; dvh uwzględnia pasek adresu w przeglądarkach mobilnych. */
+@supports (height: 100dvh) {
+  :root {
+    --sheet-h: 60dvh;
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --sheet-h: 60vh;
+  }
+
+  @supports (height: 100dvh) {
+    :root {
+      --sheet-h: 60dvh;
+    }
+  }
+
+  body {
+    padding-bottom: 24px;
+  }
+
+  .topbar {
+    padding: 10px 12px;
+  }
+
+  .brand {
+    font-size: 15px;
+  }
+
+  .controls button {
+    min-width: 44px;
+    min-height: 40px;
+  }
+
+  main {
+    margin: 16px auto;
+    padding: 0 12px;
+  }
+
+  .hero {
+    padding: 8px 0 12px;
+  }
+
+  .hero-logo {
+    width: 140px;
+    height: 140px;
+    border-radius: 22px;
+  }
+
+  .hero h1 {
+    font-size: 1.9rem;
+  }
+
+  .elements {
+    font-size: 1.4rem;
+    letter-spacing: 0.25rem;
+  }
+
+  .hero-icons {
+    gap: 10px;
+  }
+
+  .hero-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  form input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  form button,
+  .action-button,
+  .dock-close,
+  .dock-tab,
+  .dock-chip {
+    min-height: 44px;
+  }
+
+  input,
+  .target-input,
+  .character-filter,
+  .dock-search input {
+    font-size: 16px;
+  }
+
+  .author {
+    position: static;
+    width: fit-content;
+    margin: 20px auto 0;
+  }
+
+  .profile-body {
+    gap: 12px;
+    padding: 16px 12px;
+  }
+
+  .profile-body img.avatar {
+    width: 88px;
+    height: 88px;
+  }
+
+  .profile h2 {
+    font-size: 1.3rem;
+    overflow-wrap: anywhere;
+  }
+
+  .signature {
+    overflow-wrap: anywhere;
+  }
+
+  .chips {
+    justify-content: center;
+  }
+
+  .chip {
+    padding: 5px 10px;
+    font-size: 13px;
+  }
+
+  .namecard {
+    width: calc(50% - 5px);
+  }
+
+  .characters {
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: 10px;
+  }
+
+  .character img {
+    width: 64px;
+    height: 64px;
+  }
+
+  .detail {
+    padding: 12px;
+  }
+
+  .detail-head img {
+    width: 56px;
+    height: 56px;
+  }
+
+  .detail-head .push-right {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .artifacts {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-row {
+    gap: 12px;
+  }
+
+  .rv-toggle {
+    min-height: 36px;
+    padding: 6px 12px;
+  }
+
+  .target-input {
+    width: 96px;
+  }
+
+  .compare-form {
+    flex-wrap: wrap;
+  }
+
+  .compare-form input {
+    flex: 1 1 140px;
+  }
+
+  .compare-box {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table.compare {
+    min-width: 360px;
+    font-size: 13px;
+  }
+
+  .map-launcher {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+
+  .map-dock {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .dock-header,
+  .dock-footer {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .dock-tabs {
+    padding: 8px 12px 0;
+  }
+
+  .dock-body {
+    padding: 10px 12px 4px;
+  }
+
+  .dock-frame {
+    min-height: 220px;
+    margin: 0 12px;
+  }
+
+  /* Lżejsze tło: mniej pracy dla GPU i baterii. */
+  .fx-orb {
+    filter: blur(50px);
+    opacity: 0.2;
+    animation: none;
+  }
+
+  .fx-orb-3,
+  .fx-spark {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero-logo {
+    width: 120px;
+    height: 120px;
+  }
+
+  .hero h1 {
+    font-size: 1.6rem;
+  }
+
+  .characters {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
