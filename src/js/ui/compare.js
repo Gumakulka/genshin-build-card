@@ -86,7 +86,7 @@ async function runCompare(uid) {
     box.textContent = t('uidLength');
     return;
   }
-  box.textContent = t('loading');
+  box.replaceChildren(loadingNode(t('loading')));
   try {
     const other = await fetchPlayer(uid);
     if (requestId !== compareSequence) return;

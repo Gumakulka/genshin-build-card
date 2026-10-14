@@ -85,6 +85,17 @@ function propName(prop) {
   return PROP_NAMES[state.lang][prop] || prop;
 }
 
+function loadingNode(text) {
+  const box = document.createElement('div');
+  box.className = 'loading';
+  box.setAttribute('role', 'status');
+  const spinner = document.createElement('span');
+  spinner.className = 'spinner';
+  spinner.setAttribute('aria-hidden', 'true');
+  box.append(spinner, document.createTextNode(text));
+  return box;
+}
+
 function el(tag, className, text) {
   const element = document.createElement(tag);
   if (className) element.className = className;

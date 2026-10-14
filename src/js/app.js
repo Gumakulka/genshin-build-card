@@ -114,7 +114,7 @@ async function search(uid) {
   }
   const requestId = ++searchSequence;
   const isCurrent = () => requestId === searchSequence;
-  result.textContent = t('loading');
+  result.replaceChildren(loadingNode(t('loading')));
   state.offline = null;
   try {
     const [data, store] = await Promise.all([fetchPlayer(uid), loadStore()]);

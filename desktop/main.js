@@ -20,6 +20,9 @@ const BASE_HEADERS = {
   'X-Content-Type-Options': 'nosniff'
 };
 const HIDE_SCROLLBAR_CSS = 'html { scrollbar-width: none; } ::-webkit-scrollbar { display: none; }';
+const BACKGROUND_COLOR = '#0b0b0f';
+const SHOW_FALLBACK_MS = 4000;
+const MAX_CRASH_RELOADS = 3;
 
 function resolveFile(name) {
   if (name.includes('..') || name.includes('\\')) return null;
@@ -115,6 +118,8 @@ function createWindow(url) {
     height: size.height,
     minWidth: 480,
     minHeight: 600,
+    show: false,
+    backgroundColor: BACKGROUND_COLOR,
     autoHideMenuBar: true,
     title: 'Genshin Build Card',
     webPreferences: {
@@ -125,11 +130,30 @@ function createWindow(url) {
   });
 
   const origin = new URL(url).origin;
+  let crashReloads = 0;
+
+  // Okno pokazujemy dopiero po pierwszym wyrenderowaniu (bez białego błysku); zapas na wypadek błędu.
+  const showTimer = setTimeout(() => {
+    if (!win.isDestroyed() && !win.isVisible()) win.show();
+  }, SHOW_FALLBACK_MS);
+  win.once('ready-to-show', () => {
+    clearTimeout(showTimer);
+    if (!win.isDestroyed()) win.show();
+  });
 
   win.on('close', () => saveSize(win));
+  win.on('closed', () => clearTimeout(showTimer));
 
   win.webContents.on('did-finish-load', () => {
     win.webContents.insertCSS(HIDE_SCROLLBAR_CSS).catch((error) => console.error(error));
+  });
+
+  win.webContents.on('render-process-gone', (event, details) => {
+    console.error('Render process gone:', details.reason);
+    if (details.reason !== 'clean-exit' && crashReloads < MAX_CRASH_RELOADS && !win.isDestroyed()) {
+      crashReloads += 1;
+      win.reload();
+    }
   });
 
   win.webContents.setWindowOpenHandler(({ url: target }) => {
@@ -152,14 +176,28 @@ function createWindow(url) {
   });
 
   win.loadURL(url);
+  return win;
 }
 
-app.whenReady().then(async () => {
-  Menu.setApplicationMenu(null);
-  const localUrl = await startServer();
-  createWindow(localUrl || HOSTED_URL);
-});
+let mainWindow = null;
 
-app.on('window-all-closed', () => {
+// Jedna kopia programu naraz: druga próba uruchomienia tylko przywraca istniejące okno.
+if (!app.requestSingleInstanceLock()) {
   app.quit();
-});
+} else {
+  app.on('second-instance', () => {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  });
+
+  app.whenReady().then(async () => {
+    Menu.setApplicationMenu(null);
+    const localUrl = await startServer();
+    mainWindow = createWindow(localUrl || HOSTED_URL);
+  });
+
+  app.on('window-all-closed', () => {
+    app.quit();
+  });
+}
