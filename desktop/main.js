@@ -26,8 +26,15 @@ function resolveFile(name) {
 function startServer() {
   return new Promise((resolve) => {
     const server = http.createServer((req, res) => {
-      const requested = new URL(req.url, 'http://127.0.0.1').pathname;
-      const name = decodeURIComponent(requested).replace(/^\/+/, '') || 'index.html';
+      let name;
+      try {
+        const requested = new URL(req.url, 'http://127.0.0.1').pathname;
+        name = decodeURIComponent(requested).replace(/^\/+/, '') || 'index.html';
+      } catch (error) {
+        res.writeHead(400);
+        res.end('Bad request');
+        return;
+      }
       const file = resolveFile(name);
       if (!file) {
         res.writeHead(404);

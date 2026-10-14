@@ -365,7 +365,12 @@ function loadStore() {
       fetchJson('pfps.json'),
       fetchJson('namecards.json'),
       fetchJson('loc.json')
-    ]).then(([characters, pfps, namecards, loc]) => ({ characters, pfps, namecards, loc }));
+    ]).then(([characters, pfps, namecards, loc]) => {
+      if (!Object.keys(characters).length || !Object.keys(pfps).length || !Object.keys(namecards).length) {
+        storePromise = null;
+      }
+      return { characters, pfps, namecards, loc };
+    });
   }
   return storePromise;
 }
@@ -880,6 +885,15 @@ function loadCanvasImage(iconName) {
   });
 }
 
+function loadLocalImage(path) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = path;
+  });
+}
+
 async function exportCard() {
   if (!state.last) return;
   const { data, store } = state.last;
@@ -900,6 +914,8 @@ async function exportCard() {
     loadCanvasImage(getCharacterIcon(character, shown ? shown.costumeId : undefined)),
     loadCanvasImage(weapon ? weapon.flat.icon : null)
   ].concat(artifacts.map((item) => loadCanvasImage(item.flat.icon))));
+
+  const logoImage = await loadLocalImage('build/logo.jpg');
 
   const canvas = document.createElement('canvas');
   canvas.width = 960;
@@ -976,6 +992,7 @@ async function exportCard() {
   ctx.fillStyle = colors.muted;
   ctx.font = '14px system-ui, sans-serif';
   ctx.fillText('Genshin Build Card · UID ' + data.uid + ' · ' + t('author'), 50, 600);
+  if (logoImage) ctx.drawImage(logoImage, 885, 572, 44, 44);
 
   canvas.toBlob((blob) => {
     if (!blob) {
