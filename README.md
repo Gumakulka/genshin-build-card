@@ -12,7 +12,11 @@ Wersja online: https://gumakulka.github.io/genshin-build-card/ – gracza można
 
 Poza samym podglądem profilu są też: suma CV i RV artefaktów (substaty do RV wybierasz sam) z oznaczeniem najsłabszego artefaktu, paski postępu dla szansy i obrażeń kryt. oraz regeneracji energii względem własnych celów, porównanie dwóch graczy razem ze wspólnymi postaciami, link do wyniku i zapis karty postaci do PNG.
 
-Pod postacią, bronią i każdym artefaktem jest rozwijana sekcja „Gdzie zdobyć, koszty i wskazówki”: limity poziomów i wzniesień, koszty EXP i Mory, możliwe statystyki główne slotu, ogólne źródła zdobycia, wskazówki wyliczone z danych gracza oraz linki do wiki i dwóch interaktywnych map (HoYoLAB i Teyvat Interactive Map). Kod tych informacji jest w `guide.js`.
+Pod postacią, bronią i każdym artefaktem jest rozwijana sekcja „Gdzie zdobyć, koszty i wskazówki”: limity poziomów i wzniesień, koszty EXP i Mory, możliwe statystyki główne slotu, ogólne źródła zdobycia, wskazówki wyliczone z danych gracza oraz linki do wiki i map. Kod tych informacji jest w `guide.js`.
+
+Nad wynikami jest rozwijana „Mapa Teyvatu” (`map.js`): zakładki z trzema publicznymi mapami społeczności (Teyvat Interactive Map, HoYoLAB, Kongying Tavern) osadzonymi w ramce. Mapa ładuje się dopiero po rozwinięciu, a przycisk „Otwórz w nowej karcie” działa zawsze, także gdy któraś strona zablokuje osadzanie.
+
+Interfejs ma warstwę animacji (`animations.css`): wjazd i pojawianie się sekcji, kart, chipów i artefaktów jedne po drugich, paski postępu wypełniające się od lewej, unoszenie kart po najechaniu i płynne rozwijanie map i informacji. Animacje wyłączają się same, gdy system ma włączone „ogranicz ruch”.
 
 Strona pamięta w przeglądarce ostatnio sprawdzane UID, ulubionych graczy i stan konta z poprzednich wizyt (pokazuje, co się zmieniło). Gdy nie ma połączenia, otwiera ostatnio zapisane dane gracza. Jest filtr postaci, jasny i ciemny motyw oraz polska i angielska wersja.
 
@@ -37,7 +41,8 @@ Folder `desktop/` to opakowanie w Electronie. Plik `.exe` buduje GitHub Actions:
 ## Znane ograniczenia
 
 - Szczegóły postaci są tylko wtedy, gdy gracz ma publiczną gablotę w grze.
-- Informacje „gdzie zdobyć” są ogólne (wg rzadkości i typu); dokładne źródło konkretnej broni, postaci lub zestawu artefaktów sprawdzisz przez link do wiki. Mapy otwierają się w nowej karcie, nie są osadzone w stronie.
+- Mapy to cudze strony osadzone w ramce: strona może zablokować osadzanie, pokazywać własne reklamy albo zmienić adres. Gdy nie działają, użyj przycisku „Otwórz w nowej karcie”. Dozwolone adresy ramek są w polityce CSP w `index.html` i trzeba je tam dopisać, jeśli dodasz nowe źródło w `map.js`.
+- Informacje „gdzie zdobyć” są ogólne (wg rzadkości i typu); dokładne źródło konkretnej broni, postaci lub zestawu artefaktów sprawdzisz przez link do wiki.
 - Maksymalne rzuty do RV wpisałem ręcznie (`MAX_ROLLS` w `app.js`), więc wynik może się trochę różnić od innych kalkulatorów.
 - Etykiety „Stygian” i „Maks. przyjaźń” to moja interpretacja pól, których dokumentacja Enki nie opisuje.
 - Bonus do talentów z konstelacji (np. „10 (+3)”) pokazuje się tylko wtedy, gdy Enka zwraca odpowiednie pole; jeśli nie, widać poziom bazowy.
