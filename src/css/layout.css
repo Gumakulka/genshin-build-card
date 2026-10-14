@@ -27,12 +27,6 @@ body {
   transition: transform 0.65s var(--ease), visibility 0s, width 0.65s var(--ease);
 }
 
-/* Mapa pochodzi z cudzej domeny i jest jasna, więc nie da się zmienić jej motywu skryptem.
-   W ciemnym motywie strony odwracamy jej kolory filtrem (ikony też zmieniają kolor). */
-:root[data-theme='dark'] .dock-frame iframe {
-  filter: invert(0.92) hue-rotate(180deg) contrast(0.9);
-}
-
 @media (min-width: 1000px) {
   body.map-open {
     padding-right: var(--dock-w);
