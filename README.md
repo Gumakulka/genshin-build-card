@@ -10,13 +10,15 @@ Wersja online: https://gumakulka.github.io/genshin-build-card/ – gracza można
 
 ## Co potrafi
 
-Poza samym podglądem profilu są też: suma CV i RV artefaktów (substaty do RV wybierasz sam), paski postępu dla szansy i obrażeń kryt. oraz regeneracji energii względem własnych celów, porównanie dwóch graczy, link do wyniku, lista ostatnich UID i zapis karty postaci do PNG. Strona ma jasny i ciemny motyw oraz polską i angielską wersję.
+Poza samym podglądem profilu są też: suma CV i RV artefaktów (substaty do RV wybierasz sam) z oznaczeniem najsłabszego artefaktu, paski postępu dla szansy i obrażeń kryt. oraz regeneracji energii względem własnych celów, porównanie dwóch graczy razem ze wspólnymi postaciami, link do wyniku i zapis karty postaci do PNG.
+
+Strona pamięta w przeglądarce ostatnio sprawdzane UID, ulubionych graczy i stan konta z poprzednich wizyt (pokazuje, co się zmieniło). Gdy nie ma połączenia, otwiera ostatnio zapisane dane gracza. Jest filtr postaci, skróty klawiszowe (`Ctrl+K` – pole UID, strzałki – zmiana postaci), jasny i ciemny motyw oraz polska i angielska wersja.
 
 ## Jak to jest zrobione
 
 Frontend to zwykły HTML, CSS i JavaScript, bez bibliotek i bez budowania. Enka.Network nie wysyła nagłówków CORS, więc przeglądarka nie może pytać jej bezpośrednio. Pośredniczy w tym mały Worker na Cloudflare (`worker/index.js`): przyjmuje tylko adresy w formacie `/uid/123456789` i odpowiada wyłącznie stronom z listy `ALLOWED_ORIGINS`.
 
-Nazwy postaci, broni i zestawów oraz ikony biorę z danych Enki. Pliki z nazwami są przypięte do jednego commita ich repozytorium, więc nowe postacie pojawią się dopiero po zmianie numeru w `STORE_URL` (`app.js`).
+Nazwy postaci, broni i zestawów oraz ikony biorę z danych Enki. Pliki z nazwami są przypięte do jednego commita ich repozytorium i zapamiętywane w przeglądarce, więc nowe postacie pojawią się dopiero po zmianie numeru w `STORE_URL` (`app.js`).
 
 ## Uruchomienie lokalnie
 
@@ -35,7 +37,8 @@ Folder `desktop/` to opakowanie w Electronie. Plik `.exe` buduje GitHub Actions:
 - Szczegóły postaci są tylko wtedy, gdy gracz ma publiczną gablotę w grze.
 - Maksymalne rzuty do RV wpisałem ręcznie (`MAX_ROLLS` w `app.js`), więc wynik może się trochę różnić od innych kalkulatorów.
 - Etykiety „Stygian” i „Maks. przyjaźń” to moja interpretacja pól, których dokumentacja Enki nie opisuje.
-- Talenty pokazują poziomy bazowe, bez bonusów z konstelacji.
+- Bonus do talentów z konstelacji (np. „10 (+3)”) pokazuje się tylko wtedy, gdy Enka zwraca odpowiednie pole; jeśli nie, widać poziom bazowy.
+- Historia konta i tryb offline działają tylko w przeglądarce, w której były zapisane.
 
 ## Licencja
 

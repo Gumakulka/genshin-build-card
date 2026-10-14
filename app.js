@@ -8,6 +8,7 @@ const result = document.getElementById('result');
 const hero = document.getElementById('hero');
 const heroIcons = document.getElementById('hero-icons');
 const recentBox = document.getElementById('recent');
+const favoritesBox = document.getElementById('favorites');
 const langButton = document.getElementById('lang-toggle');
 const themeButton = document.getElementById('theme-toggle');
 
@@ -34,6 +35,19 @@ const TEXT = {
     namecards: 'Wizytówki',
     characters: 'Postacie z gabloty',
     recent: 'Ostatnio:',
+    favorites: 'Ulubieni:',
+    addFavorite: '⭐ Dodaj do ulubionych',
+    removeFavorite: '★ Usuń z ulubionych',
+    filterPlaceholder: 'Szukaj postaci...',
+    weakest: '⚠️ Najsłabszy artefakt',
+    stars: 'Gwiazdki Otchłani',
+    sinceVisit: 'Od ostatniej wizyty',
+    lastVisit: 'Ostatnia wizyta',
+    noChanges: 'Bez zmian w statystykach konta.',
+    firstVisit: 'To pierwsza wizyta – zapisano stan konta, następnym razem zobaczysz zmiany.',
+    offlineBanner: 'Tryb offline – dane zapisane ',
+    commonCharacters: 'Wspólne postacie',
+    shortcutsHint: 'Skróty: Ctrl+K – pole UID, ← i → – zmiana postaci.',
     copyLink: '🔗 Kopiuj link',
     linkCopied: '✅ Skopiowano!',
     exportPng: '🖼️ Pobierz kartę PNG',
@@ -44,7 +58,7 @@ const TEXT = {
     stats: 'Statystyki',
     targets: 'Cele statystyk',
     talents: 'Talenty',
-    talentsValue: 'Atak / Umiejętność / Wybuch (bazowe)',
+    talentsValue: 'Atak / Umiejętność / Wybuch',
     weapon: 'Broń',
     artifacts: 'Artefakty',
     sets: 'Zestawy',
@@ -104,6 +118,19 @@ const TEXT = {
     namecards: 'Namecards',
     characters: 'Showcase characters',
     recent: 'Recent:',
+    favorites: 'Favorites:',
+    addFavorite: '⭐ Add to favorites',
+    removeFavorite: '★ Remove from favorites',
+    filterPlaceholder: 'Search characters...',
+    weakest: '⚠️ Weakest artifact',
+    stars: 'Abyss stars',
+    sinceVisit: 'Since your last visit',
+    lastVisit: 'Last visit',
+    noChanges: 'No changes in account stats.',
+    firstVisit: 'First visit – account state saved, changes will show next time.',
+    offlineBanner: 'Offline mode – data saved ',
+    commonCharacters: 'Shared characters',
+    shortcutsHint: 'Shortcuts: Ctrl+K – UID field, ← and → – switch character.',
     copyLink: '🔗 Copy link',
     linkCopied: '✅ Copied!',
     exportPng: '🖼️ Download PNG card',
@@ -114,7 +141,7 @@ const TEXT = {
     stats: 'Stats',
     targets: 'Stat targets',
     talents: 'Talents',
-    talentsValue: 'Attack / Skill / Burst (base)',
+    talentsValue: 'Attack / Skill / Burst',
     weapon: 'Weapon',
     artifacts: 'Artifacts',
     sets: 'Sets',
@@ -283,6 +310,9 @@ const state = {
   targets: Object.assign({}, DEFAULT_TARGETS, loadJsonSetting('targets', {})),
   rvStats: sanitizeList(loadJsonSetting('rvStats', DEFAULT_RV), DEFAULT_RV),
   recent: sanitizeList(loadJsonSetting('recent', []), []),
+  favorites: sanitizeList(loadJsonSetting('favorites', []), []),
+  diff: null,
+  offline: null,
   last: null,
   selectedId: null,
   detailBox: null,
@@ -347,10 +377,27 @@ function applyTexts() {
   langButton.textContent = state.lang === 'pl' ? 'EN' : 'PL';
   themeButton.textContent = state.theme === 'dark' ? '☀️' : '🌙';
   renderRecent();
+  renderFavorites();
+}
+
+async function cachedFetch(url) {
+  try {
+    if (typeof caches !== 'undefined') {
+      const cache = await caches.open('genshin-store-v1');
+      const hit = await cache.match(url);
+      if (hit) return hit;
+      const response = await fetch(url);
+      if (response.ok) await cache.put(url, response.clone());
+      return response;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  return fetch(url);
 }
 
 function fetchJson(name) {
-  return fetch(STORE_URL + name)
+  return cachedFetch(STORE_URL + name)
     .then((r) => r.json())
     .catch((error) => {
       console.error('Could not load ' + name, error);
@@ -409,7 +456,13 @@ function setCache(uid, data) {
 async function fetchPlayer(uid) {
   const cached = getCache(uid);
   if (cached) return cached;
-  const response = await fetch(WORKER_URL + uid);
+  let response;
+  try {
+    response = await fetch(WORKER_URL + uid);
+  } catch (error) {
+    error.network = true;
+    throw error;
+  }
   if (!response.ok) {
     throw new Error(t('errors')[response.status] || t('generic') + response.status);
   }
@@ -504,9 +557,19 @@ function chip(icon, label, value) {
 }
 
 function rememberPlayer(uid, nickname) {
+  const before = state.recent.map((item) => item.uid);
   state.recent = [{ uid, nickname }].concat(state.recent.filter((item) => item.uid !== uid)).slice(0, 5);
+  state.favorites.forEach((item) => {
+    if (item.uid === uid) item.nickname = nickname;
+  });
   saveJsonSetting('recent', state.recent);
+  saveJsonSetting('favorites', state.favorites);
+  before.forEach((oldUid) => {
+    const keep = state.recent.some((item) => item.uid === oldUid) || isFavorite(oldUid);
+    if (!keep) removeKey('offline-' + oldUid);
+  });
   renderRecent();
+  renderFavorites();
 }
 
 function renderRecent() {
@@ -523,6 +586,143 @@ function renderRecent() {
     });
     recentBox.append(button);
   });
+}
+
+function removeKey(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function formatDate(timestamp) {
+  return new Date(timestamp).toLocaleString(state.lang === 'pl' ? 'pl-PL' : 'en-GB');
+}
+
+function isFavorite(uid) {
+  return state.favorites.some((item) => item.uid === uid);
+}
+
+function toggleFavorite(data) {
+  const uid = data.uid;
+  if (isFavorite(uid)) {
+    state.favorites = state.favorites.filter((item) => item.uid !== uid);
+  } else {
+    state.favorites = state.favorites.concat({ uid, nickname: data.playerInfo.nickname }).slice(-12);
+  }
+  saveJsonSetting('favorites', state.favorites);
+  renderFavorites();
+}
+
+function renderFavorites() {
+  favoritesBox.textContent = '';
+  const items = state.favorites.filter((item) => item && /^\d{9}$/.test(String(item.uid)));
+  if (!items.length) return;
+  favoritesBox.append(el('span', 'recent-label', t('favorites')));
+  items.forEach((item) => {
+    const button = el('button', 'chip recent-chip', '⭐ ' + (item.nickname || '?') + ' · ' + item.uid);
+    button.type = 'button';
+    button.addEventListener('click', () => {
+      input.value = item.uid;
+      search(item.uid);
+    });
+    favoritesBox.append(button);
+  });
+}
+
+function saveOffline(uid, data) {
+  try {
+    localStorage.setItem('offline-' + uid, JSON.stringify({ savedAt: Date.now(), data }));
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function loadOffline(uid) {
+  try {
+    const raw = localStorage.getItem('offline-' + uid);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function snapshotOf(info) {
+  return {
+    t: Date.now(),
+    level: info.level,
+    worldLevel: info.worldLevel,
+    achievements: info.finishAchievementNum,
+    abyss: info.towerFloorIndex ? info.towerFloorIndex + '-' + info.towerLevelIndex : '-',
+    stars: info.towerStarIndex || 0,
+    characters: (info.showAvatarInfoList || []).length
+  };
+}
+
+function updateHistory(uid, info) {
+  const key = 'history-' + uid;
+  const list = sanitizeList(loadJsonSetting(key, []), []);
+  const current = snapshotOf(info);
+  const previous = list.length ? list[list.length - 1] : null;
+  const changes = [];
+  if (previous) {
+    [
+      ['adventureRank', 'level'],
+      ['worldLevel', 'worldLevel'],
+      ['achievements', 'achievements'],
+      ['abyss', 'abyss'],
+      ['stars', 'stars'],
+      ['characters', 'characters']
+    ].forEach(([label, field]) => {
+      if (previous[field] !== current[field]) changes.push({ label, from: previous[field], to: current[field] });
+    });
+  }
+  if (!previous || changes.length) {
+    list.push(current);
+    saveJsonSetting(key, list.slice(-20));
+  }
+  return { previous, changes };
+}
+
+function buildHistory() {
+  const diff = state.diff;
+  if (!diff) return null;
+  const wrapper = el('section');
+  wrapper.append(el('h3', 'section-title', t('sinceVisit')));
+  if (!diff.previous) {
+    wrapper.append(el('p', 'hint', t('firstVisit')));
+    return wrapper;
+  }
+  wrapper.append(el('p', 'hint', t('lastVisit') + ': ' + formatDate(diff.previous.t)));
+  if (!diff.changes.length) {
+    wrapper.append(el('p', 'hint', t('noChanges')));
+    return wrapper;
+  }
+  const chips = el('div', 'chips');
+  diff.changes.forEach((change) => {
+    chips.append(chip('📈', t(change.label), change.from + ' → ' + change.to));
+  });
+  wrapper.append(chips);
+  return wrapper;
+}
+
+function selectCharacter(id) {
+  state.selectedId = id;
+  result.querySelectorAll('.character').forEach((node) => {
+    node.classList.toggle('selected', node.dataset.avatarId === String(id));
+  });
+  renderDetail();
+}
+
+function stepCharacter(direction) {
+  if (!state.last) return;
+  const shown = state.last.data.playerInfo.showAvatarInfoList || [];
+  const available = shown.filter((avatar) => findDetails(state.last.data, avatar.avatarId));
+  if (available.length < 2) return;
+  const index = available.findIndex((avatar) => String(avatar.avatarId) === String(state.selectedId));
+  const next = available[(index + direction + available.length) % available.length];
+  selectCharacter(next.avatarId);
 }
 
 function updateUrl(uid) {
@@ -598,7 +798,13 @@ function buildActions(data) {
   const copy = el('button', 'action-button', t('copyLink'));
   copy.type = 'button';
   copy.addEventListener('click', () => copyLink(data.uid, copy));
-  actions.append(copy);
+  const favorite = el('button', 'action-button', isFavorite(data.uid) ? t('removeFavorite') : t('addFavorite'));
+  favorite.type = 'button';
+  favorite.addEventListener('click', () => {
+    toggleFavorite(data);
+    favorite.textContent = isFavorite(data.uid) ? t('removeFavorite') : t('addFavorite');
+  });
+  actions.append(copy, favorite);
   return actions;
 }
 
@@ -629,6 +835,20 @@ function buildCharacters(data, store) {
   wrapper.append(el('h3', 'section-title', t('characters')));
   const list = el('div', 'characters');
 
+  if (avatars.length > 4) {
+    const filter = document.createElement('input');
+    filter.type = 'search';
+    filter.className = 'character-filter';
+    filter.placeholder = t('filterPlaceholder');
+    filter.addEventListener('input', () => {
+      const query = filter.value.trim().toLowerCase();
+      list.querySelectorAll('.character').forEach((node) => {
+        node.hidden = query !== '' && !node.dataset.search.includes(query);
+      });
+    });
+    wrapper.append(filter);
+  }
+
   avatars.forEach((avatar) => {
     const character = store.characters[avatar.avatarId];
     const card = el('button', 'character ' + getRarityClass(character));
@@ -637,6 +857,7 @@ function buildCharacters(data, store) {
     if (String(avatar.avatarId) === String(state.selectedId)) card.classList.add('selected');
 
     const name = getCharacterName(character, store);
+    card.dataset.search = (name + ' ' + (character && character.Element ? character.Element : '')).toLowerCase();
     card.append(createImage(getCharacterIcon(character, avatar.costumeId), name));
     card.append(el('div', 'name', name));
     const emoji = character && ELEMENT_EMOJI[character.Element] ? ELEMENT_EMOJI[character.Element] + ' ' : '';
@@ -644,13 +865,7 @@ function buildCharacters(data, store) {
     if (info.isShowAvatarTalent) meta += ' · C' + (avatar.talentLevel || 0);
     card.append(el('div', 'meta', meta));
 
-    card.addEventListener('click', () => {
-      state.selectedId = avatar.avatarId;
-      list.querySelectorAll('.character').forEach((node) => {
-        node.classList.toggle('selected', node.dataset.avatarId === String(avatar.avatarId));
-      });
-      renderDetail();
-    });
+    card.addEventListener('click', () => selectCharacter(avatar.avatarId));
     list.append(card);
   });
 
@@ -746,7 +961,14 @@ function buildExtrasPanel(details, character) {
   panel.append(el('h5', '', t('talents')));
   const order = character && character.SkillOrder ? character.SkillOrder : [];
   const levels = details.skillLevelMap || {};
-  const values = order.slice(0, 3).map((id) => levels[id] || '-');
+  const extra = details.proudSkillExtraLevelMap || {};
+  const proud = (character && character.ProudMap) || {};
+  const values = order.slice(0, 3).map((id) => {
+    const base = levels[id];
+    if (base === undefined) return '-';
+    const bonus = extra[proud[id]] || 0;
+    return bonus ? base + ' (+' + bonus + ')' : String(base);
+  });
   if (values.length) panel.append(statRow(t('talentsValue'), values.join(' / ')));
   panel.append(statRow(t('constellations'), (details.talentIdList || []).length));
   const friendship = details.fetterInfo && details.fetterInfo.expLevel;
@@ -820,6 +1042,7 @@ function buildArtifacts(items, store) {
   const grid = el('div', 'artifacts');
 
   const sets = {};
+  const cards = [];
   let cv = 0;
   let rvTotal = 0;
 
@@ -860,8 +1083,18 @@ function buildArtifacts(items, store) {
     const rv = artifactRv(flat);
     rvTotal += rv;
     card.append(el('div', 'item-meta rv-line', 'RV ' + rv.toFixed(0) + '%'));
+    cards.push({ card, rv, eligible: flat.rankLevel === undefined || flat.rankLevel === 5 });
     grid.append(card);
   });
+
+  const eligible = cards.filter((entry) => entry.eligible);
+  if (state.rvStats.length && eligible.length >= 2) {
+    const weakest = eligible.reduce((min, entry) => (entry.rv < min.rv ? entry : min));
+    if (eligible.some((entry) => entry.rv > weakest.rv)) {
+      weakest.card.classList.add('weakest');
+      weakest.card.append(el('div', 'item-meta weakest-label', t('weakest')));
+    }
+  }
 
   const setLines = Object.keys(sets).filter((name) => sets[name] >= 2).map((name) => name + ' (' + sets[name] + ')');
   if (setLines.length) wrapper.append(el('div', 'item-meta', t('sets') + ': ' + setLines.join(', ')));
@@ -892,6 +1125,16 @@ function loadLocalImage(path) {
     img.onerror = () => resolve(null);
     img.src = path;
   });
+}
+
+function drawFitted(ctx, text, x, y, maxWidth, size, bold) {
+  let current = size;
+  ctx.font = (bold ? 'bold ' : '') + current + 'px system-ui, sans-serif';
+  while (current > 10 && ctx.measureText(text).width > maxWidth) {
+    current -= 1;
+    ctx.font = (bold ? 'bold ' : '') + current + 'px system-ui, sans-serif';
+  }
+  ctx.fillText(text, x, y);
 }
 
 async function exportCard() {
@@ -962,8 +1205,7 @@ async function exportCard() {
     y += 20;
     if (images[1]) ctx.drawImage(images[1], 50, y - 20, 56, 56);
     ctx.fillStyle = colors.fg;
-    ctx.font = 'bold 16px system-ui, sans-serif';
-    ctx.fillText(getWeaponTitle(weapon, store), 118, y + 8, 200);
+    drawFitted(ctx, getWeaponTitle(weapon, store), 118, y + 8, 200, 16, true);
   }
 
   artifacts.forEach((item, index) => {
@@ -972,21 +1214,18 @@ async function exportCard() {
     if (images[2 + index]) ctx.drawImage(images[2 + index], 340, top, 64, 64);
     const setHash = flat.setNameTextMapHash !== undefined ? flat.setNameTextMapHash : flat.setNameTextHashMap;
     ctx.fillStyle = colors.fg;
-    ctx.font = 'bold 16px system-ui, sans-serif';
-    ctx.fillText(localized(setHash, store) || '', 416, top + 16, 480);
+    drawFitted(ctx, localized(setHash, store) || '', 416, top + 16, 480, 16, true);
     const main = statLine(flat.reliquaryMainstat);
-    ctx.font = '16px system-ui, sans-serif';
     if (main && main.prop) {
       ctx.fillStyle = colors.accent;
-      ctx.fillText(propName(main.prop) + ' ' + formatStat(main.prop, main.value) + '  ·  RV ' + artifactRv(flat).toFixed(0) + '%', 416, top + 38, 480);
+      drawFitted(ctx, propName(main.prop) + ' ' + formatStat(main.prop, main.value) + '  ·  RV ' + artifactRv(flat).toFixed(0) + '%', 416, top + 38, 480, 16, false);
     }
     const subs = (flat.reliquarySubstats || []).map((raw) => {
       const stat = statLine(raw);
       return stat && stat.prop ? propName(stat.prop) + ' ' + formatStat(stat.prop, stat.value) : '';
     }).filter(Boolean).join('  |  ');
     ctx.fillStyle = colors.muted;
-    ctx.font = '14px system-ui, sans-serif';
-    ctx.fillText(subs, 416, top + 60, 500);
+    drawFitted(ctx, subs, 416, top + 60, 500, 14, false);
   });
 
   ctx.fillStyle = colors.muted;
@@ -1032,6 +1271,57 @@ function buildCompareTable(first, second) {
   return table;
 }
 
+function characterCv(details) {
+  let cv = 0;
+  getArtifacts(details.equipList || []).forEach((item) => {
+    (item.flat.reliquarySubstats || []).forEach((raw) => {
+      const stat = statLine(raw);
+      if (!stat) return;
+      if (stat.prop === 'FIGHT_PROP_CRITICAL') cv += 2 * Number(stat.value);
+      if (stat.prop === 'FIGHT_PROP_CRITICAL_HURT') cv += Number(stat.value);
+    });
+  });
+  return cv;
+}
+
+function describeCharacter(data, avatar) {
+  const details = findDetails(data, avatar.avatarId);
+  let text = 'Lv. ' + avatar.level;
+  if (data.playerInfo.isShowAvatarTalent) text += ' · C' + (avatar.talentLevel || 0);
+  const cv = details ? characterCv(details) : null;
+  if (cv !== null) text += ' · CV ' + cv.toFixed(1);
+  return { text, cv };
+}
+
+function buildCommonCharacters(first, second, store) {
+  const listA = first.playerInfo.showAvatarInfoList || [];
+  const listB = second.playerInfo.showAvatarInfoList || [];
+  const common = listA.filter((x) => listB.some((y) => String(y.avatarId) === String(x.avatarId)));
+  if (!common.length) return null;
+  const wrapper = el('div');
+  wrapper.append(el('h3', 'section-title', t('commonCharacters')));
+  const table = el('table', 'compare');
+  const head = el('tr');
+  head.append(el('th', '', t('characters')), el('th', '', first.playerInfo.nickname), el('th', '', second.playerInfo.nickname));
+  table.append(head);
+  common.forEach((x) => {
+    const y = listB.find((item) => String(item.avatarId) === String(x.avatarId));
+    const a = describeCharacter(first, x);
+    const b = describeCharacter(second, y);
+    let better = '';
+    if (a.cv !== null && b.cv !== null) better = a.cv > b.cv ? 'a' : (b.cv > a.cv ? 'b' : '');
+    const row = el('tr');
+    row.append(
+      el('td', 'stat-name', getCharacterName(store.characters[x.avatarId], store)),
+      el('td', better === 'a' ? 'better' : '', a.text),
+      el('td', better === 'b' ? 'better' : '', b.text)
+    );
+    table.append(row);
+  });
+  wrapper.append(table);
+  return wrapper;
+}
+
 async function runCompare(uid) {
   const box = state.compareBox;
   if (!box || !state.last) return;
@@ -1044,9 +1334,11 @@ async function runCompare(uid) {
     const other = await fetchPlayer(uid);
     box.textContent = '';
     box.append(buildCompareTable(state.last.data, other));
+    const common = buildCommonCharacters(state.last.data, other, state.last.store);
+    if (common) box.append(common);
   } catch (error) {
     console.error(error);
-    box.textContent = error instanceof TypeError ? t('network') : error.message;
+    box.textContent = error.network ? t('network') : error.message;
   }
 }
 
@@ -1133,7 +1425,10 @@ function render() {
   if (!state.last) return;
   const { data, store } = state.last;
   result.textContent = '';
+  if (state.offline) result.append(el('p', 'hint offline-banner', t('offlineBanner') + formatDate(state.offline)));
   result.append(buildProfile(data, store), buildChips(data), buildActions(data));
+  const history = buildHistory();
+  if (history) result.append(history);
 
   const namecards = buildNamecards(data.playerInfo, store);
   if (namecards) result.append(namecards);
@@ -1165,7 +1460,7 @@ async function showPlayer(data) {
 
 function showError(error, uid) {
   result.textContent = '';
-  result.append(el('p', 'hint', error instanceof TypeError ? t('network') : error.message));
+  result.append(el('p', 'hint', error.network ? t('network') : error.message));
   const retry = el('button', 'action-button', t('retry'));
   retry.type = 'button';
   retry.addEventListener('click', () => search(uid));
@@ -1178,13 +1473,23 @@ async function search(uid) {
     return;
   }
   result.textContent = t('loading');
+  state.offline = null;
   try {
     const data = await fetchPlayer(uid);
+    state.diff = updateHistory(uid, data.playerInfo);
     await showPlayer(data);
+    saveOffline(uid, data);
     rememberPlayer(uid, data.playerInfo.nickname);
     updateUrl(uid);
   } catch (error) {
     console.error(error);
+    const saved = error.network ? loadOffline(uid) : null;
+    if (saved && saved.data && saved.data.playerInfo) {
+      state.offline = saved.savedAt;
+      state.diff = null;
+      await showPlayer(saved.data);
+      return;
+    }
     showError(error, uid);
   }
 }
@@ -1209,6 +1514,19 @@ input.addEventListener('input', () => {
 form.addEventListener('submit', (event) => {
   event.preventDefault();
   search(input.value.trim());
+});
+
+document.addEventListener('keydown', (event) => {
+  if ((event.ctrlKey || event.metaKey) && String(event.key).toLowerCase() === 'k') {
+    event.preventDefault();
+    input.focus();
+    input.select();
+    return;
+  }
+  const tag = event.target && event.target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  if (event.key === 'ArrowRight') stepCharacter(1);
+  if (event.key === 'ArrowLeft') stepCharacter(-1);
 });
 
 applyTexts();

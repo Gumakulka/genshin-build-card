@@ -56,10 +56,34 @@ function startServer() {
   });
 }
 
+function boundsFile() {
+  return path.join(app.getPath('userData'), 'window.json');
+}
+
+function loadSize() {
+  try {
+    const saved = JSON.parse(fs.readFileSync(boundsFile(), 'utf8'));
+    if (saved.width >= 480 && saved.height >= 600) return { width: saved.width, height: saved.height };
+  } catch (error) {
+    return { width: 1200, height: 850 };
+  }
+  return { width: 1200, height: 850 };
+}
+
+function saveSize(win) {
+  try {
+    const { width, height } = win.getNormalBounds();
+    fs.writeFileSync(boundsFile(), JSON.stringify({ width, height }));
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 function createWindow(url) {
+  const size = loadSize();
   const win = new BrowserWindow({
-    width: 1200,
-    height: 850,
+    width: size.width,
+    height: size.height,
     minWidth: 480,
     minHeight: 600,
     autoHideMenuBar: true,
@@ -72,6 +96,8 @@ function createWindow(url) {
   });
 
   const origin = new URL(url).origin;
+
+  win.on('close', () => saveSize(win));
 
   win.webContents.setWindowOpenHandler(({ url: target }) => {
     if (/^https?:\/\//.test(target)) shell.openExternal(target);

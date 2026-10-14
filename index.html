@@ -7,7 +7,7 @@
   <title>Genshin Build Card</title>
   <link rel="icon" type="image/png" href="build/favicon.png">
   <link rel="stylesheet" href="style.css?v=5">
-  <link rel="stylesheet" href="features.css?v=2">
+  <link rel="stylesheet" href="features.css?v=3">
 </head>
 <body>
   <aside class="side side-left" aria-hidden="true">
@@ -39,15 +39,17 @@
       <button type="submit" data-i18n="search"></button>
     </form>
 
+    <div id="favorites" class="recent"></div>
     <div id="recent" class="recent"></div>
 
     <div id="result"></div>
 
+    <p class="disclaimer" data-i18n="shortcutsHint"></p>
     <p class="disclaimer" data-i18n="disclaimer"></p>
   </main>
 
   <footer class="author" data-i18n="author"></footer>
 
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

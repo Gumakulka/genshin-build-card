@@ -151,3 +151,25 @@ table.compare td.better {
 .compare-box {
   margin-top: 8px;
 }
+
+.character-filter {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 0 10px;
+}
+
+.artifact-card.weakest {
+  border-color: #e5484d;
+}
+
+.weakest-label {
+  margin-top: 6px;
+  color: #e5484d;
+}
+
+.offline-banner {
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
