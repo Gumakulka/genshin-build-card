@@ -45,10 +45,11 @@ function buildCharacters(data, store) {
     card.dataset.search = (name + ' ' + (character && character.Element ? character.Element : '')).toLowerCase();
     card.append(createImage(getCharacterIcon(character, avatar.costumeId), name));
     card.append(el('div', 'name', name));
-    const emoji = character && ELEMENT_EMOJI[character.Element] ? ELEMENT_EMOJI[character.Element] + ' ' : '';
-    let meta = emoji + 'Lv. ' + avatar.level;
+    let meta = 'Lv. ' + avatar.level;
     if (info.isShowAvatarTalent) meta += ' · C' + (avatar.talentLevel || 0);
-    card.append(el('div', 'meta', meta));
+    const metaRow = el('div', 'meta');
+    metaRow.append(elementIcon(character && character.Element), document.createTextNode(meta));
+    card.append(metaRow);
 
     card.addEventListener('click', () => selectCharacter(avatar.avatarId));
     list.append(card);

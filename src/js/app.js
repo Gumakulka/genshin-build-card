@@ -28,8 +28,9 @@ function renderDetail() {
   const title = el('div');
   title.append(el('h4', '', getCharacterName(character, store)));
   const levelValue = details.propMap && details.propMap['4001'] ? details.propMap['4001'].val : (shown ? shown.level : '?');
-  const emoji = character && ELEMENT_EMOJI[character.Element] ? ELEMENT_EMOJI[character.Element] + ' ' : '';
-  title.append(el('div', 'item-meta', emoji + t('level') + ' ' + levelValue));
+  const levelLine = el('div', 'item-meta');
+  levelLine.append(elementIcon(character && character.Element), document.createTextNode(t('level') + ' ' + levelValue));
+  title.append(levelLine);
   head.append(title);
   const exportButton = el('button', 'action-button push-right', t('exportPng'));
   exportButton.type = 'button';
@@ -80,6 +81,8 @@ function renderHero() {
   HERO_CHARACTERS.forEach((character) => {
     heroIcons.append(createImage(character.icon, character.name, 'hero-icon'));
   });
+  renderElementRow();
+  renderSides();
 }
 
 async function showPlayer(data) {

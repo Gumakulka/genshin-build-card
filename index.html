@@ -3,21 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://enka.network; frame-src https://genshin-impact-map.appsample.com; connect-src https://genshin-proxy.klaun970.workers.dev https://raw.githubusercontent.com; base-uri 'none'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://enka.network https://gi.yatta.moe; frame-src https://genshin-impact-map.appsample.com; connect-src https://genshin-proxy.klaun970.workers.dev https://raw.githubusercontent.com; base-uri 'none'; form-action 'self'">
   <title>Genshin Build Card</title>
   <link rel="icon" type="image/png" href="build/favicon.png">
   <link rel="stylesheet" href="src/css/base.css?v=6">
   <link rel="stylesheet" href="src/css/components.css?v=1">
   <link rel="stylesheet" href="src/css/layout.css?v=1">
   <link rel="stylesheet" href="src/css/effects.css?v=1">
+  <link rel="stylesheet" href="src/css/icons.css?v=1">
 </head>
 <body>
-  <aside class="side side-left" aria-hidden="true">
-    <span>🔥</span><span>✨</span><span>💧</span><span>✨</span><span>🌿</span><span>✨</span><span>⚡</span>
-  </aside>
-  <aside class="side side-right" aria-hidden="true">
-    <span>❄️</span><span>✨</span><span>🌪️</span><span>✨</span><span>🪨</span><span>✨</span><span>⭐</span>
-  </aside>
+  <aside id="side-left" class="side side-left" aria-hidden="true"></aside>
+  <aside id="side-right" class="side side-right" aria-hidden="true"></aside>
 
   <header class="topbar">
     <span class="brand">✨ Genshin Build Card</span>
@@ -30,7 +27,7 @@
   <main>
     <section id="hero" class="hero">
       <img class="hero-logo" src="build/logo.jpg" alt="Genshin Build Card">
-      <div class="elements" aria-hidden="true">🔥 💧 🌿 ⚡ ❄️ 🌪️ 🪨</div>
+      <div id="elements" class="elements" aria-hidden="true"></div>
       <h1 data-i18n="title">Genshin Build Card</h1>
       <p data-i18n="subtitle"></p>
       <div id="hero-icons" class="hero-icons"></div>
@@ -57,15 +54,16 @@
   <script src="src/js/services/store.js?v=1"></script>
   <script src="src/js/services/player.js?v=1"></script>
   <script src="src/js/ui/helpers.js?v=1"></script>
+  <script src="src/js/ui/element-icon.js?v=1"></script>
   <script src="src/js/ui/lists.js?v=1"></script>
   <script src="src/js/ui/profile.js?v=1"></script>
-  <script src="src/js/ui/characters.js?v=1"></script>
+  <script src="src/js/ui/characters.js?v=2"></script>
   <script src="src/js/ui/equipment.js?v=1"></script>
   <script src="src/js/ui/compare.js?v=1"></script>
   <script src="src/js/ui/export-card.js?v=1"></script>
   <script src="src/js/features/guide.js?v=1"></script>
   <script src="src/js/features/map-dock.js?v=1"></script>
   <script src="src/js/features/fx.js?v=1"></script>
-  <script src="src/js/app.js?v=1"></script>
+  <script src="src/js/app.js?v=2"></script>
 </body>
 </html>

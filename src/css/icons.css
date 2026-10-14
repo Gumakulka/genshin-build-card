@@ -1,0 +1,55 @@
+/* Ikony żywiołów: rozmiary, połysk i delikatne unoszenie. */
+@keyframes ico-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -6px; }
+}
+
+.element-icon {
+  width: 1.1em;
+  height: 1.1em;
+  object-fit: contain;
+  vertical-align: -0.2em;
+}
+
+.meta .element-icon,
+.item-meta .element-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  vertical-align: -2px;
+}
+
+.elements {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  letter-spacing: 0;
+}
+
+.elements .element-icon {
+  width: 36px;
+  height: 36px;
+  vertical-align: baseline;
+  filter: drop-shadow(0 0 8px var(--glow));
+  transition: transform 0.25s var(--ease), filter 0.25s ease;
+}
+
+.elements .element-icon:hover {
+  transform: translateY(-3px) scale(1.25) rotate(8deg);
+  filter: drop-shadow(0 0 14px var(--accent));
+}
+
+.side .element-icon {
+  width: 2rem;
+  height: 2rem;
+  vertical-align: baseline;
+  filter: drop-shadow(0 0 8px var(--glow));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .elements .element-icon {
+    animation: fx-pop 0.6s ease backwards, ico-bob 3.6s ease-in-out infinite;
+    animation-delay: calc(var(--i, 0) * 100ms), calc(var(--i, 0) * 300ms + 700ms);
+  }
+}
