@@ -36,13 +36,13 @@ const TEXT = {
     traveler: ['Podróżnik', 'Podróżniczka'],
     stats: 'Statystyki',
     talents: 'Talenty',
-    talentsValue: 'Atak / Umiej. / Wybuch',
+    talentsValue: 'Atak / Umiejętność / Wybuch (bazowe)',
     weapon: 'Broń',
     artifacts: 'Artefakty',
     sets: 'Zestawy',
     cv: 'Suma CV z substatów',
     constellations: 'Konstelacje',
-    friendship: 'Poziom przyjaźcni',
+    friendship: 'Poziom przyjaźni',
     level: 'Poziom',
     base: 'Bazowy',
     hp: 'HP',
@@ -55,6 +55,7 @@ const TEXT = {
     healing: 'Bonus leczenia',
     slots: ['Kwiat', 'Pióro', 'Piaski', 'Puchar', 'Diadem'],
     noDetails: 'Szczegóły postaci są niedostępne. Gablota gracza może być ukryta albo serwer nie zwrócił pełnych danych.',
+    noCharacterDetails: 'Brak szczegółów dla tej postaci w danych z serwera.',
     pickHint: 'Kliknij postać, aby zobaczyć broń, artefakty i statystyki.',
     errors: {
       400: 'Nieprawidłowy format UID.',
@@ -92,7 +93,7 @@ const TEXT = {
     traveler: ['Traveler', 'Traveler'],
     stats: 'Stats',
     talents: 'Talents',
-    talentsValue: 'Attack / Skill / Burst',
+    talentsValue: 'Attack / Skill / Burst (base)',
     weapon: 'Weapon',
     artifacts: 'Artifacts',
     sets: 'Sets',
@@ -111,6 +112,7 @@ const TEXT = {
     healing: 'Healing Bonus',
     slots: ['Flower', 'Plume', 'Sands', 'Goblet', 'Circlet'],
     noDetails: 'Character details are unavailable. The player showcase may be hidden or the server did not return full data.',
+    noCharacterDetails: 'No details for this character in the server data.',
     pickHint: 'Click a character to see weapon, artifacts and stats.',
     errors: {
       400: 'Invalid UID format.',
@@ -317,7 +319,9 @@ function getCache(uid) {
     const raw = localStorage.getItem('player-' + uid);
     if (!raw) return null;
     const cached = JSON.parse(raw);
-    return Date.now() < cached.expires ? cached.data : null;
+    if (Date.now() < cached.expires) return cached.data;
+    localStorage.removeItem('player-' + uid);
+    return null;
   } catch (error) {
     localStorage.removeItem('player-' + uid);
     return null;
@@ -656,9 +660,13 @@ function renderDetail() {
     box.append(el('p', 'hint', t('noDetails')));
     return;
   }
+  if (state.selectedId === null || state.selectedId === undefined) {
+    box.append(el('p', 'hint', t('pickHint')));
+    return;
+  }
   const details = findDetails(data, state.selectedId);
   if (!details) {
-    box.append(el('p', 'hint', t('pickHint')));
+    box.append(el('p', 'hint', t('noCharacterDetails')));
     return;
   }
 
