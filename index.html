@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' https://enka.network https://gi.yatta.moe https://cdn.jsdelivr.net; frame-src https://genshin-impact-map.appsample.com; connect-src https://genshin-proxy.klaun970.workers.dev https://raw.githubusercontent.com; base-uri 'none'; form-action 'self'">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' https://enka.network https://gi.yatta.moe https://cdn.jsdelivr.net; frame-src https://genshin-impact-map.appsample.com; connect-src https://genshin-proxy.klaun970.workers.dev https://raw.githubusercontent.com; object-src 'none'; base-uri 'none'; form-action 'self'">
   <title>Genshin Build Card</title>
   <link rel="icon" type="image/png" href="build/favicon.png">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/cinzel/index.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/nunito/index.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/cinzel@5/index.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/nunito@5/index.css">
   <link rel="stylesheet" href="src/css/base.css?v=6">
   <link rel="stylesheet" href="src/css/components.css?v=1">
   <link rel="stylesheet" href="src/css/layout.css?v=3">
@@ -18,6 +19,7 @@
   <link rel="stylesheet" href="src/css/menu.css?v=1">
   <link rel="stylesheet" href="src/css/extras.css?v=1">
   <link rel="stylesheet" href="src/css/theme.css?v=1">
+  <link rel="stylesheet" href="src/css/hub.css?v=1">
 </head>
 <body>
   <aside id="side-left" class="side side-left" aria-hidden="true"></aside>
@@ -61,7 +63,7 @@
   <script src="src/js/data/texts.js?v=1"></script>
   <script src="src/js/data/constants.js?v=1"></script>
   <script src="src/js/core.js?v=4"></script>
-  <script src="src/js/ui/icons.js?v=1"></script>
+  <script src="src/js/ui/icons.js?v=2"></script>
   <script src="src/js/services/store.js?v=2"></script>
   <script src="src/js/services/player.js?v=2"></script>
   <script src="src/js/ui/helpers.js?v=1"></script>
@@ -77,7 +79,8 @@
   <script src="src/js/features/farm.js?v=1"></script>
   <script src="src/js/features/swipe.js?v=1"></script>
   <script src="src/js/features/menu.js?v=3"></script>
+  <script src="src/js/features/hub.js?v=1"></script>
   <script src="src/js/features/fx.js?v=3"></script>
-  <script src="src/js/app.js?v=4"></script>
+  <script src="src/js/app.js?v=5"></script>
 </body>
 </html>

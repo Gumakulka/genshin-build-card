@@ -1,6 +1,12 @@
 const ALLOWED_ORIGINS = ["https://gumakulka.github.io"];
 const LOCAL_ORIGIN = /^http:\/\/(?:127\.0\.0\.1|localhost):\d{1,5}$/;
 const UPSTREAM_TIMEOUT_MS = 15000;
+const BASE_HEADERS = {
+  "Content-Type": "application/json; charset=utf-8",
+  "Cache-Control": "no-store",
+  "Vary": "Origin",
+  "X-Content-Type-Options": "nosniff",
+};
 
 function isAllowedOrigin(origin) {
   return ALLOWED_ORIGINS.includes(origin) || LOCAL_ORIGIN.test(origin);
@@ -9,12 +15,7 @@ function isAllowedOrigin(origin) {
 function jsonResponse(body, status, extra) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      "Cache-Control": "no-store",
-      "Vary": "Origin",
-      ...extra,
-    },
+    headers: { ...BASE_HEADERS, ...extra },
   });
 }
 
@@ -46,12 +47,7 @@ export default {
       });
       return new Response(upstream.body, {
         status: upstream.status,
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          "Cache-Control": "no-store",
-          "Vary": "Origin",
-          ...cors,
-        },
+        headers: { ...BASE_HEADERS, ...cors },
       });
     } catch (error) {
       return jsonResponse({ error: "Upstream unavailable" }, 502, cors);

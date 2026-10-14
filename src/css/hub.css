@@ -1,0 +1,335 @@
+/* Menu główne (nakładka po kliknięciu w nazwę strony) i panel polecanego buildu. */
+.brand {
+  cursor: pointer;
+}
+
+.brand:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+body.hub-open {
+  overflow: hidden;
+}
+
+.hub {
+  --c: var(--accent);
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 93%, transparent);
+  backdrop-filter: blur(14px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0s linear 0.35s;
+}
+
+.hub.open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.35s ease;
+}
+
+.hub[data-element='Fire'] { --c: #ff7a4d; }
+.hub[data-element='Water'] { --c: #4cc2ff; }
+.hub[data-element='Grass'] { --c: #8ee05a; }
+.hub[data-element='Electric'] { --c: #b58cff; }
+.hub[data-element='Ice'] { --c: #9fe7f5; }
+.hub[data-element='Wind'] { --c: #5cf0c0; }
+.hub[data-element='Rock'] { --c: #f5c242; }
+
+.hub-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+}
+
+.hub-header::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--c) 18%, var(--c) 82%, transparent);
+  opacity: 0.7;
+}
+
+.hub-title {
+  flex: 1;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.06em;
+  color: var(--c);
+}
+
+.hub-back,
+.hub-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--fg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.hub-back:hover,
+.hub-close:hover {
+  border-color: var(--c);
+}
+
+.hub-back[hidden] {
+  display: none;
+}
+
+.hub-body {
+  flex: 1;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 16px 56px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.hub-intro {
+  margin: 0 0 18px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.hub-elements {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 14px;
+}
+
+.hub-element {
+  --c: var(--accent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 10px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  color: var(--fg);
+  background: linear-gradient(180deg, var(--card-2), var(--card));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.hub-element[data-element='Fire'] { --c: #ff7a4d; }
+.hub-element[data-element='Water'] { --c: #4cc2ff; }
+.hub-element[data-element='Grass'] { --c: #8ee05a; }
+.hub-element[data-element='Electric'] { --c: #b58cff; }
+.hub-element[data-element='Ice'] { --c: #9fe7f5; }
+.hub-element[data-element='Wind'] { --c: #5cf0c0; }
+.hub-element[data-element='Rock'] { --c: #f5c242; }
+
+.hub-element:hover {
+  border-color: var(--c);
+  box-shadow: 0 0 26px rgba(255, 255, 255, 0.06), 0 0 0 1px var(--c);
+  transform: translateY(-3px);
+}
+
+.hub-element img {
+  width: 52px;
+  height: 52px;
+}
+
+.hub-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.hub-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--fg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.hub-tile .ico {
+  color: var(--accent);
+}
+
+.hub-tile:hover:not(:disabled) {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.hub-tile:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.hub-chars {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.hub-chars .character {
+  min-height: 130px;
+}
+
+.hub-section {
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.hub-char-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.hub-char-head img.portrait {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid var(--c);
+}
+
+.hub-char-head h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+
+.advice {
+  position: relative;
+}
+
+.advice-row {
+  display: flex;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 14px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.advice-row:last-of-type {
+  border-bottom: 0;
+}
+
+.advice-label {
+  flex: 0 0 112px;
+  color: var(--muted);
+}
+
+.advice-value {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.advice-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.advice-tag {
+  padding: 3px 10px;
+  font-size: 12px;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+}
+
+.advice-check {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.advice-check .advice-row {
+  align-items: center;
+}
+
+.match-ok {
+  color: #3fb67a;
+}
+
+.match-bad {
+  color: #e5484d;
+}
+
+.advice-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.advice-note a {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hub.open .hub-element {
+    animation: fx-pop 0.5s ease backwards;
+    animation-delay: calc(var(--i, 0) * 60ms + 100ms);
+  }
+
+  .hub.open .hub-tile {
+    animation: fx-rise 0.5s var(--ease) backwards;
+  }
+
+  .hub.open .hub-chars .character {
+    animation: fx-rise 0.45s var(--ease) backwards;
+    animation-delay: calc(var(--i, 0) * 30ms);
+  }
+}
+
+@media (max-width: 760px) {
+  .hub-header {
+    padding: 10px 12px;
+  }
+
+  .hub-title {
+    font-size: 1.05rem;
+  }
+
+  .advice-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .advice-label {
+    flex-basis: auto;
+  }
+
+  .hub-chars {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+}

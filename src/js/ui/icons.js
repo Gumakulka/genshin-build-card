@@ -1,6 +1,6 @@
 /* Ikony z biblioteki Lucide (licencja ISC) ładowane z jsDelivr. Kolor bierze się z CSS (maska),
-   więc ikona dopasowuje się do motywu i do koloru tekstu. */
-const ICON_BASE = 'https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/';
+   więc ikona dopasowuje się do motywu i do koloru tekstu. Wersja jest przypięta do serii 0.x. */
+const ICON_BASE = 'https://cdn.jsdelivr.net/npm/lucide-static@0/icons/';
 
 function icon(name, className) {
   const node = document.createElement('span');

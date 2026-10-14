@@ -47,6 +47,8 @@ function renderDetail() {
   const weapon = buildWeaponPanel(details.equipList || [], store);
   if (weapon) right.append(weapon);
   right.append(buildRvPanel());
+  const advice = buildAdvicePanel(character, store, details);
+  if (advice) right.append(advice);
   grid.append(left, right);
   panel.append(grid);
   panel.append(guideCharacter(details, character, shown, store));
