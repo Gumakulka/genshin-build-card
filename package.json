@@ -44,7 +44,7 @@
           ]
         }
       ],
-      "artifactName": "Genshin-Build-Card-${version}-portable.exe"
+      "artifactName": "${productName}.${ext}"
     }
   }
 }
