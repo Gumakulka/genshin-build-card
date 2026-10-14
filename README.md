@@ -4,53 +4,53 @@
 
 # Genshin Build Card
 
-Wpisz UID, a zobaczysz profil gracza z Genshin Impact: awatar, wizytówki, poziomy, Otchłań i postacie z gabloty. Po kliknięciu postaci pokażą się jej statystyki, broń i artefakty.
+Genshin Build Card to strona, na której wpisujesz UID gracza i od razu widzisz jego profil z Genshin Impact: awatar, wizytówki, poziomy, postęp w Otchłani i postacie z gabloty. Po kliknięciu postaci zobaczysz jej statystyki, broń i artefakty.
 
-**Wersja online:** https://gumakulka.github.io/genshin-build-card/
+**Wypróbuj online:** https://gumakulka.github.io/genshin-build-card/
 
-UID możesz też podać w adresie, np. `?uid=760720445`. Strona dobrze działa na telefonie.
+UID możesz też podać w adresie strony, na przykład `?uid=760720445`. Strona dobrze działa również na telefonie.
 
-## Co potrafi
+## Co potrafi Genshin Build Card
 
-- Pokazuje profil gracza, wizytówki i postacie z gabloty, które można przeszukiwać.
-- W szczegółach postaci wyświetla statystyki z paskami względem Twoich celów (CRIT, ER), talenty, broń i artefakty. Dla artefaktów liczy sumę CV i RV oraz oznacza najsłabszy z nich.
-- Pod postacią, bronią i artefaktami znajdziesz sekcję „Gdzie zdobyć, koszty i wskazówki”.
+- Pokazuje profil gracza, jego wizytówki i postacie z gabloty, w których można szukać.
+- W szczegółach postaci prezentuje statystyki z paskami porównującymi je z Twoimi celami (CRIT, ER), a także talenty, broń i artefakty. Dla artefaktów liczy sumy CV i RV oraz zaznacza najsłabszy z nich.
+- Pod postacią, bronią i artefaktami podpowiada, gdzie je zdobyć, ile kosztują i na co zwrócić uwagę.
 - Porównuje dwóch graczy, w tym ich wspólne postacie.
-- Zapisuje kartę postaci jako PNG i kopiuje link do wyniku.
-- Zapamiętuje ulubionych graczy i ostatnio sprawdzanych, pokazuje, co zmieniło się na koncie od ostatniej wizyty, i działa offline na ostatnio zapisanych danych.
+- Zapisuje kartę postaci jako obraz PNG i kopiuje link do wyniku.
+- Pamięta ulubionych oraz ostatnio sprawdzanych graczy, pokazuje, co zmieniło się na koncie od Twojej ostatniej wizyty, i działa offline na ostatnio zapisanych danych.
 - Pozwala zapisać listę ulubionych do pliku i wczytać ją na innym urządzeniu.
-- Zawiera mapę z wyszukiwarką znaczników (np. Cecilia).
-- Podpowiada w planie farmienia, które książki do talentów są dziś dostępne w domenach.
-- Na telefonie zmienia postać po przesunięciu palcem w lewo lub w prawo.
-- Ma jasny i ciemny motyw, wersję polską i angielską oraz efekty po kliknięciu. Efekty wyłączają się, jeśli w systemie włączysz ograniczenie animacji.
+- Zawiera mapę z wyszukiwarką znaczników, na przykład Cecilii.
+- W planie farmienia pokazuje, które książki do talentów można dziś zdobyć w domenach.
+- Na telefonie pozwala zmienić postać przesunięciem palca w lewo lub w prawo.
+- Ma jasny i ciemny motyw, wersję polską i angielską oraz drobne efekty po kliknięciu. Efekty znikają, jeśli w systemie włączysz ograniczenie animacji.
 
-## Jak korzystać
+## Jak korzystać z Genshin Build Card
 
 1. Wpisz 9-cyfrowy UID gracza i kliknij „Szukaj”.
-2. Kliknij postać, żeby zobaczyć jej szczegóły.
-3. Menu w prawym górnym rogu otwiera mapę i plan farmienia, przenosi do ulubionych i ostatnio sprawdzanych graczy oraz pozwala zapisać lub wczytać listę ulubionych.
+2. Kliknij wybraną postać, żeby zobaczyć jej szczegóły.
+3. Skorzystaj z menu w prawym górnym rogu. Otworzysz w nim mapę i plan farmienia, przejdziesz do ulubionych i ostatnio sprawdzanych graczy oraz zapiszesz lub wczytasz listę ulubionych.
 
-Dane zapisane w przeglądarce (ulubieni, historia, tryb offline) usuniesz w menu pozycją „Wyczyść zapisane dane”.
+Dane zapisane w przeglądarce (ulubieni gracze, historia i tryb offline) możesz usunąć w menu przyciskiem „Wyczyść zapisane dane”.
 
-## Wersja na Windowsa
+## Genshin Build Card na Windowsie
 
-Program `Genshin Build Card.exe` to ta sama strona w osobnym oknie, bez przeglądarki. Plik buduje GitHub Actions: otwórz zakładkę Actions, wybierz „Build Windows exe”, kliknij „Run workflow” i pobierz plik z wyników uruchomienia. Program nie jest podpisany, więc przy pierwszym uruchomieniu Windows SmartScreen może wyświetlić ostrzeżenie.
+Plik `Genshin Build Card.exe` otwiera tę samą stronę w osobnym oknie, bez przeglądarki. Buduje go GitHub Actions: wejdź w zakładkę Actions, wybierz „Build Windows exe”, kliknij „Run workflow” i pobierz gotowy plik z wyników uruchomienia. Program nie ma podpisu cyfrowego, więc przy pierwszym uruchomieniu Windows SmartScreen może wyświetlić ostrzeżenie.
 
-## Znane ograniczenia
+## Czego Genshin Build Card nie potrafi
 
-- Szczegóły postaci są dostępne tylko wtedy, gdy gracz ma w grze publiczną gablotę.
-- Mapa nie wie, jakiego materiału potrzebuje Twoja postać, więc znacznik trzeba wyszukać samodzielnie. Baza znaczników kończy się na Sumeru, dlatego nowsze regiony mogą ich nie mieć.
-- Plan farmienia pokazuje, które serie książek do talentów są dostępne danego dnia, ale nie przypisuje ich do Twoich postaci. Szczegóły sprawdzisz na wiki, do której prowadzi link w oknie planu.
-- Wynik RV może się trochę różnić od innych kalkulatorów, ponieważ maksymalne wartości rzutów wpisałem ręcznie.
+- Szczegóły postaci widzisz tylko wtedy, gdy gracz ma w grze publiczną gablotę.
+- Mapa nie wie, jakiego materiału potrzebuje Twoja postać, więc znacznik musisz wyszukać samodzielnie. Baza znaczników kończy się na Sumeru, dlatego w nowszych regionach może ich nie być.
+- Plan farmienia pokazuje, które książki są dostępne danego dnia, ale nie przypisuje ich do Twoich postaci. Szczegóły znajdziesz na wiki, do której prowadzi link w oknie planu.
+- Wynik RV może się trochę różnić od wyników w innych kalkulatorach, ponieważ maksymalne wartości rzutów wpisałem ręcznie.
 - Historia konta i tryb offline działają tylko w tej przeglądarce, w której zostały zapisane.
-- Lista znajomych z gry nie jest publicznie dostępna, więc aplikacja nie może jej pokazać.
+- Lista znajomych z gry nie jest publiczna, więc strona nie może jej pokazać.
 
-## Dla programistów
+## Informacje dla programistów
 
-Szczegóły techniczne programu na Windowsa opisuje plik `desktop/README.md`.
+Szczegóły techniczne wersji na Windowsa znajdziesz w pliku `desktop/README.md`.
 
 ## Licencja i źródła
 
-Projekt jest na licencji MIT. To projekt fanowski, niezwiązany z HoYoverse. Grafiki z gry należą do ich właścicieli i są ładowane z Enka.Network oraz Project Amber dopiero podczas działania strony. Logo w katalogu `build/` zawiera znak gry, który również jest własnością HoYoverse.
+Genshin Build Card jest dostępny na licencji MIT. To projekt fanowski i nie ma żadnego związku z HoYoverse. Grafiki z gry należą do ich właścicieli, a strona pobiera je z Enka.Network i Project Amber dopiero podczas działania. Logo w katalogu `build/` zawiera znak gry, który również jest własnością HoYoverse.
 
-Czcionki Cinzel i Nunito pochodzą z projektu [Fontsource](https://fontsource.org/) (licencja OFL). Ikony pochodzą z biblioteki [Lucide](https://lucide.dev/) (licencja ISC). Dane graczy dostarcza [Enka.Network](https://enka.network/).
+Dane graczy dostarcza [Enka.Network](https://enka.network/). Czcionki Cinzel i Nunito pochodzą z projektu [Fontsource](https://fontsource.org/) (licencja OFL), a ikony z biblioteki [Lucide](https://lucide.dev/) (licencja ISC).
