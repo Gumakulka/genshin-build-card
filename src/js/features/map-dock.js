@@ -1,12 +1,14 @@
 /* Panel mapy: dosuwa się z prawej strony (na wąskich ekranach od dołu) i przesuwa resztę strony,
    zamiast ją zasłaniać. Pokazuje oficjalnie osadzalną mapę AppSample z filtrem typów znaczników.
-   Kliknięcie postaci otwiera tryb "Only <postać>": ukryte są zakładki Broń/Artefakty i wyszukiwarka. */
+   Kliknięcie postaci otwiera tryb "Only <postać>": ukryte są zakładki Broń/Artefakty i wyszukiwarka,
+   a panel pokazuje tylko materiały talentów tej postaci i jej własnego bossa (zamiast wszystkich bossów). */
 const MAP_BASE = 'https://genshin-impact-map.appsample.com/location?names=';
 const MAP_OTHER = [
   ['HoYoLAB', 'https://act.hoyolab.com/ys/app/interactive-map/index.html'],
   ['Kongying Tavern', 'https://yuanshen.site/'],
   ['AppSample', 'https://genshin-impact-map.appsample.com/']
 ];
+const GENSHIN_DB_TALENTS = 'https://raw.githubusercontent.com/theBowja/genshin-db/main/src/data/English/talents/';
 
 const BOSS_NAMES = [
   'Anemo Hypostasis', 'Cryo Regisvine', 'Electro Hypostasis', 'Oceanid', 'Pyro Regisvine', 'Geo Hypostasis',
@@ -14,6 +16,23 @@ const BOSS_NAMES = [
   'Hydro Hypostasis', 'Thunder Manifestation', 'Electro Regisvine', 'Jadeplume Terrorshroom',
   'Dendro Hypostasis', 'Aeonblight Drake', 'Setekh Wenut'
 ].join(',');
+
+/* Materiały bossów wzniesienia (tylko pewne przypisania) -> nazwa bossa na mapie. */
+const BOSS_DROP = {
+  'Hurricane Seed': 'Anemo Hypostasis',
+  'Lightning Prism': 'Electro Hypostasis',
+  'Basalt Pillar': 'Geo Hypostasis',
+  'Hoarfrost Core': 'Cryo Regisvine',
+  'Everflame Seed': 'Pyro Regisvine',
+  'Cleansing Heart': 'Oceanid',
+  'Perpetual Heart': 'Perpetual Mechanical Array',
+  'Crystalline Bloom': 'Cryo Hypostasis',
+  'Smoldering Pearl': 'Pyro Hypostasis',
+  'Marionette Core': 'Maguu Kenki',
+  'Riftborn Regalia': 'Primo Geovishap',
+  'Dew of Repudiation': 'Hydro Hypostasis',
+  'Storm Beads': 'Thunder Manifestation'
+};
 
 const SPECIALTY_NAMES = [
   'Jueyun Chili', 'Calla Lily', 'Qingxin', 'Small Lamp Grass', 'Violetgrass', 'Cecilia', 'Silk Flower',
@@ -65,7 +84,8 @@ const DOCK_CONTEXTS = {
   }
 };
 
-const dock = { open: false, wide: false, context: 'character', names: 'Domain', loaded: '', timer: null, iframe: null, built: false, only: null };
+const dock = { open: false, wide: false, context: 'character', names: 'Domain', loaded: '', timer: null, iframe: null, built: false, only: null, bossNames: '' };
+const dockNeeds = { token: 0, status: 'idle', list: [] };
 const dockNodes = {};
 
 function mapUrl(names) {
@@ -74,6 +94,98 @@ function mapUrl(names) {
 
 function cleanSearch(value) {
   return String(value).replace(/[^A-Za-z0-9 ,'\-().:+&!]/g, '').replace(/\s+/g, ' ').trim().slice(0, 80);
+}
+
+function dockPresets(context) {
+  if (!dock.only || dock.context !== 'character') return context.presets;
+  const list = [context.presets[0]];
+  if (dock.bossNames) list.push({ pl: 'Boss postaci', en: 'Character boss', names: dock.bossNames });
+  return list;
+}
+
+function dockEnglishName(avatarId) {
+  try {
+    const last = state.last;
+    if (!last || !last.store || !last.store.characters) return null;
+    const character = last.store.characters[avatarId];
+    if (!character) return null;
+    let english = guideEnglishName(character.NameTextMapHash, last.store);
+    if (!english && character.SideIconName) {
+      const raw = character.SideIconName.replace('UI_AvatarIcon_Side_', '');
+      english = NAME_FIX[raw] || raw;
+    }
+    return english;
+  } catch (error) {
+    return null;
+  }
+}
+
+async function loadCharacterNeeds(avatarId) {
+  const token = ++dockNeeds.token;
+  dockNeeds.status = 'loading';
+  dockNeeds.list = [];
+  dock.bossNames = '';
+  const english = dockEnglishName(avatarId);
+  if (!english) {
+    dockNeeds.status = 'error';
+    renderDock();
+    return;
+  }
+  const slug = english.toLowerCase().replace(/[^a-z0-9]/g, '');
+  try {
+    const response = await fetch(GENSHIN_DB_TALENTS + slug + '.json');
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const data = await response.json();
+    if (token !== dockNeeds.token) return;
+    const totals = {};
+    const costs = data && data.costs ? data.costs : {};
+    Object.keys(costs).forEach((level) => {
+      (costs[level] || []).forEach((item) => {
+        if (item && item.name) totals[item.name] = (totals[item.name] || 0) + (Number(item.count) || 0);
+      });
+    });
+    const names = Object.keys(totals);
+    if (!names.length) throw new Error('empty');
+    dockNeeds.list = names
+      .sort((a, b) => (a === 'Mora' ? -1 : b === 'Mora' ? 1 : a.localeCompare(b)))
+      .map((name) => ({ name, count: totals[name] }));
+    const bosses = [];
+    names.forEach((name) => {
+      if (BOSS_DROP[name] && !bosses.includes(BOSS_DROP[name])) bosses.push(BOSS_DROP[name]);
+    });
+    dock.bossNames = bosses.join(',');
+    dockNeeds.status = 'ready';
+  } catch (error) {
+    if (token !== dockNeeds.token) return;
+    dockNeeds.status = 'error';
+  }
+  renderDock();
+}
+
+function renderNeeds() {
+  const box = dockNodes.needs;
+  if (!box) return;
+  box.textContent = '';
+  box.hidden = !dock.only;
+  if (!dock.only) return;
+  if (dockNeeds.status === 'loading') {
+    box.append(el('p', 'dock-hint', gt('Ładowanie materiałów postaci...', 'Loading character materials...')));
+    return;
+  }
+  if (dockNeeds.status === 'error') {
+    box.append(el('p', 'dock-hint', gt('Nie udało się pobrać materiałów tej postaci. Mapa pokazuje same domeny.', 'Could not load this character\'s materials. The map shows domains only.')));
+    return;
+  }
+  if (dockNeeds.status !== 'ready') return;
+  box.append(el('div', 'guide-title', gt('Materiały talentów (poziomy 2–10, na jeden talent)', 'Talent materials (levels 2–10, per talent)')));
+  const list = el('ul', 'guide-list');
+  dockNeeds.list.forEach((item) => {
+    list.append(el('li', '', item.name + ' × ' + gnum(item.count)));
+  });
+  box.append(list);
+  if (!dock.bossNames) {
+    box.append(el('p', 'dock-hint', gt('Brak bossa tej postaci na mapie – materiał pochodzi np. z bossa tygodniowego lub nowszego regionu.', 'No boss for this character on the map – the material comes e.g. from a weekly boss or a newer region.')));
+  }
 }
 
 function renderDock() {
@@ -96,10 +208,10 @@ function renderDock() {
   });
 
   dockNodes.hint.textContent = only
-    ? gt('Tryb "Only ' + only + '": tylko domeny i bossowie postaci. Pozostałe znaczniki są ukryte.', 'Mode "Only ' + only + '": character domains and bosses only. Other markers are hidden.')
+    ? gt('Tryb "Only ' + only + '": przyciski mapy pokazują tylko domeny i bossa tej postaci, a lista poniżej – jej materiały.', 'Mode "Only ' + only + '": the map buttons show only this character\'s domains and boss, and the list below shows its materials.')
     : gt(context.hintPl, context.hintEn);
   dockNodes.chips.textContent = '';
-  context.presets.forEach((preset) => {
+  dockPresets(context).forEach((preset) => {
     const chipNode = el('button', preset.names === dock.names ? 'dock-chip active' : 'dock-chip', gt(preset.pl, preset.en));
     chipNode.type = 'button';
     chipNode.addEventListener('click', () => setDockNames(preset.names));
@@ -110,10 +222,13 @@ function renderDock() {
     allChip.type = 'button';
     allChip.addEventListener('click', () => {
       dock.only = null;
+      dock.names = context.presets[0].names;
       renderDock();
+      if (dock.open) loadDockMap();
     });
     dockNodes.chips.append(allChip);
   }
+  renderNeeds();
 
   dockNodes.searchForm.hidden = !context.search || Boolean(only);
   dockNodes.input.placeholder = gt('Szukaj na mapie, np. Cecilia', 'Search the map, e.g. Cecilia');
@@ -182,8 +297,9 @@ function mapDockOpen(contextKey) {
 
 function mapDockSelectCharacter(avatarId) {
   if (!dock.built) return;
+  const cleanId = String(avatarId).replace(/[^0-9]/g, '');
   const result = document.getElementById('result');
-  const card = result ? result.querySelector('.character[data-avatar-id="' + String(avatarId).replace(/[^0-9]/g, '') + '"]') : null;
+  const card = result ? result.querySelector('.character[data-avatar-id="' + cleanId + '"]') : null;
   const nameNode = card ? card.querySelector('.name') : null;
   const name = nameNode ? nameNode.textContent.trim().slice(0, 40) : '';
   dock.only = name || null;
@@ -192,6 +308,7 @@ function mapDockSelectCharacter(avatarId) {
   setDockOpen(true);
   renderDock();
   loadDockMap();
+  if (dock.only) loadCharacterNeeds(cleanId);
 }
 
 function closeDock() {
@@ -238,6 +355,8 @@ function buildDockBody() {
   const body = el('div', 'dock-body');
   dockNodes.hint = el('p', 'dock-hint');
   dockNodes.chips = el('div', 'dock-chips');
+  dockNodes.needs = el('div', 'dock-needs');
+  dockNodes.needs.hidden = true;
 
   dockNodes.searchForm = el('form', 'dock-search');
   dockNodes.input = document.createElement('input');
@@ -259,7 +378,7 @@ function buildDockBody() {
     if (value) setDockNames(value);
   });
   dockNodes.searchForm.append(dockNodes.input, dockNodes.searchButton, datalist);
-  body.append(dockNodes.hint, dockNodes.chips, dockNodes.searchForm);
+  body.append(dockNodes.hint, dockNodes.chips, dockNodes.needs, dockNodes.searchForm);
   return body;
 }
 
