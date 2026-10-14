@@ -19,7 +19,10 @@ async function cachedFetch(url) {
 
 function fetchJson(name) {
   return cachedFetch(STORE_URL + name)
-    .then((r) => r.json())
+    .then((response) => {
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      return response.json();
+    })
     .catch((error) => {
       console.error('Could not load ' + name, error);
       return {};
