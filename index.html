@@ -1,22 +1,41 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src https://enka.network; connect-src https://genshin-proxy.klaun970.workers.dev https://raw.githubusercontent.com; base-uri 'none'; form-action 'self'">
   <title>Genshin Build Card</title>
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
+  <header class="topbar">
+    <span class="brand">✨ Genshin Build Card</span>
+    <div class="controls">
+      <button id="lang-toggle" type="button">EN</button>
+      <button id="theme-toggle" type="button">☀️</button>
+    </div>
+  </header>
+
   <main>
-    <h1>Genshin Build Card</h1>
-    <p>Wpisz UID gracza (9 cyfr), aby zobaczyć jego postacie.</p>
+    <section id="hero" class="hero">
+      <div class="elements" aria-hidden="true">🔥 💧 🌿 ⚡ ❄️ 🌪️ 🪨</div>
+      <h1 data-i18n="title">Genshin Build Card</h1>
+      <p data-i18n="subtitle"></p>
+      <div id="hero-icons" class="hero-icons"></div>
+    </section>
+
     <form id="uid-form">
-      <input id="uid-input" type="text" inputmode="numeric" maxlength="9" minlength="9" pattern="[0-9]{9}" title="UID składa się z 9 cyfr" placeholder="UID, np. 800000000" required>
-      <button type="submit">Szukaj</button>
+      <input id="uid-input" type="text" inputmode="numeric" maxlength="9" minlength="9" pattern="[0-9]{9}" required data-i18n-placeholder="placeholder" data-i18n-title="uidTitle">
+      <button type="submit" data-i18n="search"></button>
     </form>
+
     <div id="result"></div>
+
+    <p class="disclaimer" data-i18n="disclaimer"></p>
   </main>
-  <script src="app.js?v=3"></script>
+
+  <footer class="author" data-i18n="author"></footer>
+
+  <script src="app.js?v=4"></script>
 </body>
 </html>
