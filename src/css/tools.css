@@ -1,0 +1,58 @@
+/* Kalkulator talentów, żywica i resety (widoki w menu głównym). */
+.tool {
+  display: grid;
+  gap: 14px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.tool select,
+.tool input {
+  min-width: 0;
+  padding: 8px 10px;
+  font: inherit;
+  color: var(--fg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.tool-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.tool-name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.tool-arrow {
+  color: var(--muted);
+}
+
+.tool-big {
+  margin: 4px 0;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  color: var(--accent);
+}
+
+.tool-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tool-controls input {
+  flex: 1;
+  min-width: 120px;
+}
+
+.tool .panel > div:not(.tool-big):not(.tool-controls):not(.tool-row):not(.stat-row):not(.item-meta) {
+  padding: 4px 0;
+  font-size: 14px;
+}
