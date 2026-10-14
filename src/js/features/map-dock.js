@@ -1,6 +1,5 @@
 /* Panel mapy: dosuwa się z prawej strony (na wąskich ekranach od dołu) i przesuwa resztę strony,
-   zamiast ją zasłaniać. Pokazuje oficjalnie osadzalną mapę AppSample z filtrem typów znaczników.
-   Kliknięcie postaci otwiera tryb "Only <postać>": ukryte są zakładki Broń/Artefakty i wyszukiwarka. */
+   zamiast ją zasłaniać. Pokazuje oficjalnie osadzalną mapę AppSample z filtrem typów znaczników. */
 const MAP_BASE = 'https://genshin-impact-map.appsample.com/location?names=';
 const MAP_OTHER = [
   ['HoYoLAB', 'https://act.hoyolab.com/ys/app/interactive-map/index.html'],
@@ -31,7 +30,7 @@ const DOCK_CONTEXTS = {
     icon: '🧑',
     pl: 'Postać',
     en: 'Character',
-    hintPl: 'Domeny talentów i wznoszeń oraz bossowie, z których wypadają materiały postaci. Lokalną specjalność wyszukaj po nazwie.',
+    hintPl: 'Domeny talentów i wzniesień oraz bossowie, z których wypadają materiały postaci. Lokalną specjalność wyszukaj po nazwie.',
     hintEn: 'Talent and ascension domains and the bosses that drop character materials. Search a local specialty by name.',
     presets: [
       { pl: 'Domeny', en: 'Domains', names: 'Domain' },
@@ -43,7 +42,7 @@ const DOCK_CONTEXTS = {
     icon: '⚔️',
     pl: 'Broń',
     en: 'Weapon',
-    hintPl: 'Materiały do wznoszeń broni wypadają z domen broni i od wrogów. Kliknij znacznik, aby zobaczyć szczegóły.',
+    hintPl: 'Materiały do wzniesień broni wypadają z domen broni i od wrogów. Kliknij znacznik, aby zobaczyć szczegóły.',
     hintEn: 'Weapon ascension materials drop from weapon domains and enemies. Click a marker for details.',
     presets: [
       { pl: 'Domeny', en: 'Domains', names: 'Domain' },
@@ -65,7 +64,7 @@ const DOCK_CONTEXTS = {
   }
 };
 
-const dock = { open: false, wide: false, context: 'character', names: 'Domain', loaded: '', timer: null, iframe: null, built: false, only: null };
+const dock = { open: false, wide: false, context: 'character', names: 'Domain', loaded: '', timer: null, iframe: null, built: false };
 const dockNodes = {};
 
 function mapUrl(names) {
@@ -79,25 +78,19 @@ function cleanSearch(value) {
 function renderDock() {
   if (!dock.built) return;
   const context = DOCK_CONTEXTS[dock.context];
-  const only = dock.only;
-  dockNodes.title.textContent = only
-    ? gt('🗺️ Only ' + only, '🗺️ Only ' + only)
-    : gt('🗺️ Mapa – gdzie to zdobyć', '🗺️ Map – where to get it');
+  dockNodes.title.textContent = gt('🗺️ Mapa – gdzie to zdobyć', '🗺️ Map – where to get it');
   dockNodes.close.textContent = gt('Zamknij ✕', 'Close ✕');
   dockNodes.size.textContent = dock.wide ? '⇥' : '⇤';
   dockNodes.size.title = dock.wide ? gt('Węższy panel', 'Narrower panel') : gt('Szerszy panel', 'Wider panel');
   dockNodes.launcher.textContent = gt('🗺️ Mapa', '🗺️ Map');
 
-  dockNodes.tabsWrap.style.display = only ? 'none' : '';
   dockNodes.tabs.forEach((tab) => {
     const key = tab.dataset.context;
     tab.classList.toggle('active', key === dock.context);
     tab.textContent = DOCK_CONTEXTS[key].icon + ' ' + gt(DOCK_CONTEXTS[key].pl, DOCK_CONTEXTS[key].en);
   });
 
-  dockNodes.hint.textContent = only
-    ? gt('Tryb "Only ' + only + '": tylko domeny i bossowie postaci. Pozostałe znaczniki są ukryte.', 'Mode "Only ' + only + '": character domains and bosses only. Other markers are hidden.')
-    : gt(context.hintPl, context.hintEn);
+  dockNodes.hint.textContent = gt(context.hintPl, context.hintEn);
   dockNodes.chips.textContent = '';
   context.presets.forEach((preset) => {
     const chipNode = el('button', preset.names === dock.names ? 'dock-chip active' : 'dock-chip', gt(preset.pl, preset.en));
@@ -105,17 +98,8 @@ function renderDock() {
     chipNode.addEventListener('click', () => setDockNames(preset.names));
     dockNodes.chips.append(chipNode);
   });
-  if (only) {
-    const allChip = el('button', 'dock-chip', gt('Pokaż wszystko', 'Show all'));
-    allChip.type = 'button';
-    allChip.addEventListener('click', () => {
-      dock.only = null;
-      renderDock();
-    });
-    dockNodes.chips.append(allChip);
-  }
 
-  dockNodes.searchForm.hidden = !context.search || Boolean(only);
+  dockNodes.searchForm.hidden = !context.search;
   dockNodes.input.placeholder = gt('Szukaj na mapie, np. Cecilia', 'Search the map, e.g. Cecilia');
   dockNodes.searchButton.textContent = gt('Szukaj', 'Search');
   dockNodes.skeleton.textContent = gt('Ładowanie mapy...', 'Loading the map...');
@@ -168,27 +152,10 @@ function setDockOpen(open) {
 
 function mapDockOpen(contextKey) {
   if (!dock.built) return;
-  if (contextKey && DOCK_CONTEXTS[contextKey]) {
-    dock.only = null;
-    if (contextKey !== dock.context) {
-      dock.context = contextKey;
-      dock.names = DOCK_CONTEXTS[contextKey].presets[0].names;
-    }
+  if (contextKey && DOCK_CONTEXTS[contextKey] && contextKey !== dock.context) {
+    dock.context = contextKey;
+    dock.names = DOCK_CONTEXTS[contextKey].presets[0].names;
   }
-  setDockOpen(true);
-  renderDock();
-  loadDockMap();
-}
-
-function mapDockSelectCharacter(avatarId) {
-  if (!dock.built) return;
-  const result = document.getElementById('result');
-  const card = result ? result.querySelector('.character[data-avatar-id="' + String(avatarId).replace(/[^0-9]/g, '') + '"]') : null;
-  const nameNode = card ? card.querySelector('.name') : null;
-  const name = nameNode ? nameNode.textContent.trim().slice(0, 40) : '';
-  dock.only = name || null;
-  dock.context = 'character';
-  dock.names = DOCK_CONTEXTS.character.presets[0].names;
   setDockOpen(true);
   renderDock();
   loadDockMap();
@@ -222,7 +189,6 @@ function buildDockHeader() {
 
 function buildDockTabs() {
   const tabs = el('div', 'dock-tabs');
-  dockNodes.tabsWrap = tabs;
   dockNodes.tabs = Object.keys(DOCK_CONTEXTS).map((key) => {
     const tab = el('button', 'dock-tab');
     tab.type = 'button';
@@ -308,7 +274,7 @@ if (dockResult) {
   dockResult.addEventListener('click', (event) => {
     const target = event.target;
     const card = target && typeof target.closest === 'function' ? target.closest('.character') : null;
-    if (card && card.dataset.avatarId) mapDockSelectCharacter(card.dataset.avatarId);
+    if (card) mapDockOpen('character');
   });
 }
 
