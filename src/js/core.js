@@ -1,0 +1,100 @@
+/* Rdzeń: elementy strony, ustawienia w przeglądarce, stan aplikacji i tłumaczenia. */
+const form = document.getElementById('uid-form');
+const input = document.getElementById('uid-input');
+const result = document.getElementById('result');
+const hero = document.getElementById('hero');
+const heroIcons = document.getElementById('hero-icons');
+const recentBox = document.getElementById('recent');
+const favoritesBox = document.getElementById('favorites');
+const langButton = document.getElementById('lang-toggle');
+const themeButton = document.getElementById('theme-toggle');
+const languageHooks = [];
+
+function sanitizeList(value, fallback) {
+  return Array.isArray(value) ? value : fallback;
+}
+
+function loadSetting(key, fallback) {
+  try {
+    return localStorage.getItem(key) || fallback;
+  } catch (error) {
+    return fallback;
+  }
+}
+
+function loadJsonSetting(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (error) {
+    return fallback;
+  }
+}
+
+function saveSetting(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function saveJsonSetting(key, value) {
+  saveSetting(key, JSON.stringify(value));
+}
+
+function removeKey(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+const state = {
+  lang: loadSetting('lang', navigator.language && navigator.language.startsWith('pl') ? 'pl' : 'en'),
+  theme: loadSetting('theme', window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'),
+  targets: Object.assign({}, DEFAULT_TARGETS, loadJsonSetting('targets', {})),
+  rvStats: sanitizeList(loadJsonSetting('rvStats', DEFAULT_RV), DEFAULT_RV),
+  recent: sanitizeList(loadJsonSetting('recent', []), []),
+  favorites: sanitizeList(loadJsonSetting('favorites', []), []),
+  diff: null,
+  offline: null,
+  last: null,
+  selectedId: null,
+  detailBox: null,
+  compareBox: null
+};
+
+function t(key) {
+  return TEXT[state.lang][key];
+}
+
+function propName(prop) {
+  return PROP_NAMES[state.lang][prop] || prop;
+}
+
+function el(tag, className, text) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined && text !== null) element.textContent = text;
+  return element;
+}
+
+function applyTexts() {
+  document.documentElement.lang = state.lang;
+  document.documentElement.dataset.theme = state.theme;
+  document.querySelectorAll('[data-i18n]').forEach((node) => {
+    node.textContent = t(node.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((node) => {
+    node.placeholder = t(node.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach((node) => {
+    node.title = t(node.dataset.i18nTitle);
+  });
+  langButton.textContent = state.lang === 'pl' ? 'EN' : 'PL';
+  themeButton.textContent = state.theme === 'dark' ? '☀️' : '🌙';
+  renderRecent();
+  renderFavorites();
+}
