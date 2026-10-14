@@ -1,4 +1,6 @@
 /* Składanie widoku, wyszukiwanie gracza i uruchomienie aplikacji. Ładowany jako ostatni. */
+let searchSequence = 0;
+
 function renderDetail() {
   const box = state.detailBox;
   if (!box || !state.last) return;
@@ -85,8 +87,8 @@ function renderHero() {
   renderSides();
 }
 
-async function showPlayer(data) {
-  const store = await loadStore();
+async function showPlayer(data, loadedStore) {
+  const store = loadedStore || await loadStore();
   state.last = { data, store };
   const shown = data.playerInfo.showAvatarInfoList || [];
   const first = shown.find((a) => findDetails(data, a.avatarId));
@@ -106,19 +108,24 @@ function showError(error, uid) {
 
 async function search(uid) {
   if (!/^\d{9}$/.test(uid)) {
+    searchSequence += 1;
     result.textContent = t('uidLength');
     return;
   }
+  const requestId = ++searchSequence;
+  const isCurrent = () => requestId === searchSequence;
   result.textContent = t('loading');
   state.offline = null;
   try {
-    const data = await fetchPlayer(uid);
+    const [data, store] = await Promise.all([fetchPlayer(uid), loadStore()]);
+    if (!isCurrent()) return;
     state.diff = updateHistory(uid, data.playerInfo);
-    await showPlayer(data);
+    await showPlayer(data, store);
     saveOffline(uid, data);
     rememberPlayer(uid, data.playerInfo.nickname);
     updateUrl(uid);
   } catch (error) {
+    if (!isCurrent()) return;
     console.error(error);
     const saved = error.network ? loadOffline(uid) : null;
     if (saved && saved.data && saved.data.playerInfo) {

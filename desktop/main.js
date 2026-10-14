@@ -5,7 +5,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const ASSETS = app.isPackaged ? path.join(process.resourcesPath, 'assets') : path.join(ROOT, 'build');
-const PORT = 5500;
+const PREFERRED_PORT = 5500;
 const HOSTED_URL = 'https://gumakulka.github.io/genshin-build-card/';
 const ASSET_FILES = new Set(['logo.jpg', 'favicon.png']);
 const TYPES = {
@@ -14,6 +14,10 @@ const TYPES = {
   '.css': 'text/css; charset=utf-8',
   '.png': 'image/png',
   '.jpg': 'image/jpeg'
+};
+const BASE_HEADERS = {
+  'Cache-Control': 'no-store',
+  'X-Content-Type-Options': 'nosniff'
 };
 
 function resolveFile(name) {
@@ -24,37 +28,60 @@ function resolveFile(name) {
   return null;
 }
 
-function startServer() {
-  return new Promise((resolve) => {
-    const server = http.createServer((req, res) => {
-      let name;
-      try {
-        const requested = new URL(req.url, 'http://127.0.0.1').pathname;
-        name = decodeURIComponent(requested).replace(/^\/+/, '') || 'index.html';
-      } catch (error) {
-        res.writeHead(400);
-        res.end('Bad request');
-        return;
-      }
-      const file = resolveFile(name);
-      if (!file) {
-        res.writeHead(404);
-        res.end('Not found');
-        return;
-      }
-      fs.readFile(file, (error, data) => {
-        if (error) {
-          res.writeHead(404);
-          res.end('Not found');
-          return;
-        }
-        res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream' });
-        res.end(data);
-      });
-    });
-    server.once('error', () => resolve(null));
-    server.listen(PORT, '127.0.0.1', () => resolve('http://127.0.0.1:' + PORT + '/'));
+function send(res, status, type, body) {
+  res.writeHead(status, { ...BASE_HEADERS, 'Content-Type': type });
+  res.end(body);
+}
+
+function listen(server, port) {
+  return new Promise((resolve, reject) => {
+    const onError = (error) => {
+      server.removeListener('listening', onListening);
+      reject(error);
+    };
+    const onListening = () => {
+      server.removeListener('error', onError);
+      resolve(server.address().port);
+    };
+    server.once('error', onError);
+    server.once('listening', onListening);
+    server.listen(port, '127.0.0.1');
   });
+}
+
+async function startServer() {
+  const server = http.createServer((req, res) => {
+    let name;
+    try {
+      const requested = new URL(req.url, 'http://127.0.0.1').pathname;
+      name = decodeURIComponent(requested).replace(/^\/+/, '') || 'index.html';
+    } catch (error) {
+      send(res, 400, 'text/plain; charset=utf-8', 'Bad request');
+      return;
+    }
+    const file = resolveFile(name);
+    if (!file) {
+      send(res, 404, 'text/plain; charset=utf-8', 'Not found');
+      return;
+    }
+    fs.readFile(file, (error, data) => {
+      if (error) {
+        send(res, 404, 'text/plain; charset=utf-8', 'Not found');
+        return;
+      }
+      send(res, 200, TYPES[path.extname(file)] || 'application/octet-stream', data);
+    });
+  });
+  // Stały port zachowuje ten sam origin (localStorage); gdy zajęty, bierzemy wolny port systemowy.
+  for (const port of [PREFERRED_PORT, 0]) {
+    try {
+      const actual = await listen(server, port);
+      return 'http://127.0.0.1:' + actual + '/';
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  return null;
 }
 
 function boundsFile() {
@@ -106,7 +133,14 @@ function createWindow(url) {
   });
 
   win.webContents.on('will-navigate', (event, target) => {
-    if (new URL(target).origin !== origin) {
+    let targetOrigin;
+    try {
+      targetOrigin = new URL(target).origin;
+    } catch (error) {
+      event.preventDefault();
+      return;
+    }
+    if (targetOrigin !== origin) {
       event.preventDefault();
       if (/^https?:\/\//.test(target)) shell.openExternal(target);
     }

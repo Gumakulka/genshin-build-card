@@ -7,11 +7,12 @@
   "main": "desktop/main.js",
   "scripts": {
     "start": "electron .",
+    "check": "node scripts/check.mjs",
     "dist": "electron-builder --win --publish never"
   },
   "devDependencies": {
-    "electron": "latest",
-    "electron-builder": "latest"
+    "electron": "44.7.2",
+    "electron-builder": "26.17.0"
   },
   "build": {
     "appId": "com.gumakulka.genshinbuildcard",
