@@ -1,3 +1,20 @@
+.hero-logo {
+  display: block;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 8px;
+  border-radius: 28px;
+  object-fit: cover;
+  box-shadow: 0 0 48px var(--glow), 0 0 0 2px var(--border);
+  animation: float 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-logo {
+    animation: none;
+  }
+}
+
 .recent {
   display: flex;
   flex-wrap: wrap;

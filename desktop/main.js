@@ -4,32 +4,43 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
+const ASSETS = app.isPackaged ? path.join(process.resourcesPath, 'assets') : path.join(ROOT, 'build');
 const PORT = 5500;
 const HOSTED_URL = 'https://gumakulka.github.io/genshin-build-card/';
 const FILES = new Set(['index.html', 'app.js', 'style.css', 'features.css']);
+const ASSET_FILES = new Set(['logo.jpg', 'favicon.png']);
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8'
+  '.css': 'text/css; charset=utf-8',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg'
 };
+
+function resolveFile(name) {
+  if (FILES.has(name)) return path.join(ROOT, name);
+  if (name.startsWith('build/') && ASSET_FILES.has(name.slice(6))) return path.join(ASSETS, name.slice(6));
+  return null;
+}
 
 function startServer() {
   return new Promise((resolve) => {
     const server = http.createServer((req, res) => {
       const requested = new URL(req.url, 'http://127.0.0.1').pathname;
       const name = decodeURIComponent(requested).replace(/^\/+/, '') || 'index.html';
-      if (!FILES.has(name)) {
+      const file = resolveFile(name);
+      if (!file) {
         res.writeHead(404);
         res.end('Not found');
         return;
       }
-      fs.readFile(path.join(ROOT, name), (error, data) => {
+      fs.readFile(file, (error, data) => {
         if (error) {
           res.writeHead(404);
           res.end('Not found');
           return;
         }
-        res.writeHead(200, { 'Content-Type': TYPES[path.extname(name)] || 'application/octet-stream' });
+        res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream' });
         res.end(data);
       });
     });

@@ -26,6 +26,16 @@
       "features.css",
       "desktop/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "build/logo.jpg",
+        "to": "assets/logo.jpg"
+      },
+      {
+        "from": "build/favicon.png",
+        "to": "assets/favicon.png"
+      }
+    ],
     "win": {
       "target": [
         {
