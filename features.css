@@ -1,0 +1,136 @@
+.recent {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.recent-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+button.recent-chip {
+  font: inherit;
+  font-size: 13px;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+button.recent-chip:hover,
+.action-button:hover {
+  border-color: var(--accent);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.action-button {
+  font: inherit;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.push-right {
+  margin-left: auto;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stat-bar {
+  padding: 4px 0;
+}
+
+progress {
+  width: 100%;
+  height: 8px;
+  accent-color: var(--accent);
+}
+
+.target-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 14px;
+}
+
+.target-input {
+  width: 80px;
+  padding: 4px 8px;
+  font-size: 14px;
+}
+
+.rv-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.rv-toggle {
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.rv-toggle.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #111114;
+}
+
+.rv-line {
+  margin-top: 6px;
+  color: var(--accent);
+}
+
+.compare-form {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+  margin: 0 0 12px;
+}
+
+table.compare {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+table.compare th,
+table.compare td {
+  border-bottom: 1px solid var(--border);
+  padding: 8px;
+  text-align: left;
+}
+
+table.compare td.better {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.compare-box {
+  margin-top: 8px;
+}

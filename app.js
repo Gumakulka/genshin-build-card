@@ -1,5 +1,5 @@
 const WORKER_URL = 'https://genshin-proxy.klaun970.workers.dev/uid/';
-const STORE_URL = 'https://raw.githubusercontent.com/EnkaNetwork/API-docs/master/store/';
+const STORE_URL = 'https://raw.githubusercontent.com/EnkaNetwork/API-docs/b8ac71c2fba62519c905551d741474e8cd6a267b/store/';
 const IMG_URL = 'https://enka.network/ui/';
 
 const form = document.getElementById('uid-form');
@@ -7,6 +7,7 @@ const input = document.getElementById('uid-input');
 const result = document.getElementById('result');
 const hero = document.getElementById('hero');
 const heroIcons = document.getElementById('hero-icons');
+const recentBox = document.getElementById('recent');
 const langButton = document.getElementById('lang-toggle');
 const themeButton = document.getElementById('theme-toggle');
 
@@ -20,6 +21,7 @@ const TEXT = {
     loading: 'Ładowanie...',
     uidLength: 'UID musi mieć dokładnie 9 cyfr.',
     network: 'Nie udało się połączyć z serwerem (Failed to fetch). Sprawdź konsolę (F12).',
+    retry: 'Spróbuj ponownie',
     unknownCharacter: 'Nieznana postać',
     avatarAlt: 'Awatar gracza',
     adventureRank: 'Poziom przygód',
@@ -31,20 +33,28 @@ const TEXT = {
     region: 'Region',
     namecards: 'Wizytówki',
     characters: 'Postacie z gabloty',
+    recent: 'Ostatnio:',
+    copyLink: '🔗 Kopiuj link',
+    linkCopied: '✅ Skopiowano!',
+    exportPng: '🖼️ Pobierz kartę PNG',
+    exportFail: 'Nie udało się utworzyć obrazka.',
     disclaimer: 'Projekt fanowski, niezwiązany z HoYoverse. Grafiki należą do ich właścicieli.',
     author: 'Autor: Gumakulka',
     traveler: ['Podróżnik', 'Podróżniczka'],
     stats: 'Statystyki',
+    targets: 'Cele statystyk',
     talents: 'Talenty',
     talentsValue: 'Atak / Umiejętność / Wybuch (bazowe)',
     weapon: 'Broń',
     artifacts: 'Artefakty',
     sets: 'Zestawy',
     cv: 'Suma CV z substatów',
+    rv: 'Suma RV',
+    rvTitle: 'Liczone substaty (RV)',
+    rvHint: 'RV = jakość rzutów wybranych substatów dla artefaktów 5★ (100% = jeden maksymalny rzut).',
     constellations: 'Konstelacje',
     friendship: 'Poziom przyjaźni',
     level: 'Poziom',
-    base: 'Bazowy',
     hp: 'HP',
     atk: 'ATK',
     def: 'DEF',
@@ -54,6 +64,10 @@ const TEXT = {
     er: 'Regen. energii',
     healing: 'Bonus leczenia',
     slots: ['Kwiat', 'Pióro', 'Piaski', 'Puchar', 'Diadem'],
+    compareTitle: 'Porównaj z innym graczem',
+    comparePlaceholder: 'UID drugiego gracza',
+    compareButton: 'Porównaj',
+    compareStat: 'Statystyka',
     noDetails: 'Szczegóły postaci są niedostępne. Gablota gracza może być ukryta albo serwer nie zwrócił pełnych danych.',
     noCharacterDetails: 'Brak szczegółów dla tej postaci w danych z serwera.',
     pickHint: 'Kliknij postać, aby zobaczyć broń, artefakty i statystyki.',
@@ -77,6 +91,7 @@ const TEXT = {
     loading: 'Loading...',
     uidLength: 'The UID must have exactly 9 digits.',
     network: 'Could not reach the server (Failed to fetch). Check the console (F12).',
+    retry: 'Try again',
     unknownCharacter: 'Unknown character',
     avatarAlt: 'Player avatar',
     adventureRank: 'Adventure Rank',
@@ -88,20 +103,28 @@ const TEXT = {
     region: 'Region',
     namecards: 'Namecards',
     characters: 'Showcase characters',
+    recent: 'Recent:',
+    copyLink: '🔗 Copy link',
+    linkCopied: '✅ Copied!',
+    exportPng: '🖼️ Download PNG card',
+    exportFail: 'Could not create the image.',
     disclaimer: 'Fan project, not affiliated with HoYoverse. Artwork belongs to its owners.',
     author: 'Author: Gumakulka',
     traveler: ['Traveler', 'Traveler'],
     stats: 'Stats',
+    targets: 'Stat targets',
     talents: 'Talents',
     talentsValue: 'Attack / Skill / Burst (base)',
     weapon: 'Weapon',
     artifacts: 'Artifacts',
     sets: 'Sets',
     cv: 'Total substat CV',
+    rv: 'Total RV',
+    rvTitle: 'Counted substats (RV)',
+    rvHint: 'RV = roll quality of the selected substats on 5★ artifacts (100% = one maximum roll).',
     constellations: 'Constellations',
     friendship: 'Friendship level',
     level: 'Level',
-    base: 'Base',
     hp: 'HP',
     atk: 'ATK',
     def: 'DEF',
@@ -111,6 +134,10 @@ const TEXT = {
     er: 'Energy Recharge',
     healing: 'Healing Bonus',
     slots: ['Flower', 'Plume', 'Sands', 'Goblet', 'Circlet'],
+    compareTitle: 'Compare with another player',
+    comparePlaceholder: 'Second player UID',
+    compareButton: 'Compare',
+    compareStat: 'Stat',
     noDetails: 'Character details are unavailable. The player showcase may be hidden or the server did not return full data.',
     noCharacterDetails: 'No details for this character in the server data.',
     pickHint: 'Click a character to see weapon, artifacts and stats.',
@@ -185,6 +212,21 @@ const DMG_PROPS = {
   46: 'FIGHT_PROP_ICE_ADD_HURT'
 };
 
+const MAX_ROLLS = {
+  FIGHT_PROP_CRITICAL: 3.9,
+  FIGHT_PROP_CRITICAL_HURT: 7.8,
+  FIGHT_PROP_ATTACK_PERCENT: 5.8,
+  FIGHT_PROP_HP_PERCENT: 5.8,
+  FIGHT_PROP_DEFENSE_PERCENT: 7.3,
+  FIGHT_PROP_CHARGE_EFFICIENCY: 6.5,
+  FIGHT_PROP_ELEMENT_MASTERY: 23,
+  FIGHT_PROP_ATTACK: 19,
+  FIGHT_PROP_HP: 299,
+  FIGHT_PROP_DEFENSE: 23
+};
+
+const DEFAULT_RV = ['FIGHT_PROP_CRITICAL', 'FIGHT_PROP_CRITICAL_HURT', 'FIGHT_PROP_ATTACK_PERCENT'];
+const DEFAULT_TARGETS = { critRate: 70, critDmg: 140, er: 100 };
 const SLOT_ORDER = ['EQUIP_BRACER', 'EQUIP_NECKLACE', 'EQUIP_SHOES', 'EQUIP_RING', 'EQUIP_DRESS'];
 const PERCENT_PATTERN = /PERCENT|CRITICAL|CHARGE_EFFICIENCY|HEAL_ADD|ADD_HURT/;
 
@@ -238,16 +280,33 @@ const HANDLED_KEYS = [
 const state = {
   lang: loadSetting('lang', navigator.language && navigator.language.startsWith('pl') ? 'pl' : 'en'),
   theme: loadSetting('theme', window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'),
+  targets: Object.assign({}, DEFAULT_TARGETS, loadJsonSetting('targets', {})),
+  rvStats: sanitizeList(loadJsonSetting('rvStats', DEFAULT_RV), DEFAULT_RV),
+  recent: sanitizeList(loadJsonSetting('recent', []), []),
   last: null,
   selectedId: null,
-  detailBox: null
+  detailBox: null,
+  compareBox: null
 };
 
 let storePromise = null;
 
+function sanitizeList(value, fallback) {
+  return Array.isArray(value) ? value : fallback;
+}
+
 function loadSetting(key, fallback) {
   try {
     return localStorage.getItem(key) || fallback;
+  } catch (error) {
+    return fallback;
+  }
+}
+
+function loadJsonSetting(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
   } catch (error) {
     return fallback;
   }
@@ -261,6 +320,10 @@ function saveSetting(key, value) {
   }
 }
 
+function saveJsonSetting(key, value) {
+  saveSetting(key, JSON.stringify(value));
+}
+
 function t(key) {
   return TEXT[state.lang][key];
 }
@@ -272,17 +335,18 @@ function propName(prop) {
 function applyTexts() {
   document.documentElement.lang = state.lang;
   document.documentElement.dataset.theme = state.theme;
-  document.querySelectorAll('[data-i18n]').forEach((el) => {
-    el.textContent = t(el.dataset.i18n);
+  document.querySelectorAll('[data-i18n]').forEach((node) => {
+    node.textContent = t(node.dataset.i18n);
   });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
-    el.placeholder = t(el.dataset.i18nPlaceholder);
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((node) => {
+    node.placeholder = t(node.dataset.i18nPlaceholder);
   });
-  document.querySelectorAll('[data-i18n-title]').forEach((el) => {
-    el.title = t(el.dataset.i18nTitle);
+  document.querySelectorAll('[data-i18n-title]').forEach((node) => {
+    node.title = t(node.dataset.i18nTitle);
   });
   langButton.textContent = state.lang === 'pl' ? 'EN' : 'PL';
   themeButton.textContent = state.theme === 'dark' ? '☀️' : '🌙';
+  renderRecent();
 }
 
 function fetchJson(name) {
@@ -417,10 +481,64 @@ function statRow(name, value) {
   return row;
 }
 
+function progressRow(name, value, target) {
+  const row = el('div', 'stat-bar');
+  const top = el('div', 'stat-row');
+  top.append(el('span', 'stat-name', name), el('span', 'stat-value', value.toFixed(1) + '% / ' + target + '%'));
+  const bar = document.createElement('progress');
+  bar.max = 100;
+  bar.value = target > 0 ? Math.min(100, (value / target) * 100) : 0;
+  row.append(top, bar);
+  return row;
+}
+
 function chip(icon, label, value) {
   const wrapper = el('span', 'chip');
   wrapper.append(el('span', '', icon), el('span', 'chip-label', label), el('span', 'chip-value', value));
   return wrapper;
+}
+
+function rememberPlayer(uid, nickname) {
+  state.recent = [{ uid, nickname }].concat(state.recent.filter((item) => item.uid !== uid)).slice(0, 5);
+  saveJsonSetting('recent', state.recent);
+  renderRecent();
+}
+
+function renderRecent() {
+  recentBox.textContent = '';
+  const items = state.recent.filter((item) => item && /^\d{9}$/.test(String(item.uid)));
+  if (!items.length) return;
+  recentBox.append(el('span', 'recent-label', t('recent')));
+  items.forEach((item) => {
+    const button = el('button', 'chip recent-chip', (item.nickname || '?') + ' · ' + item.uid);
+    button.type = 'button';
+    button.addEventListener('click', () => {
+      input.value = item.uid;
+      search(item.uid);
+    });
+    recentBox.append(button);
+  });
+}
+
+function updateUrl(uid) {
+  try {
+    history.replaceState(null, '', '?uid=' + uid);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function copyLink(uid, button) {
+  const url = location.origin + location.pathname + '?uid=' + uid;
+  try {
+    await navigator.clipboard.writeText(url);
+    button.textContent = t('linkCopied');
+  } catch (error) {
+    button.textContent = url;
+  }
+  setTimeout(() => {
+    button.textContent = t('copyLink');
+  }, 2500);
 }
 
 function buildProfile(data, store) {
@@ -468,6 +586,15 @@ function buildChips(data) {
     chips.append(chip('🔹', key, info[key]));
   });
   return chips;
+}
+
+function buildActions(data) {
+  const actions = el('div', 'actions');
+  const copy = el('button', 'action-button', t('copyLink'));
+  copy.type = 'button';
+  copy.addEventListener('click', () => copyLink(data.uid, copy));
+  actions.append(copy);
+  return actions;
 }
 
 function buildNamecards(info, store) {
@@ -526,26 +653,86 @@ function buildCharacters(data, store) {
   return wrapper;
 }
 
-function buildStatsPanel(details) {
+function getStatLines(details) {
   const props = details.fightPropMap || {};
-  const panel = el('div', 'panel');
-  panel.append(el('h5', '', t('stats')));
-  panel.append(statRow(t('hp'), Math.round(props[2000] || 0)));
-  panel.append(statRow(t('atk'), Math.round(props[2001] || 0)));
-  panel.append(statRow(t('def'), Math.round(props[2002] || 0)));
-  panel.append(statRow(t('em'), Math.round(props[28] || 0)));
-  panel.append(statRow(t('critRate'), ((props[20] || 0) * 100).toFixed(1) + '%'));
-  panel.append(statRow(t('critDmg'), ((props[22] || 0) * 100).toFixed(1) + '%'));
-  panel.append(statRow(t('er'), ((props[23] || 0) * 100).toFixed(1) + '%'));
-  if (props[26]) panel.append(statRow(t('healing'), (props[26] * 100).toFixed(1) + '%'));
+  const lines = [
+    { name: t('hp'), text: String(Math.round(props[2000] || 0)) },
+    { name: t('atk'), text: String(Math.round(props[2001] || 0)) },
+    { name: t('def'), text: String(Math.round(props[2002] || 0)) },
+    { name: t('em'), text: String(Math.round(props[28] || 0)) },
+    { key: 'critRate', name: t('critRate'), number: (props[20] || 0) * 100 },
+    { key: 'critDmg', name: t('critDmg'), number: (props[22] || 0) * 100 },
+    { key: 'er', name: t('er'), number: (props[23] || 0) * 100 }
+  ];
+  if (props[26]) lines.push({ name: t('healing'), number: props[26] * 100 });
 
   let bestKey = null;
   Object.keys(DMG_PROPS).forEach((key) => {
     if ((props[key] || 0) > 0 && (bestKey === null || props[key] > props[bestKey])) bestKey = key;
   });
-  if (bestKey !== null) {
-    panel.append(statRow(propName(DMG_PROPS[bestKey]), (props[bestKey] * 100).toFixed(1) + '%'));
-  }
+  if (bestKey !== null) lines.push({ name: propName(DMG_PROPS[bestKey]), number: props[bestKey] * 100 });
+
+  lines.forEach((line) => {
+    if (line.text === undefined) line.text = line.number.toFixed(1) + '%';
+  });
+  return lines;
+}
+
+function buildStatsPanel(details) {
+  const panel = el('div', 'panel');
+  panel.append(el('h5', '', t('stats')));
+  getStatLines(details).forEach((line) => {
+    if (line.key && state.targets[line.key] !== undefined) {
+      panel.append(progressRow(line.name, line.number, state.targets[line.key]));
+    } else {
+      panel.append(statRow(line.name, line.text));
+    }
+  });
+  return panel;
+}
+
+function buildTargetsPanel() {
+  const panel = el('div', 'panel');
+  panel.append(el('h5', '', t('targets')));
+  [['critRate', 'critRate'], ['critDmg', 'critDmg'], ['er', 'er']].forEach(([key, label]) => {
+    const row = el('label', 'target-row');
+    row.append(el('span', 'stat-name', t(label) + ' (%)'));
+    const field = document.createElement('input');
+    field.type = 'number';
+    field.min = '0';
+    field.max = '999';
+    field.className = 'target-input';
+    field.value = String(state.targets[key]);
+    field.addEventListener('change', () => {
+      const value = Math.min(999, Math.max(0, Number(field.value) || 0));
+      state.targets[key] = value;
+      saveJsonSetting('targets', state.targets);
+      renderDetail();
+    });
+    row.append(field);
+    panel.append(row);
+  });
+  return panel;
+}
+
+function buildRvPanel() {
+  const panel = el('div', 'panel');
+  panel.append(el('h5', '', t('rvTitle')));
+  const list = el('div', 'rv-toggles');
+  Object.keys(MAX_ROLLS).forEach((prop) => {
+    const button = el('button', 'rv-toggle', propName(prop));
+    button.type = 'button';
+    if (state.rvStats.includes(prop)) button.classList.add('on');
+    button.addEventListener('click', () => {
+      state.rvStats = state.rvStats.includes(prop)
+        ? state.rvStats.filter((item) => item !== prop)
+        : state.rvStats.concat(prop);
+      saveJsonSetting('rvStats', state.rvStats);
+      renderDetail();
+    });
+    list.append(button);
+  });
+  panel.append(list, el('div', 'item-meta', t('rvHint')));
   return panel;
 }
 
@@ -569,8 +756,38 @@ function statLine(stat) {
   return { prop, value };
 }
 
+function findWeapon(items) {
+  return items.find((entry) => entry.flat && entry.flat.itemType === 'ITEM_WEAPON') || null;
+}
+
+function getArtifacts(items) {
+  return items
+    .filter((entry) => entry.flat && entry.flat.itemType === 'ITEM_RELIQUARY')
+    .sort((a, b) => SLOT_ORDER.indexOf(a.flat.equipType) - SLOT_ORDER.indexOf(b.flat.equipType));
+}
+
+function getWeaponTitle(item, store) {
+  const flat = item.flat;
+  const name = localized(flat.nameTextMapHash !== undefined ? flat.nameTextMapHash : flat.nameTextHashMap, store);
+  const weapon = item.weapon || {};
+  const affix = weapon.affixMap ? Object.values(weapon.affixMap)[0] : 0;
+  return (name || t('weapon')) + ' · ' + t('level') + ' ' + (weapon.level || '?') + ' · R' + ((affix || 0) + 1);
+}
+
+function artifactRv(flat) {
+  if (flat.rankLevel !== undefined && flat.rankLevel !== 5) return 0;
+  let total = 0;
+  (flat.reliquarySubstats || []).forEach((raw) => {
+    const stat = statLine(raw);
+    if (stat && stat.prop && state.rvStats.includes(stat.prop) && MAX_ROLLS[stat.prop]) {
+      total += (Number(stat.value) / MAX_ROLLS[stat.prop]) * 100;
+    }
+  });
+  return total;
+}
+
 function buildWeaponPanel(items, store) {
-  const item = items.find((entry) => entry.flat && entry.flat.itemType === 'ITEM_WEAPON');
+  const item = findWeapon(items);
   if (!item) return null;
   const flat = item.flat;
   const panel = el('div', 'panel');
@@ -579,13 +796,7 @@ function buildWeaponPanel(items, store) {
   const row = el('div', 'weapon');
   row.append(createImage(flat.icon, 'Weapon'));
   const text = el('div');
-  const name = localized(flat.nameTextMapHash !== undefined ? flat.nameTextMapHash : flat.nameTextHashMap, store);
-  text.append(el('div', 'item-name', name || t('weapon')));
-
-  const weapon = item.weapon || {};
-  const affix = weapon.affixMap ? Object.values(weapon.affixMap)[0] : 0;
-  text.append(el('div', 'item-meta', t('level') + ' ' + (weapon.level || '?') + ' · R' + ((affix || 0) + 1)));
-
+  text.append(el('div', 'item-name', getWeaponTitle(item, store)));
   (flat.weaponStats || []).forEach((raw) => {
     const stat = statLine(raw);
     if (stat && stat.prop) text.append(el('div', 'item-meta', propName(stat.prop) + ': ' + formatStat(stat.prop, stat.value)));
@@ -596,9 +807,8 @@ function buildWeaponPanel(items, store) {
 }
 
 function buildArtifacts(items, store) {
-  const artifacts = items.filter((entry) => entry.flat && entry.flat.itemType === 'ITEM_RELIQUARY');
+  const artifacts = getArtifacts(items);
   if (!artifacts.length) return null;
-  artifacts.sort((a, b) => SLOT_ORDER.indexOf(a.flat.equipType) - SLOT_ORDER.indexOf(b.flat.equipType));
 
   const wrapper = el('div', 'panel');
   wrapper.append(el('h5', '', t('artifacts')));
@@ -606,6 +816,7 @@ function buildArtifacts(items, store) {
 
   const sets = {};
   let cv = 0;
+  let rvTotal = 0;
 
   artifacts.forEach((item) => {
     const flat = item.flat;
@@ -640,13 +851,209 @@ function buildArtifacts(items, store) {
       if (stat.prop === 'FIGHT_PROP_CRITICAL_HURT') cv += Number(stat.value);
     });
     card.append(subs);
+
+    const rv = artifactRv(flat);
+    rvTotal += rv;
+    card.append(el('div', 'item-meta rv-line', 'RV ' + rv.toFixed(0) + '%'));
     grid.append(card);
   });
 
   const setLines = Object.keys(sets).filter((name) => sets[name] >= 2).map((name) => name + ' (' + sets[name] + ')');
   if (setLines.length) wrapper.append(el('div', 'item-meta', t('sets') + ': ' + setLines.join(', ')));
   wrapper.append(el('div', 'item-meta', t('cv') + ': ' + cv.toFixed(1)));
+  wrapper.append(el('div', 'item-meta', t('rv') + ': ' + rvTotal.toFixed(0) + '%'));
   wrapper.append(grid);
+  return wrapper;
+}
+
+function loadCanvasImage(iconName) {
+  return new Promise((resolve) => {
+    if (!iconName || !/^[A-Za-z0-9_]+$/.test(iconName)) {
+      resolve(null);
+      return;
+    }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = IMG_URL + iconName + '.png';
+  });
+}
+
+async function exportCard() {
+  if (!state.last) return;
+  const { data, store } = state.last;
+  const details = findDetails(data, state.selectedId);
+  if (!details) return;
+
+  const character = store.characters[details.avatarId];
+  const items = details.equipList || [];
+  const weapon = findWeapon(items);
+  const artifacts = getArtifacts(items);
+  const shown = (data.playerInfo.showAvatarInfoList || []).find((a) => String(a.avatarId) === String(details.avatarId));
+  const dark = state.theme === 'dark';
+  const colors = dark
+    ? { bg: '#0b0b0f', card: '#16161d', fg: '#f2f2f5', muted: '#9a9aa8', accent: '#e8c872' }
+    : { bg: '#ffffff', card: '#f4f4f7', fg: '#111114', muted: '#666672', accent: '#d9a93f' };
+
+  const images = await Promise.all([
+    loadCanvasImage(getCharacterIcon(character, shown ? shown.costumeId : undefined)),
+    loadCanvasImage(weapon ? weapon.flat.icon : null)
+  ].concat(artifacts.map((item) => loadCanvasImage(item.flat.icon))));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 960;
+  canvas.height = 640;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = colors.bg;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = colors.card;
+  ctx.fillRect(20, 20, 920, 600);
+  ctx.strokeStyle = colors.accent;
+  ctx.lineWidth = 3;
+  ctx.strokeRect(20, 20, 920, 600);
+
+  const emoji = character && ELEMENT_EMOJI[character.Element] ? ELEMENT_EMOJI[character.Element] + ' ' : '';
+  const levelValue = details.propMap && details.propMap['4001'] ? details.propMap['4001'].val : (shown ? shown.level : '?');
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = colors.fg;
+  ctx.font = 'bold 34px system-ui, sans-serif';
+  ctx.fillText(getCharacterName(character, store), 50, 78);
+  ctx.fillStyle = colors.muted;
+  ctx.font = '18px system-ui, sans-serif';
+  ctx.fillText(emoji + t('level') + ' ' + levelValue + ' · C' + (details.talentIdList || []).length, 50, 106);
+
+  if (images[0]) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(860, 80, 48, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(images[0], 812, 32, 96, 96);
+    ctx.restore();
+  }
+
+  ctx.font = '18px system-ui, sans-serif';
+  let y = 160;
+  getStatLines(details).forEach((line) => {
+    ctx.fillStyle = colors.muted;
+    ctx.fillText(line.name, 50, y);
+    ctx.fillStyle = colors.fg;
+    ctx.fillText(line.text, 230, y);
+    y += 30;
+  });
+
+  if (weapon) {
+    y += 20;
+    if (images[1]) ctx.drawImage(images[1], 50, y - 20, 56, 56);
+    ctx.fillStyle = colors.fg;
+    ctx.font = 'bold 16px system-ui, sans-serif';
+    ctx.fillText(getWeaponTitle(weapon, store), 118, y + 8, 200);
+  }
+
+  artifacts.forEach((item, index) => {
+    const top = 140 + index * 90;
+    const flat = item.flat;
+    if (images[2 + index]) ctx.drawImage(images[2 + index], 340, top, 64, 64);
+    const setHash = flat.setNameTextMapHash !== undefined ? flat.setNameTextMapHash : flat.setNameTextHashMap;
+    ctx.fillStyle = colors.fg;
+    ctx.font = 'bold 16px system-ui, sans-serif';
+    ctx.fillText(localized(setHash, store) || '', 416, top + 16, 480);
+    const main = statLine(flat.reliquaryMainstat);
+    ctx.font = '16px system-ui, sans-serif';
+    if (main && main.prop) {
+      ctx.fillStyle = colors.accent;
+      ctx.fillText(propName(main.prop) + ' ' + formatStat(main.prop, main.value) + '  ·  RV ' + artifactRv(flat).toFixed(0) + '%', 416, top + 38, 480);
+    }
+    const subs = (flat.reliquarySubstats || []).map((raw) => {
+      const stat = statLine(raw);
+      return stat && stat.prop ? propName(stat.prop) + ' ' + formatStat(stat.prop, stat.value) : '';
+    }).filter(Boolean).join('  |  ');
+    ctx.fillStyle = colors.muted;
+    ctx.font = '14px system-ui, sans-serif';
+    ctx.fillText(subs, 416, top + 60, 500);
+  });
+
+  ctx.fillStyle = colors.muted;
+  ctx.font = '14px system-ui, sans-serif';
+  ctx.fillText('Genshin Build Card · UID ' + data.uid + ' · ' + t('author'), 50, 600);
+
+  canvas.toBlob((blob) => {
+    if (!blob) {
+      alert(t('exportFail'));
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'genshin-card-' + data.uid + '-' + details.avatarId + '.png';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 5000);
+  }, 'image/png');
+}
+
+function buildCompareTable(first, second) {
+  const rows = [
+    [t('adventureRank'), (d) => d.playerInfo.level, true],
+    [t('worldLevel'), (d) => d.playerInfo.worldLevel, true],
+    [t('achievements'), (d) => d.playerInfo.finishAchievementNum, true],
+    [t('abyss'), (d) => (d.playerInfo.towerFloorIndex ? d.playerInfo.towerFloorIndex + '-' + d.playerInfo.towerLevelIndex : '-'), false],
+    ['⭐ ' + t('abyss'), (d) => d.playerInfo.towerStarIndex || 0, true],
+    [t('characters'), (d) => (d.playerInfo.showAvatarInfoList || []).length, true]
+  ];
+  const table = el('table', 'compare');
+  const head = el('tr');
+  head.append(el('th', '', t('compareStat')), el('th', '', first.playerInfo.nickname), el('th', '', second.playerInfo.nickname));
+  table.append(head);
+  rows.forEach(([label, getter, numeric]) => {
+    const a = getter(first);
+    const b = getter(second);
+    const row = el('tr');
+    const cellA = el('td', numeric && a > b ? 'better' : '', a);
+    const cellB = el('td', numeric && b > a ? 'better' : '', b);
+    row.append(el('td', 'stat-name', label), cellA, cellB);
+    table.append(row);
+  });
+  return table;
+}
+
+async function runCompare(uid) {
+  const box = state.compareBox;
+  if (!box || !state.last) return;
+  if (!/^\d{9}$/.test(uid)) {
+    box.textContent = t('uidLength');
+    return;
+  }
+  box.textContent = t('loading');
+  try {
+    const other = await fetchPlayer(uid);
+    box.textContent = '';
+    box.append(buildCompareTable(state.last.data, other));
+  } catch (error) {
+    console.error(error);
+    box.textContent = error instanceof TypeError ? t('network') : error.message;
+  }
+}
+
+function buildCompareSection() {
+  const wrapper = el('section');
+  wrapper.append(el('h3', 'section-title', t('compareTitle')));
+  const row = el('form', 'compare-form');
+  const field = document.createElement('input');
+  field.type = 'text';
+  field.inputMode = 'numeric';
+  field.maxLength = 9;
+  field.placeholder = t('comparePlaceholder');
+  field.addEventListener('input', () => {
+    field.value = field.value.replace(/\D/g, '').slice(0, 9);
+  });
+  const button = el('button', 'action-button', t('compareButton'));
+  button.type = 'submit';
+  row.addEventListener('submit', (event) => {
+    event.preventDefault();
+    runCompare(field.value.trim());
+  });
+  row.append(field, button);
+  state.compareBox = el('div', 'compare-box');
+  wrapper.append(row, state.compareBox);
   return wrapper;
 }
 
@@ -682,23 +1089,25 @@ function renderDetail() {
   const emoji = character && ELEMENT_EMOJI[character.Element] ? ELEMENT_EMOJI[character.Element] + ' ' : '';
   title.append(el('div', 'item-meta', emoji + t('level') + ' ' + levelValue));
   head.append(title);
+  const exportButton = el('button', 'action-button push-right', t('exportPng'));
+  exportButton.type = 'button';
+  exportButton.addEventListener('click', () => exportCard());
+  head.append(exportButton);
   panel.append(head);
 
   const grid = el('div', 'detail-grid');
-  const left = el('div');
-  left.append(buildStatsPanel(details));
-  left.append(el('div', 'hint'));
-  left.append(buildExtrasPanel(details, character));
-  const right = el('div');
+  const left = el('div', 'column');
+  left.append(buildStatsPanel(details), buildExtrasPanel(details, character), buildTargetsPanel());
+  const right = el('div', 'column');
   const weapon = buildWeaponPanel(details.equipList || [], store);
   if (weapon) right.append(weapon);
+  right.append(buildRvPanel());
   grid.append(left, right);
   panel.append(grid);
 
   const artifacts = buildArtifacts(details.equipList || [], store);
   if (artifacts) {
-    const spacer = el('div', 'hint');
-    panel.append(spacer, artifacts);
+    panel.append(el('div', 'hint'), artifacts);
   }
   box.append(panel);
 }
@@ -707,7 +1116,7 @@ function render() {
   if (!state.last) return;
   const { data, store } = state.last;
   result.textContent = '';
-  result.append(buildProfile(data, store), buildChips(data));
+  result.append(buildProfile(data, store), buildChips(data), buildActions(data));
 
   const namecards = buildNamecards(data.playerInfo, store);
   if (namecards) result.append(namecards);
@@ -718,6 +1127,7 @@ function render() {
   state.detailBox = el('div');
   result.append(state.detailBox);
   renderDetail();
+  result.append(buildCompareSection());
 }
 
 function renderHero() {
@@ -734,6 +1144,32 @@ async function showPlayer(data) {
   state.selectedId = first ? first.avatarId : null;
   hero.hidden = true;
   render();
+}
+
+function showError(error, uid) {
+  result.textContent = '';
+  result.append(el('p', 'hint', error instanceof TypeError ? t('network') : error.message));
+  const retry = el('button', 'action-button', t('retry'));
+  retry.type = 'button';
+  retry.addEventListener('click', () => search(uid));
+  result.append(retry);
+}
+
+async function search(uid) {
+  if (!/^\d{9}$/.test(uid)) {
+    result.textContent = t('uidLength');
+    return;
+  }
+  result.textContent = t('loading');
+  try {
+    const data = await fetchPlayer(uid);
+    await showPlayer(data);
+    rememberPlayer(uid, data.playerInfo.nickname);
+    updateUrl(uid);
+  } catch (error) {
+    console.error(error);
+    showError(error, uid);
+  }
 }
 
 langButton.addEventListener('click', () => {
@@ -753,26 +1189,16 @@ input.addEventListener('input', () => {
   input.value = input.value.replace(/\D/g, '').slice(0, 9);
 });
 
-form.addEventListener('submit', async (event) => {
+form.addEventListener('submit', (event) => {
   event.preventDefault();
-  const uid = input.value.trim();
-  if (uid.length !== 9) {
-    result.textContent = t('uidLength');
-    return;
-  }
-  result.textContent = t('loading');
-  try {
-    const data = await fetchPlayer(uid);
-    await showPlayer(data);
-  } catch (error) {
-    console.error(error);
-    if (error instanceof TypeError) {
-      result.textContent = t('network');
-    } else {
-      result.textContent = error.message;
-    }
-  }
+  search(input.value.trim());
 });
 
 applyTexts();
 renderHero();
+
+const urlUid = new URLSearchParams(location.search).get('uid');
+if (urlUid && /^\d{9}$/.test(urlUid)) {
+  input.value = urlUid;
+  search(urlUid);
+}
