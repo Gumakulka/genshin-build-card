@@ -19,6 +19,7 @@ const BASE_HEADERS = {
   'Cache-Control': 'no-store',
   'X-Content-Type-Options': 'nosniff'
 };
+const HIDE_SCROLLBAR_CSS = 'html { scrollbar-width: none; } ::-webkit-scrollbar { display: none; }';
 
 function resolveFile(name) {
   if (name.includes('..') || name.includes('\\')) return null;
@@ -126,6 +127,10 @@ function createWindow(url) {
   const origin = new URL(url).origin;
 
   win.on('close', () => saveSize(win));
+
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.insertCSS(HIDE_SCROLLBAR_CSS).catch((error) => console.error(error));
+  });
 
   win.webContents.setWindowOpenHandler(({ url: target }) => {
     if (/^https?:\/\//.test(target)) shell.openExternal(target);
