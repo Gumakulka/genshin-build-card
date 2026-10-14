@@ -12,7 +12,9 @@ Wersja online: https://gumakulka.github.io/genshin-build-card/ – gracza można
 
 Poza samym podglądem profilu są też: suma CV i RV artefaktów (substaty do RV wybierasz sam) z oznaczeniem najsłabszego artefaktu, paski postępu dla szansy i obrażeń kryt. oraz regeneracji energii względem własnych celów, porównanie dwóch graczy razem ze wspólnymi postaciami, link do wyniku i zapis karty postaci do PNG.
 
-Strona pamięta w przeglądarce ostatnio sprawdzane UID, ulubionych graczy i stan konta z poprzednich wizyt (pokazuje, co się zmieniło). Gdy nie ma połączenia, otwiera ostatnio zapisane dane gracza. Jest filtr postaci, skróty klawiszowe (`Ctrl+K` – pole UID, strzałki – zmiana postaci), jasny i ciemny motyw oraz polska i angielska wersja.
+Pod postacią, bronią i każdym artefaktem jest rozwijana sekcja „Gdzie zdobyć, koszty i wskazówki”: limity poziomów i wzniesień, koszty EXP i Mory, możliwe statystyki główne slotu, ogólne źródła zdobycia, wskazówki wyliczone z danych gracza oraz linki do wiki i dwóch interaktywnych map (HoYoLAB i Teyvat Interactive Map). Kod tych informacji jest w `guide.js`.
+
+Strona pamięta w przeglądarce ostatnio sprawdzane UID, ulubionych graczy i stan konta z poprzednich wizyt (pokazuje, co się zmieniło). Gdy nie ma połączenia, otwiera ostatnio zapisane dane gracza. Jest filtr postaci, jasny i ciemny motyw oraz polska i angielska wersja.
 
 ## Jak to jest zrobione
 
@@ -35,6 +37,7 @@ Folder `desktop/` to opakowanie w Electronie. Plik `.exe` buduje GitHub Actions:
 ## Znane ograniczenia
 
 - Szczegóły postaci są tylko wtedy, gdy gracz ma publiczną gablotę w grze.
+- Informacje „gdzie zdobyć” są ogólne (wg rzadkości i typu); dokładne źródło konkretnej broni, postaci lub zestawu artefaktów sprawdzisz przez link do wiki. Mapy otwierają się w nowej karcie, nie są osadzone w stronie.
 - Maksymalne rzuty do RV wpisałem ręcznie (`MAX_ROLLS` w `app.js`), więc wynik może się trochę różnić od innych kalkulatorów.
 - Etykiety „Stygian” i „Maks. przyjaźń” to moja interpretacja pól, których dokumentacja Enki nie opisuje.
 - Bonus do talentów z konstelacji (np. „10 (+3)”) pokazuje się tylko wtedy, gdy Enka zwraca odpowiednie pole; jeśli nie, widać poziom bazowy.

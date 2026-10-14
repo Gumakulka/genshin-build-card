@@ -4,11 +4,11 @@ Aplikacja w Electronie, która uruchamia tę samą stronę w osobnym oknie, bez 
 
 ## Jak to działa
 
-- Przy starcie aplikacja uruchamia lokalny serwer na `127.0.0.1:5500` i serwuje tylko pliki strony (`index.html`, `app.js`, `style.css`, `features.css`) oraz logo i favicon z folderu `build/`.
+- Przy starcie aplikacja uruchamia lokalny serwer na `127.0.0.1:5500` i serwuje tylko pliki strony (`index.html`, `app.js`, `guide.js`, `style.css`, `features.css`) oraz logo i favicon z folderu `build/`.
 - Adres `http://127.0.0.1:5500` jest dopuszczony w Workerze na Cloudflare, więc zapytania o gracza działają bez zmian.
 - Jeśli port 5500 jest zajęty (np. przez Live Server w VS Code), aplikacja otwiera zamiast tego wersję z GitHub Pages.
 - Program pamięta rozmiar okna (plik `window.json` w folderze danych programu).
-- Linki zewnętrzne otwierają się w domyślnej przeglądarce.
+- Linki zewnętrzne (wiki, mapy) otwierają się w domyślnej przeglądarce.
 
 ## Budowanie pliku .exe
 

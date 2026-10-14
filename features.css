@@ -173,3 +173,54 @@ table.compare td.better {
   border-radius: 10px;
   padding: 8px 12px;
 }
+
+.guide {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: var(--card);
+}
+
+.guide summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--accent);
+}
+
+.guide-list {
+  margin: 8px 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.guide-list li {
+  margin-bottom: 4px;
+}
+
+.guide-title {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.guide-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.guide-link {
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.guide-link:hover {
+  border-color: var(--accent);
+}

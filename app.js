@@ -47,7 +47,6 @@ const TEXT = {
     firstVisit: 'To pierwsza wizyta – zapisano stan konta, następnym razem zobaczysz zmiany.',
     offlineBanner: 'Tryb offline – dane zapisane ',
     commonCharacters: 'Wspólne postacie',
-    shortcutsHint: 'Skróty: Ctrl+K – pole UID, ← i → – zmiana postaci.',
     copyLink: '🔗 Kopiuj link',
     linkCopied: '✅ Skopiowano!',
     exportPng: '🖼️ Pobierz kartę PNG',
@@ -130,7 +129,6 @@ const TEXT = {
     firstVisit: 'First visit – account state saved, changes will show next time.',
     offlineBanner: 'Offline mode – data saved ',
     commonCharacters: 'Shared characters',
-    shortcutsHint: 'Shortcuts: Ctrl+K – UID field, ← and → – switch character.',
     copyLink: '🔗 Copy link',
     linkCopied: '✅ Copied!',
     exportPng: '🖼️ Download PNG card',
@@ -715,16 +713,6 @@ function selectCharacter(id) {
   renderDetail();
 }
 
-function stepCharacter(direction) {
-  if (!state.last) return;
-  const shown = state.last.data.playerInfo.showAvatarInfoList || [];
-  const available = shown.filter((avatar) => findDetails(state.last.data, avatar.avatarId));
-  if (available.length < 2) return;
-  const index = available.findIndex((avatar) => String(avatar.avatarId) === String(state.selectedId));
-  const next = available[(index + direction + available.length) % available.length];
-  selectCharacter(next.avatarId);
-}
-
 function updateUrl(uid) {
   try {
     history.replaceState(null, '', '?uid=' + uid);
@@ -1030,6 +1018,7 @@ function buildWeaponPanel(items, store) {
   });
   row.append(text);
   panel.append(row);
+  panel.append(guideWeapon(item, store));
   return panel;
 }
 
@@ -1083,6 +1072,7 @@ function buildArtifacts(items, store) {
     const rv = artifactRv(flat);
     rvTotal += rv;
     card.append(el('div', 'item-meta rv-line', 'RV ' + rv.toFixed(0) + '%'));
+    card.append(guideArtifact(item, store));
     cards.push({ card, rv, eligible: flat.rankLevel === undefined || flat.rankLevel === 5 });
     grid.append(card);
   });
@@ -1413,6 +1403,7 @@ function renderDetail() {
   right.append(buildRvPanel());
   grid.append(left, right);
   panel.append(grid);
+  panel.append(guideCharacter(details, character, shown, store));
 
   const artifacts = buildArtifacts(details.equipList || [], store);
   if (artifacts) {
@@ -1514,19 +1505,6 @@ input.addEventListener('input', () => {
 form.addEventListener('submit', (event) => {
   event.preventDefault();
   search(input.value.trim());
-});
-
-document.addEventListener('keydown', (event) => {
-  if ((event.ctrlKey || event.metaKey) && String(event.key).toLowerCase() === 'k') {
-    event.preventDefault();
-    input.focus();
-    input.select();
-    return;
-  }
-  const tag = event.target && event.target.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-  if (event.key === 'ArrowRight') stepCharacter(1);
-  if (event.key === 'ArrowLeft') stepCharacter(-1);
 });
 
 applyTexts();
