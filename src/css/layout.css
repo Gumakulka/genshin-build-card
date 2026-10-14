@@ -1,0 +1,71 @@
+/* Układ „split view”: panel mapy zajmuje kolumnę po prawej, a cała strona się do niego dopasowuje.
+   Na szerokich ekranach treść się zwęża, na wąskich panel wysuwa się od dołu i podnosi stopkę. */
+:root {
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dock-w: clamp(360px, 36vw, 540px);
+  --sheet-h: 56vh;
+}
+
+body.map-wide {
+  --dock-w: clamp(420px, 54vw, 860px);
+}
+
+body {
+  transition: padding-right 0.65s var(--ease), padding-bottom 0.65s var(--ease);
+}
+
+.author,
+.side-right {
+  transition: right 0.65s var(--ease), bottom 0.65s var(--ease), opacity 0.4s ease;
+}
+
+.map-dock {
+  transition: transform 0.65s var(--ease), visibility 0s linear 0.65s, width 0.65s var(--ease);
+}
+
+.map-dock.open {
+  transition: transform 0.65s var(--ease), visibility 0s, width 0.65s var(--ease);
+}
+
+@media (min-width: 1000px) {
+  body.map-open {
+    padding-right: var(--dock-w);
+  }
+
+  body.map-open .author {
+    right: calc(var(--dock-w) + 12px);
+  }
+
+  body.map-open .side-right {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 999px) {
+  .map-dock {
+    top: auto;
+    left: 0;
+    width: auto;
+    height: var(--sheet-h);
+    border-left: 0;
+    border-top: 1px solid var(--accent);
+    box-shadow: 0 -14px 44px rgba(0, 0, 0, 0.45);
+    transform: translateY(104%);
+  }
+
+  .map-dock.open {
+    transform: none;
+  }
+
+  body.map-open {
+    padding-bottom: calc(var(--sheet-h) + 24px);
+  }
+
+  body.map-open .author {
+    bottom: calc(var(--sheet-h) + 10px);
+  }
+
+  .dock-size {
+    display: none;
+  }
+}
