@@ -6,7 +6,7 @@ body {
 }
 
 main {
-  max-width: 600px;
+  max-width: 760px;
   margin: 40px auto;
   padding: 0 16px;
 }
@@ -14,4 +14,76 @@ main {
 input, button {
   padding: 8px 12px;
   font-size: 16px;
+}
+
+.profile {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background: #2a3045;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.profile img {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: #1e2230;
+}
+
+.profile h2 {
+  margin: 0 0 4px;
+}
+
+.signature {
+  margin: 0 0 8px;
+  color: #b8c0d8;
+  font-style: italic;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+
+.characters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.character {
+  background: #2a3045;
+  border-radius: 12px;
+  padding: 8px;
+  text-align: center;
+}
+
+.character img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #1e2230;
+}
+
+.character .name {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.character .meta {
+  font-size: 12px;
+  color: #b8c0d8;
+}
+
+img.missing {
+  visibility: hidden;
 }
