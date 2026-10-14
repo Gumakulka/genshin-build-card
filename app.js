@@ -45,14 +45,27 @@ function showPlayer(data) {
   result.append(title, level);
 }
 
+input.addEventListener('input', () => {
+  input.value = input.value.replace(/\D/g, '').slice(0, 9);
+});
+
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   const uid = input.value.trim();
+  if (uid.length !== 9) {
+    result.textContent = 'UID musi miec dokladnie 9 cyfr.';
+    return;
+  }
   result.textContent = 'Ladowanie...';
   try {
     const data = await fetchPlayer(uid);
     showPlayer(data);
   } catch (error) {
-    result.textContent = error.message;
+    console.error(error);
+    if (error instanceof TypeError) {
+      result.textContent = 'Nie udalo sie polaczyc z API (Failed to fetch). Mozliwa blokada CORS - otworz konsole (F12) i sprawdz blad.';
+    } else {
+      result.textContent = error.message;
+    }
   }
 });

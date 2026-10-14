@@ -9,9 +9,9 @@
 <body>
   <main>
     <h1>Genshin Build Card</h1>
-    <p>Wpisz UID gracza, aby zobaczyć jego postacie.</p>
+    <p>Wpisz UID gracza (9 cyfr), aby zobaczyć jego postacie.</p>
     <form id="uid-form">
-      <input id="uid-input" type="text" inputmode="numeric" placeholder="UID, np. 800000000" required>
+      <input id="uid-input" type="text" inputmode="numeric" maxlength="9" minlength="9" pattern="[0-9]{9}" title="UID składa się z 9 cyfr" placeholder="UID, np. 800000000" required>
       <button type="submit">Szukaj</button>
     </form>
     <div id="result"></div>
