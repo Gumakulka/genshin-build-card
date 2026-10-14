@@ -8,6 +8,7 @@ const result = document.getElementById('result');
 
 const ERRORS = {
   400: 'Nieprawidłowy format UID.',
+  403: 'Serwer odrzucił zapytanie z tej strony.',
   404: 'Taki gracz nie istnieje.',
   424: 'Gra jest w trakcie konserwacji. Spróbuj później.',
   429: 'Za dużo zapytań. Odczekaj chwilę.',
@@ -57,15 +58,24 @@ function loadStore() {
 }
 
 function getCache(uid) {
-  const raw = localStorage.getItem('player-' + uid);
-  if (!raw) return null;
-  const cached = JSON.parse(raw);
-  return Date.now() < cached.expires ? cached.data : null;
+  try {
+    const raw = localStorage.getItem('player-' + uid);
+    if (!raw) return null;
+    const cached = JSON.parse(raw);
+    return Date.now() < cached.expires ? cached.data : null;
+  } catch (error) {
+    localStorage.removeItem('player-' + uid);
+    return null;
+  }
 }
 
 function setCache(uid, data) {
-  const ttl = (data.ttl || 60) * 1000;
-  localStorage.setItem('player-' + uid, JSON.stringify({ expires: Date.now() + ttl, data }));
+  try {
+    const ttl = (data.ttl || 60) * 1000;
+    localStorage.setItem('player-' + uid, JSON.stringify({ expires: Date.now() + ttl, data }));
+  } catch (error) {
+    console.error('Nie udało się zapisać cache', error);
+  }
 }
 
 async function fetchPlayer(uid) {
@@ -81,6 +91,7 @@ async function fetchPlayer(uid) {
 }
 
 function createImage(iconName, alt) {
+  if (!/^[A-Za-z0-9_]+$/.test(iconName)) return document.createTextNode('');
   const img = document.createElement('img');
   img.src = IMG_URL + iconName + '.png';
   img.alt = alt;
