@@ -54,6 +54,7 @@ const MENU_ITEMS = [
   { id: 'favorites', icon: '⭐', pl: 'Ulubieni gracze', en: 'Favorite players', run: () => menuScrollTo(favoritesBox), enabled: () => state.favorites.length > 0 },
   { id: 'recent', icon: '🕘', pl: 'Ostatnio sprawdzani', en: 'Recently checked', run: () => menuScrollTo(recentBox), enabled: () => state.recent.length > 0 },
   { id: 'map', icon: '🗺️', pl: 'Mapa', en: 'Map', run: () => mapDockOpen() },
+  { id: 'farm', icon: '📅', pl: 'Plan farmienia', en: 'Farming plan', run: () => farmOpen() },
   { id: 'sep' },
   { id: 'github', icon: '🔗', pl: 'Kod na GitHubie', en: 'Source on GitHub', href: MENU_GITHUB_URL },
   { id: 'clear', icon: '🗑️', pl: 'Wyczyść zapisane dane', en: 'Clear saved data', run: menuClearData, danger: true }
