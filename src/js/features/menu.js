@@ -1,5 +1,4 @@
-/* Menu główne (przycisk na pasku u góry): szybkie przejścia, kopia ulubionych i porządki w zapisanych danych.
-   Nie zmienia istniejących przycisków języka i motywu. Ładowany po map-dock.js. */
+/* Menu główne: szybkie przejścia, powrót do strony startowej, kopia ulubionych i porządki w danych. */
 const MENU_GITHUB_URL = 'https://github.com/Gumakulka/genshin-build-card';
 const MENU_STORAGE_PREFIXES = ['player-', 'offline-', 'history-'];
 const MENU_STORAGE_KEYS = ['recent', 'favorites'];
@@ -12,12 +11,24 @@ function menuText(pl, en) {
 
 function menuHome() {
   if (typeof searchSequence !== 'undefined') searchSequence += 1;
+
   state.last = null;
   state.selectedId = null;
+  state.detailBox = null;
+  state.compareBox = null;
+  state.offline = null;
+  state.diff = null;
+
   result.textContent = '';
   hero.hidden = false;
   input.value = '';
-  history.replaceState(null, '', location.pathname);
+
+  try {
+    history.replaceState(null, '', location.pathname);
+  } catch (error) {
+    console.error(error);
+  }
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
   input.focus();
 }
@@ -31,10 +42,13 @@ function menuClearData() {
     'Usunąć zapisane dane (ostatni i ulubieni gracze, historia, pamięć offline)? Język i motyw zostaną.',
     'Delete saved data (recent and favorite players, history, offline cache)? Language and theme are kept.'
   );
+
   if (!window.confirm(question)) return;
+
   try {
     const keys = [];
     for (let i = 0; i < localStorage.length; i += 1) keys.push(localStorage.key(i));
+
     keys.forEach((key) => {
       if (!key) return;
       if (MENU_STORAGE_KEYS.includes(key) || MENU_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix))) {
@@ -44,6 +58,7 @@ function menuClearData() {
   } catch (error) {
     console.error(error);
   }
+
   state.recent = [];
   state.favorites = [];
   renderRecent();
@@ -55,6 +70,7 @@ function menuExportFavorites() {
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
+
   link.href = url;
   link.download = 'genshin-build-card-favorites.json';
   document.body.append(link);
@@ -65,27 +81,32 @@ function menuExportFavorites() {
 
 function menuCleanPlayer(item) {
   const clean = {};
+
   Object.keys(item).forEach((key) => {
     const value = item[key];
     if (key.length > 30) return;
     if (typeof value === 'string') clean[key] = value.slice(0, 60);
     else if (typeof value === 'number' && Number.isFinite(value)) clean[key] = value;
   });
+
   clean.uid = String(item.uid);
   return clean;
 }
 
 async function menuImportFavorites(file) {
   if (!file || file.size > 200000) return;
+
   try {
     const data = JSON.parse(await file.text());
     const incoming = sanitizePlayers(Array.isArray(data) ? data : data && data.favorites).map(menuCleanPlayer);
     const known = new Set(state.favorites.map((item) => String(item.uid)));
+
     incoming.forEach((item) => {
       if (known.has(item.uid) || state.favorites.length >= MENU_MAX_IMPORT) return;
       known.add(item.uid);
       state.favorites.push(item);
     });
+
     saveJsonSetting('favorites', state.favorites);
     renderFavorites();
   } catch (error) {
@@ -95,7 +116,7 @@ async function menuImportFavorites(file) {
 }
 
 const MENU_ITEMS = [
-  { id: 'home', icon: 'house', pl: 'Start', en: 'Home', run: menuHome },
+  { id: 'home', icon: 'house', pl: 'Menu główne', en: 'Main menu', run: menuHome },
   { id: 'favorites', icon: 'star', pl: 'Ulubieni gracze', en: 'Favorite players', run: () => menuScrollTo(favoritesBox), enabled: () => state.favorites.length > 0 },
   { id: 'recent', icon: 'history', pl: 'Ostatnio sprawdzani', en: 'Recently checked', run: () => menuScrollTo(recentBox), enabled: () => state.recent.length > 0 },
   { id: 'map', icon: 'map', pl: 'Mapa', en: 'Map', run: () => mapDockOpen() },
@@ -112,6 +133,7 @@ function setMenuOpen(open) {
   menu.open = open;
   menu.panel.classList.toggle('open', open);
   menu.button.setAttribute('aria-expanded', String(open));
+
   if (open) {
     menu.entries.forEach((entry) => {
       if (entry.item.enabled) entry.node.disabled = !entry.item.enabled();
@@ -123,6 +145,7 @@ function renderMenu() {
   if (!menu.button) return;
   menu.button.title = menuText('Menu', 'Menu');
   menu.button.setAttribute('aria-label', menuText('Menu', 'Menu'));
+
   menu.entries.forEach((entry) => {
     const badge = el('span', 'menu-icon');
     badge.append(icon(entry.item.icon));
@@ -159,7 +182,9 @@ function buildMenu() {
       menu.panel.append(el('div', 'menu-sep'));
       return;
     }
+
     let node;
+
     if (item.href) {
       node = el('a', 'menu-item');
       node.href = item.href;
@@ -174,6 +199,7 @@ function buildMenu() {
         item.run();
       });
     }
+
     node.setAttribute('role', 'menuitem');
     menu.entries.push({ item, node });
     menu.panel.append(node);
@@ -183,9 +209,11 @@ function buildMenu() {
     event.stopPropagation();
     setMenuOpen(!menu.open);
   });
+
   document.addEventListener('click', (event) => {
     if (menu.open && !menu.panel.contains(event.target)) setMenuOpen(false);
   });
+
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && menu.open) {
       setMenuOpen(false);
