@@ -1,27 +1,58 @@
 /* Małe, wspólne elementy interfejsu i funkcje pomocnicze. */
 function createImage(iconName, alt, className) {
   if (!iconName || !/^[A-Za-z0-9_]+$/.test(iconName)) return document.createTextNode('');
+
   const img = document.createElement('img');
-  img.src = IMG_URL + iconName + '.png';
+  const candidates = [];
+
+  if (iconName.includes('_Side')) {
+    candidates.push(IMG_URL + iconName + '.png');
+    candidates.push(IMG_URL + iconName.replace('_Side', '') + '.png');
+  } else {
+    candidates.push(IMG_URL + iconName + '.png');
+    candidates.push(IMG_URL + iconName.replace('UI_AvatarIcon_', 'UI_AvatarIcon_Side_') + '.png');
+  }
+
+  let candidateIndex = 0;
+  img.src = candidates[candidateIndex];
   img.alt = alt;
   img.loading = 'lazy';
+
   if (className) img.className = className;
-  img.addEventListener('error', () => img.classList.add('missing'));
+
+  img.addEventListener('error', () => {
+    candidateIndex += 1;
+
+    if (candidateIndex < candidates.length) {
+      img.src = candidates[candidateIndex];
+      return;
+    }
+
+    img.classList.add('missing');
+  });
+
   return img;
 }
 
 function getCharacterIcon(character, costumeId) {
   if (!character || !character.SideIconName) return null;
+
   const costume = character.Costumes && character.Costumes[costumeId];
   if (costume && costume.icon) return costume.icon;
-  return character.SideIconName.replace('_Side', '');
+
+  /* Enka udostępnia ikony pod adresem https://enka.network/ui/[nazwa].png.
+     Ikona Side jest podstawową ikoną postaci w menu. */
+  return character.SideIconName;
 }
 
 function getCharacterName(character, store) {
   if (!character || !character.SideIconName) return t('unknownCharacter');
+
   const raw = character.SideIconName.replace('UI_AvatarIcon_Side_', '');
+
   if (raw === 'PlayerBoy') return t('traveler')[0];
   if (raw === 'PlayerGirl') return t('traveler')[1];
+
   return localized(character.NameTextMapHash, store) || NAME_FIX[raw] || raw;
 }
 
@@ -34,12 +65,15 @@ function getRarityClass(character) {
 
 function getProfileIcon(info, store) {
   const picture = info.profilePicture || {};
+
   if (picture.id && store.pfps[picture.id] && store.pfps[picture.id].iconPath) {
     return store.pfps[picture.id].iconPath;
   }
+
   if (picture.avatarId) {
     return getCharacterIcon(store.characters[picture.avatarId], picture.costumeId);
   }
+
   return null;
 }
 
@@ -68,10 +102,12 @@ function progressRow(name, value, target) {
   const row = el('div', 'stat-bar');
   const top = el('div', 'stat-row');
   top.append(el('span', 'stat-name', name), el('span', 'stat-value', value.toFixed(1) + '% / ' + target + '%'));
+
   const bar = document.createElement('progress');
   bar.max = 100;
   bar.value = target > 0 ? Math.min(100, (value / target) * 100) : 0;
   row.append(top, bar);
+
   return row;
 }
 
