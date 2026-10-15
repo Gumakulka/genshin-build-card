@@ -1,10 +1,13 @@
-name: Build Windows exe
+name: Build Windows exe and release
 
 on:
   workflow_dispatch:
   push:
     tags:
       - 'v*'
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -26,8 +29,17 @@ jobs:
       - name: Build exe
         run: npm run dist
 
-      - name: Upload exe
+      - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: genshin-build-card-windows
           path: dist/*.exe
+
+      - name: Attach exe to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.exe
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
