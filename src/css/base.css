@@ -43,11 +43,28 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: -2;
   pointer-events: none;
   background:
     radial-gradient(circle at 15% 0%, var(--glow), transparent 45%),
     radial-gradient(circle at 85% 100%, var(--glow-2), transparent 45%);
+  animation: pageGlow 18s ease-in-out infinite;
+}
+
+.page-particles {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.page-particles span {
+  position: absolute;
+  bottom: -50px;
+  opacity: 0;
+  text-shadow: 0 0 10px currentColor;
+  animation: pageFloat linear infinite;
 }
 
 .side {
@@ -123,36 +140,33 @@ main {
   padding: 34px 0;
 }
 
-.hero::before,
-.hero::after {
-  content: '';
+.hero-trailer {
   position: absolute;
-  width: 340px;
-  height: 340px;
-  border-radius: 50%;
-  filter: blur(70px);
-  opacity: 0.55;
+  inset: 0;
+  overflow: hidden;
   pointer-events: none;
   z-index: 0;
 }
 
-.hero::before {
-  top: -110px;
-  left: -110px;
-  background: radial-gradient(circle, var(--glow), transparent 70%);
-  animation: heroGlow 12s ease-in-out infinite;
+.hero-trailer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(11, 11, 15, 0.94), rgba(11, 11, 15, 0.64), rgba(11, 11, 15, 0.94)),
+    radial-gradient(circle at 50% 40%, transparent, rgba(11, 11, 15, 0.78));
 }
 
-.hero::after {
-  right: -120px;
-  bottom: -140px;
-  background: radial-gradient(circle, var(--glow-2), transparent 70%);
-  animation: heroGlow 15s ease-in-out infinite reverse;
-}
-
-.hero > *:not(.hero-particles) {
-  position: relative;
-  z-index: 1;
+.hero-trailer iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 1200px);
+  height: max(100%, 675px);
+  transform: translate(-50%, -50%);
+  border: 0;
+  opacity: 0.24;
+  pointer-events: none;
 }
 
 .hero-particles {
@@ -160,7 +174,7 @@ main {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
 }
 
 .hero-particles span {
@@ -169,6 +183,37 @@ main {
   opacity: 0;
   text-shadow: 0 0 12px currentColor;
   animation: heroFloat linear infinite;
+}
+
+.hero > *:not(.hero-trailer):not(.hero-particles) {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes pageFloat {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(-110vh) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes pageGlow {
+  0%, 100% {
+    background-position: 0% 0%, 100% 100%;
+  }
+  50% {
+    background-position: 25% 20%, 75% 80%;
+  }
 }
 
 @keyframes heroFloat {
@@ -185,15 +230,6 @@ main {
   100% {
     transform: translateY(-430px) scale(1.15);
     opacity: 0;
-  }
-}
-
-@keyframes heroGlow {
-  0%, 100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(35px, 25px, 0) scale(1.12);
   }
 }
 
@@ -226,7 +262,7 @@ main {
   align-items: center;
   gap: 14px;
   padding: 10px 22px 10px 10px;
-  background: linear-gradient(90deg, var(--card), var(--card-2));
+  background: rgba(22, 22, 29, 0.82);
   border: 1px solid var(--border);
   border-radius: 999px;
   box-shadow: 0 10px 34px var(--glow);
@@ -258,8 +294,8 @@ main {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero::before,
-  .hero::after,
+  body::before,
+  .page-particles span,
   .hero-particles span,
   .hero-banner-card {
     animation: none;

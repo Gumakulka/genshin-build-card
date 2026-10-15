@@ -1,6 +1,16 @@
 /* Składanie widoku, wyszukiwanie gracza i uruchomienie aplikacji. Ładowany jako ostatni. */
 let searchSequence = 0;
 let heroBanner = null;
+let heroTrailerFrame = null;
+let heroTrailerIndex = 0;
+
+const HERO_TRAILERS = ['TAlKhARUcoY', 'lMdsrZ1otlA'];
+
+function heroTrailerUrl(id) {
+  return 'https://www.youtube-nocookie.com/embed/' + id +
+    '?autoplay=1&mute=1&loop=1&playlist=' + id +
+    '&controls=0&modestbranding=1&rel=0&playsinline=1&disablekb=1&iv_load_policy=3';
+}
 
 function renderDetail() {
   const box = state.detailBox;
@@ -90,6 +100,37 @@ function setHeroBanner(index) {
   heroBanner.replaceChildren(image, name);
 }
 
+function buildHeroTrailer() {
+  const wrapper = el('div', 'hero-trailer');
+  heroTrailerFrame = document.createElement('iframe');
+  heroTrailerFrame.src = heroTrailerUrl(HERO_TRAILERS[0]);
+  heroTrailerFrame.title = 'Genshin Impact official background';
+  heroTrailerFrame.allow = 'autoplay; encrypted-media; picture-in-picture';
+  heroTrailerFrame.referrerPolicy = 'strict-origin-when-cross-origin';
+  heroTrailerFrame.tabIndex = -1;
+  heroTrailerFrame.setAttribute('aria-hidden', 'true');
+  wrapper.append(heroTrailerFrame);
+
+  return wrapper;
+}
+
+function buildPageParticles() {
+  const particles = el('div', 'page-particles');
+  const symbols = ['✦', '✧', '·', '✦', '✧'];
+
+  for (let index = 0; index < 28; index += 1) {
+    const particle = el('span', '', symbols[index % symbols.length]);
+    particle.style.left = (Math.random() * 100).toFixed(2) + '%';
+    particle.style.animationDelay = (Math.random() * 14).toFixed(2) + 's';
+    particle.style.animationDuration = (10 + Math.random() * 10).toFixed(2) + 's';
+    particle.style.fontSize = (7 + Math.random() * 13).toFixed(1) + 'px';
+    particle.style.color = index % 5 === 0 ? 'var(--accent)' : 'var(--muted)';
+    particles.append(particle);
+  }
+
+  return particles;
+}
+
 function buildHeroParticles() {
   const particles = el('div', 'hero-particles');
   const symbols = ['✦', '✧', '·', '✦', '✧'];
@@ -111,6 +152,7 @@ function renderHero() {
   heroIcons.classList.add('hero-banner');
   heroIcons.replaceChildren();
 
+  hero.prepend(buildHeroTrailer());
   hero.prepend(buildHeroParticles());
 
   heroBanner = el('div', 'hero-banner-card');
@@ -141,6 +183,13 @@ function renderHero() {
       });
     }, 500);
   }, 4000);
+
+  if (!reducedMotion) {
+    setInterval(() => {
+      heroTrailerIndex = (heroTrailerIndex + 1) % HERO_TRAILERS.length;
+      heroTrailerFrame.src = heroTrailerUrl(HERO_TRAILERS[heroTrailerIndex]);
+    }, 60000);
+  }
 
   renderElementRow();
   renderSides();
@@ -222,6 +271,7 @@ form.addEventListener('submit', (event) => {
 
 applyTexts();
 renderHero();
+document.body.prepend(buildPageParticles());
 
 const urlUid = new URLSearchParams(location.search).get('uid');
 if (urlUid && /^\d{9}$/.test(urlUid)) {
