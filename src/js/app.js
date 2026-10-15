@@ -1,5 +1,6 @@
 /* Składanie widoku, wyszukiwanie gracza i uruchomienie aplikacji. Ładowany jako ostatni. */
 let searchSequence = 0;
+let heroBanner = null;
 
 function renderDetail() {
   const box = state.detailBox;
@@ -81,10 +82,47 @@ function render() {
   result.append(buildCompareSection());
 }
 
+function setHeroBanner(index) {
+  const character = HERO_CHARACTERS[index];
+  const image = createImage(character.icon, character.name, 'hero-banner-icon');
+  const name = el('span', 'hero-banner-name', character.name);
+
+  heroBanner.replaceChildren(image, name);
+}
+
 function renderHero() {
-  HERO_CHARACTERS.forEach((character) => {
-    heroIcons.append(createImage(character.icon, character.name, 'hero-icon'));
-  });
+  heroIcons.classList.add('hero-banner');
+  heroIcons.replaceChildren();
+
+  heroBanner = el('div', 'hero-banner-card');
+  heroIcons.append(heroBanner);
+
+  let heroIndex = 0;
+  setHeroBanner(heroIndex);
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  setInterval(() => {
+    heroIndex = (heroIndex + 1) % HERO_CHARACTERS.length;
+
+    if (reducedMotion) {
+      setHeroBanner(heroIndex);
+      return;
+    }
+
+    heroBanner.classList.add('hero-banner-leave');
+
+    setTimeout(() => {
+      setHeroBanner(heroIndex);
+      heroBanner.classList.remove('hero-banner-leave');
+      heroBanner.classList.add('hero-banner-enter');
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => heroBanner.classList.remove('hero-banner-enter'));
+      });
+    }, 700);
+  }, 10000);
+
   renderElementRow();
   renderSides();
 }

@@ -139,25 +139,52 @@ main {
   letter-spacing: 0.4rem;
 }
 
-.hero-icons {
+.hero-banner {
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
-.hero-icon {
-  width: 72px;
-  height: 72px;
+.hero-banner-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 22px 10px 10px;
+  background: linear-gradient(90deg, var(--card), var(--card-2));
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 10px 34px var(--glow);
+  transition: transform 0.7s ease, opacity 0.7s ease;
+}
+
+.hero-banner-icon {
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   border: 2px solid var(--accent);
-  background: var(--card);
+  background: var(--bg);
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+.hero-banner-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.hero-banner-leave {
+  transform: translateX(-70px);
+  opacity: 0;
+}
+
+.hero-banner-enter {
+  transform: translateX(70px);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-banner-card {
+    transition: none;
+  }
 }
 
 form {
