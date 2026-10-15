@@ -39,34 +39,6 @@ body {
   padding-bottom: 64px;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 15% 0%, var(--glow), transparent 45%),
-    radial-gradient(circle at 85% 100%, var(--glow-2), transparent 45%);
-  animation: pageGlow 18s ease-in-out infinite;
-}
-
-.page-particles {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.page-particles span {
-  position: absolute;
-  bottom: -50px;
-  opacity: 0;
-  text-shadow: 0 0 10px currentColor;
-  animation: pageFloat linear infinite;
-}
-
 .side {
   position: fixed;
   top: 90px;
@@ -140,99 +112,6 @@ main {
   padding: 34px 0;
 }
 
-.hero-trailer {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.hero-trailer::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, rgba(11, 11, 15, 0.94), rgba(11, 11, 15, 0.64), rgba(11, 11, 15, 0.94)),
-    radial-gradient(circle at 50% 40%, transparent, rgba(11, 11, 15, 0.78));
-}
-
-.hero-trailer iframe {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: max(100%, 1200px);
-  height: max(100%, 675px);
-  transform: translate(-50%, -50%);
-  border: 0;
-  opacity: 0.24;
-  pointer-events: none;
-}
-
-.hero-particles {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.hero-particles span {
-  position: absolute;
-  bottom: -50px;
-  opacity: 0;
-  text-shadow: 0 0 12px currentColor;
-  animation: heroFloat linear infinite;
-}
-
-.hero > *:not(.hero-trailer):not(.hero-particles) {
-  position: relative;
-  z-index: 2;
-}
-
-@keyframes pageFloat {
-  0% {
-    transform: translateY(0) scale(0.6);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.5;
-  }
-  90% {
-    opacity: 0.2;
-  }
-  100% {
-    transform: translateY(-110vh) scale(1.1);
-    opacity: 0;
-  }
-}
-
-@keyframes pageGlow {
-  0%, 100% {
-    background-position: 0% 0%, 100% 100%;
-  }
-  50% {
-    background-position: 25% 20%, 75% 80%;
-  }
-}
-
-@keyframes heroFloat {
-  0% {
-    transform: translateY(0) scale(0.6);
-    opacity: 0;
-  }
-  12% {
-    opacity: 0.75;
-  }
-  85% {
-    opacity: 0.35;
-  }
-  100% {
-    transform: translateY(-430px) scale(1.15);
-    opacity: 0;
-  }
-}
-
 .hero h1 {
   font-size: 2.6rem;
   margin: 8px 0;
@@ -253,7 +132,8 @@ main {
 
 .hero-banner {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   margin-top: 24px;
 }
 
@@ -265,16 +145,22 @@ main {
   background: rgba(22, 22, 29, 0.82);
   border: 1px solid var(--border);
   border-radius: 999px;
-  box-shadow: 0 10px 34px var(--glow);
-  transition: transform 0.5s ease, opacity 0.5s ease;
+  box-shadow: 0 10px 34px color-mix(in srgb, var(--el, var(--accent)) 22%, transparent);
+  transition: transform 0.45s var(--ease, ease), opacity 0.45s ease, box-shadow 0.45s ease;
 }
 
 .hero-banner-icon {
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  border: 2px solid var(--accent);
+  border: 2px solid var(--el, var(--accent));
   background: var(--bg);
+}
+
+.hero-banner-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .hero-banner-name {
@@ -283,21 +169,47 @@ main {
   letter-spacing: 0.4px;
 }
 
+.hero-banner-element {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+
+.hero-banner-bar {
+  width: min(240px, 60%);
+  height: 3px;
+  margin-top: 18px;
+  border-radius: 3px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.hero-banner-bar span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--el, var(--accent));
+  transform-origin: left;
+}
+
 .hero-banner-leave {
-  transform: translateX(-80px);
+  transform: translateX(-70px);
   opacity: 0;
 }
 
 .hero-banner-enter {
-  transform: translateX(80px);
+  transform: translateX(70px);
   opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body::before,
-  .page-particles span,
-  .hero-particles span,
-  .hero-banner-card {
+  .hero-banner-card,
+  .hero-banner-bar span {
     animation: none;
     transition: none;
   }
@@ -513,6 +425,10 @@ h3.section-title {
   .profile-body {
     flex-direction: column;
     text-align: center;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
   }
 }
 

@@ -1,16 +1,22 @@
 /* Składanie widoku, wyszukiwanie gracza i uruchomienie aplikacji. Ładowany jako ostatni. */
 let searchSequence = 0;
+
+const HERO_INTERVAL_MS = 4000;
+const HERO_LEAVE_MS = 450;
+const HERO_ELEMENT_COLORS = {
+  Fire: '#ff7a45', Water: '#4cc2ff', Grass: '#7bd84b', Electric: '#b985ff',
+  Ice: '#9fe8ff', Wind: '#5fe0b8', Rock: '#f0b53a'
+};
+const HERO_FALLBACK_ELEMENTS = {
+  Furina: 'Water', Zhongli: 'Rock', Nahida: 'Grass', 'Raiden Shogun': 'Electric',
+  Venti: 'Wind', 'Hu Tao': 'Fire'
+};
+const heroReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 let heroBanner = null;
-let heroTrailerFrame = null;
-let heroTrailerIndex = 0;
-
-const HERO_TRAILERS = ['TAlKhARUcoY', 'lMdsrZ1otlA'];
-
-function heroTrailerUrl(id) {
-  return 'https://www.youtube-nocookie.com/embed/' + id +
-    '?autoplay=1&mute=1&loop=1&playlist=' + id +
-    '&controls=0&modestbranding=1&rel=0&playsinline=1&disablekb=1&iv_load_policy=3';
-}
+let heroBar = null;
+let heroIndex = 0;
+let heroStore = null;
+let heroIds = [];
 
 function renderDetail() {
   const box = state.detailBox;
@@ -92,104 +98,90 @@ function render() {
   result.append(buildCompareSection());
 }
 
-function setHeroBanner(index) {
-  const character = HERO_CHARACTERS[index];
-  const image = createImage(character.icon, character.name, 'hero-banner-icon');
-  const name = el('span', 'hero-banner-name', character.name);
-
-  heroBanner.replaceChildren(image, name);
+function heroShuffle(list) {
+  for (let i = list.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  return list;
 }
 
-function buildHeroTrailer() {
-  const wrapper = el('div', 'hero-trailer');
-  heroTrailerFrame = document.createElement('iframe');
-  heroTrailerFrame.src = heroTrailerUrl(HERO_TRAILERS[0]);
-  heroTrailerFrame.title = 'Genshin Impact official background';
-  heroTrailerFrame.allow = 'autoplay; encrypted-media; picture-in-picture';
-  heroTrailerFrame.referrerPolicy = 'strict-origin-when-cross-origin';
-  heroTrailerFrame.tabIndex = -1;
-  heroTrailerFrame.setAttribute('aria-hidden', 'true');
-  wrapper.append(heroTrailerFrame);
-
-  return wrapper;
+function heroIdsFromStore(store) {
+  return heroShuffle(Object.keys((store && store.characters) || {}).filter((id) => {
+    const character = store.characters[id];
+    return Boolean(character) && Boolean(character.SideIconName) && character.NameTextMapHash !== undefined &&
+      !/PlayerBoy|PlayerGirl/.test(character.SideIconName) && getRarityClass(character) === 'rarity-5';
+  }));
 }
 
-function buildPageParticles() {
-  const particles = el('div', 'page-particles');
-  const symbols = ['✦', '✧', '·', '✦', '✧'];
+function heroCurrent() {
+  if (heroStore && heroIds.length) {
+    const character = heroStore.characters[heroIds[heroIndex % heroIds.length]];
+    return { icon: getCharacterIcon(character), name: getCharacterName(character, heroStore), element: character.Element || null };
+  }
+  const fallback = HERO_CHARACTERS[heroIndex % HERO_CHARACTERS.length];
+  return { icon: fallback.icon, name: fallback.name, element: HERO_FALLBACK_ELEMENTS[fallback.name] || null };
+}
 
-  for (let index = 0; index < 28; index += 1) {
-    const particle = el('span', '', symbols[index % symbols.length]);
-    particle.style.left = (Math.random() * 100).toFixed(2) + '%';
-    particle.style.animationDelay = (Math.random() * 14).toFixed(2) + 's';
-    particle.style.animationDuration = (10 + Math.random() * 10).toFixed(2) + 's';
-    particle.style.fontSize = (7 + Math.random() * 13).toFixed(1) + 'px';
-    particle.style.color = index % 5 === 0 ? 'var(--accent)' : 'var(--muted)';
-    particles.append(particle);
+function setHeroBanner() {
+  const entry = heroCurrent();
+  heroIcons.style.setProperty('--el', HERO_ELEMENT_COLORS[entry.element] || 'var(--accent)');
+
+  const meta = el('span', 'hero-banner-meta');
+  meta.append(el('span', 'hero-banner-name', entry.name));
+  if (entry.element && HUB_ELEMENT_NAMES[entry.element]) {
+    const badge = el('span', 'hero-banner-element');
+    badge.append(elementIcon(entry.element), document.createTextNode(HUB_ELEMENT_NAMES[entry.element]));
+    meta.append(badge);
   }
 
-  return particles;
+  heroBanner.replaceChildren(createImage(entry.icon, entry.name, 'hero-banner-icon'), meta);
+  heroBar.replaceChildren(el('span'));
 }
 
-function buildHeroParticles() {
-  const particles = el('div', 'hero-particles');
-  const symbols = ['✦', '✧', '·', '✦', '✧'];
+function heroNext() {
+  if (hero.hidden || document.hidden || heroBanner.matches(':hover')) return;
+  const total = heroStore && heroIds.length ? heroIds.length : HERO_CHARACTERS.length;
+  heroIndex = (heroIndex + 1) % total;
 
-  for (let index = 0; index < 22; index += 1) {
-    const particle = el('span', '', symbols[index % symbols.length]);
-    particle.style.left = (Math.random() * 100).toFixed(2) + '%';
-    particle.style.animationDelay = (Math.random() * 9).toFixed(2) + 's';
-    particle.style.animationDuration = (7 + Math.random() * 7).toFixed(2) + 's';
-    particle.style.fontSize = (8 + Math.random() * 14).toFixed(1) + 'px';
-    particle.style.color = index % 4 === 0 ? 'var(--accent)' : 'var(--muted)';
-    particles.append(particle);
+  if (heroReduced) {
+    setHeroBanner();
+    return;
   }
 
-  return particles;
+  heroBanner.classList.add('hero-banner-leave');
+  setTimeout(() => {
+    heroBanner.style.transition = 'none';
+    heroBanner.classList.remove('hero-banner-leave');
+    heroBanner.classList.add('hero-banner-enter');
+    setHeroBanner();
+    void heroBanner.offsetWidth;
+    heroBanner.style.transition = '';
+    heroBanner.classList.remove('hero-banner-enter');
+  }, HERO_LEAVE_MS);
 }
 
 function renderHero() {
   heroIcons.classList.add('hero-banner');
   heroIcons.replaceChildren();
 
-  hero.prepend(buildHeroTrailer());
-  hero.prepend(buildHeroParticles());
-
   heroBanner = el('div', 'hero-banner-card');
-  heroIcons.append(heroBanner);
+  heroBar = el('div', 'hero-banner-bar');
+  heroBar.setAttribute('aria-hidden', 'true');
+  heroIcons.append(heroBanner, heroBar);
+  setHeroBanner();
 
-  let heroIndex = 0;
-  setHeroBanner(heroIndex);
+  setInterval(heroNext, HERO_INTERVAL_MS);
+  languageHooks.push(() => setHeroBanner());
 
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  setInterval(() => {
-    heroIndex = (heroIndex + 1) % HERO_CHARACTERS.length;
-
-    if (reducedMotion) {
-      setHeroBanner(heroIndex);
-      return;
-    }
-
-    heroBanner.classList.add('hero-banner-leave');
-
-    setTimeout(() => {
-      setHeroBanner(heroIndex);
-      heroBanner.classList.remove('hero-banner-leave');
-      heroBanner.classList.add('hero-banner-enter');
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => heroBanner.classList.remove('hero-banner-enter'));
-      });
-    }, 500);
-  }, 4000);
-
-  if (!reducedMotion) {
-    setInterval(() => {
-      heroTrailerIndex = (heroTrailerIndex + 1) % HERO_TRAILERS.length;
-      heroTrailerFrame.src = heroTrailerUrl(HERO_TRAILERS[heroTrailerIndex]);
-    }, 60000);
-  }
+  loadStore().then((store) => {
+    const ids = heroIdsFromStore(store);
+    if (!ids.length) return;
+    heroStore = store;
+    heroIds = ids;
+    heroIndex = 0;
+    setHeroBanner();
+  });
 
   renderElementRow();
   renderSides();
@@ -271,7 +263,6 @@ form.addEventListener('submit', (event) => {
 
 applyTexts();
 renderHero();
-document.body.prepend(buildPageParticles());
 
 const urlUid = new URLSearchParams(location.search).get('uid');
 if (urlUid && /^\d{9}$/.test(urlUid)) {

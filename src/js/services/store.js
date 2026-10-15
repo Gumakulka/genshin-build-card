@@ -1,5 +1,4 @@
-/* Dane statyczne Enki: postacie, awatary, wizytówki i nazwy.
-   Dane pochodzą z aktualnego katalogu store/gi w repozytorium EnkaNetwork/API-docs. */
+/* Dane statyczne Enki: postacie, awatary, wizytówki i nazwy. */
 let storePromise = null;
 
 const STORE_CACHE_NAME = 'genshin-store-v2';
@@ -60,7 +59,7 @@ function normIcon(value) {
 }
 
 function normalizeCostume(costume) {
-  if (!costume) return null;
+  if (!costume || typeof costume !== 'object') return null;
 
   return {
     ...costume,
@@ -71,13 +70,21 @@ function normalizeCostume(costume) {
 }
 
 function normalizeCostumes(value) {
-  if (Array.isArray(value)) return value.map(normalizeCostume).filter(Boolean);
+  const result = {};
 
-  if (value && typeof value === 'object') {
-    return Object.entries(value).map(([id, costume]) => normalizeCostume({ ...costume, id })).filter(Boolean);
+  if (Array.isArray(value)) {
+    value.forEach((costume, index) => {
+      const normalized = normalizeCostume(costume);
+      if (normalized) result[costume && costume.id !== undefined ? costume.id : index] = normalized;
+    });
+  } else if (value && typeof value === 'object') {
+    Object.keys(value).forEach((id) => {
+      const normalized = normalizeCostume(value[id]);
+      if (normalized) result[id] = normalized;
+    });
   }
 
-  return [];
+  return result;
 }
 
 function normalizeAvatars(data) {
@@ -97,9 +104,7 @@ function normalizeAvatars(data) {
       Costumes: normalizeCostumes(source.Costumes)
     };
 
-    /* Aloy jest dostępna tylko na PlayStation, więc nie pokazujemy jej w menu postaci. */
     if (String(id) === '10000062') delete character.NameTextMapHash;
-
     characters[id] = character;
   });
 
@@ -112,11 +117,7 @@ function normalizePfps(data) {
   Object.keys(data || {}).forEach((id) => {
     const source = data[id];
     if (!source) return;
-
-    result[id] = {
-      ...source,
-      iconPath: normIcon(source.iconPath || source.IconPath)
-    };
+    result[id] = { ...source, iconPath: normIcon(source.iconPath || source.IconPath) };
   });
 
   return result;
@@ -128,23 +129,14 @@ function normalizeNamecards(data) {
   Object.keys(data || {}).forEach((id) => {
     const source = data[id];
     if (!source) return;
-
-    result[id] = {
-      ...source,
-      icon: normIcon(source.icon || source.Icon)
-    };
+    result[id] = { ...source, icon: normIcon(source.icon || source.Icon) };
   });
 
   return result;
 }
 
 function emptyStore() {
-  return {
-    characters: {},
-    pfps: {},
-    namecards: {},
-    loc: {}
-  };
+  return { characters: {}, pfps: {}, namecards: {}, loc: {} };
 }
 
 function loadStore() {
@@ -163,12 +155,7 @@ function loadStore() {
         storePromise = null;
       }
 
-      return {
-        characters,
-        pfps: normalizedPfps,
-        namecards: normalizedNamecards,
-        loc: locs || {}
-      };
+      return { characters, pfps: normalizedPfps, namecards: normalizedNamecards, loc: locs || {} };
     }).catch((error) => {
       console.error('Could not load Enka store', error);
       storePromise = null;
