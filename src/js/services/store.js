@@ -55,8 +55,8 @@ function fetchJson(name) {
 }
 
 function normIcon(value) {
-  if (typeof value !== 'string') return value;
-  return value.replace(/^\/ui\//, '').replace(/\.(png|jpg|jpeg|webp)$/i, '');
+  if (typeof value !== 'string') return '';
+  return value.replace(/^\/ui\//i, '').replace(/\.(png|jpe?g|webp)$/i, '');
 }
 
 function normalizeCostume(costume) {
@@ -64,9 +64,9 @@ function normalizeCostume(costume) {
 
   return {
     ...costume,
-    sideIconName: costume.sideIconName || normIcon(costume.SideIcon),
-    icon: costume.icon || normIcon(costume.Icon),
-    art: costume.art || normIcon(costume.Art)
+    sideIconName: normIcon(costume.sideIconName || costume.SideIcon),
+    icon: normIcon(costume.icon || costume.Icon),
+    art: normIcon(costume.art || costume.Art)
   };
 }
 
@@ -89,9 +89,9 @@ function normalizeAvatars(data) {
 
     const character = {
       ...source,
-      SideIconName: source.SideIconName || normIcon(source.SideIcon),
-      Icon: source.Icon || normIcon(source.Icon),
-      Art: source.Art || normIcon(source.Art),
+      SideIconName: normIcon(source.SideIconName || source.SideIcon),
+      Icon: normIcon(source.Icon || source.icon),
+      Art: normIcon(source.Art || source.art),
       Consts: source.Consts || [],
       Skills: source.Skills || [],
       Costumes: normalizeCostumes(source.Costumes)
@@ -115,7 +115,7 @@ function normalizePfps(data) {
 
     result[id] = {
       ...source,
-      iconPath: source.iconPath || normIcon(source.IconPath)
+      iconPath: normIcon(source.iconPath || source.IconPath)
     };
   });
 
@@ -131,7 +131,7 @@ function normalizeNamecards(data) {
 
     result[id] = {
       ...source,
-      icon: source.icon || normIcon(source.Icon)
+      icon: normIcon(source.icon || source.Icon)
     };
   });
 
