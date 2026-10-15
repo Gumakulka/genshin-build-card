@@ -1,113 +1,22 @@
-/* Plan farmienia (okno) i wskazówka przesuwania palcem. */
-.swipe-hint {
-  display: none;
-  text-align: center;
-}
-
-@media (hover: none) {
-  .swipe-hint {
-    display: block;
-  }
-}
-
-.farm-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 70;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.6);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0s linear 0.2s;
-}
-
-.farm-overlay.open {
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.2s ease, visibility 0s;
-}
-
-.farm-dialog {
-  width: 100%;
-  max-width: 640px;
-  max-height: 85vh;
-  padding: 16px;
-  overflow-y: auto;
-  background: var(--card);
-  border: 1px solid var(--accent);
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-.farm-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.farm-title {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.farm-server {
-  display: flex;
+/* Dodatkowe style logo jako przycisku powrotu do strony startowej. */
+.brand-button {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
-}
-
-.farm-server select {
-  padding: 6px 10px;
   font: inherit;
-  font-size: 14px;
-  color: var(--fg);
-  background: var(--card-2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 4px 8px;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
-.farm-line {
-  margin: 0 0 12px;
-  font-weight: 600;
-  color: var(--accent);
+.brand-button:hover {
+  background: var(--card);
 }
 
-.farm-scroll {
-  overflow-x: auto;
-}
-
-.farm-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.farm-table th,
-.farm-table td {
-  padding: 8px;
-  text-align: left;
-  white-space: nowrap;
-  border-bottom: 1px solid var(--border);
-}
-
-.farm-table .farm-today {
-  font-weight: 700;
-  color: #111114;
-  background: var(--accent);
-}
-
-body.farm-open {
-  overflow: hidden;
-}
-
-@media (max-width: 760px) {
-  .farm-server select {
-    font-size: 16px;
-  }
+.brand-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }

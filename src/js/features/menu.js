@@ -1,4 +1,4 @@
-/* Menu główne: szybkie przejścia, powrót do strony startowej, kopia ulubionych i porządki w danych. */
+/* Menu główne: logo wraca na start, a osobny przycisk otwiera panel z narzędziami. */
 const MENU_GITHUB_URL = 'https://github.com/Gumakulka/genshin-build-card';
 const MENU_STORAGE_PREFIXES = ['player-', 'offline-', 'history-'];
 const MENU_STORAGE_KEYS = ['recent', 'favorites'];
@@ -11,6 +11,9 @@ function menuText(pl, en) {
 
 function menuHome() {
   if (typeof searchSequence !== 'undefined') searchSequence += 1;
+
+  if (typeof closeHub === 'function') closeHub();
+  if (typeof mapDockClose === 'function') mapDockClose();
 
   state.last = null;
   state.selectedId = null;
@@ -116,15 +119,17 @@ async function menuImportFavorites(file) {
 }
 
 const MENU_ITEMS = [
-  { id: 'home', icon: 'house', pl: 'Menu główne', en: 'Main menu', run: menuHome },
-  { id: 'favorites', icon: 'star', pl: 'Ulubieni gracze', en: 'Favorite players', run: () => menuScrollTo(favoritesBox), enabled: () => state.favorites.length > 0 },
-  { id: 'recent', icon: 'history', pl: 'Ostatnio sprawdzani', en: 'Recently checked', run: () => menuScrollTo(recentBox), enabled: () => state.recent.length > 0 },
+  { id: 'tools', icon: 'layout-grid', pl: 'Narzędzia', en: 'Tools', run: () => hubGo({ type: 'home' }) },
+  { id: 'talents', icon: 'calculator', pl: 'Kalkulator talentów', en: 'Talent calculator', run: () => hubGo({ type: 'tool', id: 'talents' }) },
   { id: 'map', icon: 'map', pl: 'Mapa', en: 'Map', run: () => mapDockOpen() },
   { id: 'farm', icon: 'calendar-days', pl: 'Plan farmienia', en: 'Farming plan', run: () => farmOpen() },
   { id: 'sep1' },
+  { id: 'favorites', icon: 'star', pl: 'Ulubieni gracze', en: 'Favorite players', run: () => menuScrollTo(favoritesBox), enabled: () => state.favorites.length > 0 },
+  { id: 'recent', icon: 'history', pl: 'Ostatnio sprawdzani', en: 'Recently checked', run: () => menuScrollTo(recentBox), enabled: () => state.recent.length > 0 },
+  { id: 'sep2' },
   { id: 'export', icon: 'download', pl: 'Zapisz ulubionych do pliku', en: 'Export favorites', run: menuExportFavorites, enabled: () => state.favorites.length > 0 },
   { id: 'import', icon: 'upload', pl: 'Wczytaj ulubionych z pliku', en: 'Import favorites', run: () => menu.file.click() },
-  { id: 'sep2' },
+  { id: 'sep3' },
   { id: 'github', icon: 'git-branch', pl: 'Kod na GitHubie', en: 'Source on GitHub', href: MENU_GITHUB_URL },
   { id: 'clear', icon: 'trash-2', pl: 'Wyczyść zapisane dane', en: 'Clear saved data', run: menuClearData, danger: true }
 ];
@@ -143,8 +148,8 @@ function setMenuOpen(open) {
 
 function renderMenu() {
   if (!menu.button) return;
-  menu.button.title = menuText('Menu', 'Menu');
-  menu.button.setAttribute('aria-label', menuText('Menu', 'Menu'));
+  menu.button.title = menuText('Narzędzia i opcje', 'Tools and options');
+  menu.button.setAttribute('aria-label', menuText('Narzędzia i opcje', 'Tools and options'));
 
   menu.entries.forEach((entry) => {
     const badge = el('span', 'menu-icon');
@@ -155,6 +160,7 @@ function renderMenu() {
 
 function buildMenu() {
   const controls = document.querySelector('.controls');
+  const brand = document.getElementById('brand-home');
   if (!controls) return;
 
   menu.button = el('button', 'menu-button');
@@ -210,8 +216,15 @@ function buildMenu() {
     setMenuOpen(!menu.open);
   });
 
+  if (brand) {
+    brand.addEventListener('click', () => {
+      setMenuOpen(false);
+      menuHome();
+    });
+  }
+
   document.addEventListener('click', (event) => {
-    if (menu.open && !menu.panel.contains(event.target)) setMenuOpen(false);
+    if (menu.open && !menu.panel.contains(event.target) && event.target !== menu.button) setMenuOpen(false);
   });
 
   document.addEventListener('keydown', (event) => {
