@@ -1,6 +1,6 @@
 /* Stałe: adresy, limity, nazwy i wartości domyślne. */
 const WORKER_URL = 'https://genshin-proxy.klaun970.workers.dev/uid/';
-const STORE_URL = 'https://raw.githubusercontent.com/EnkaNetwork/API-docs/b8ac71c2fba62519c905551d741474e8cd6a267b/store/';
+const STORE_URL = 'https://raw.githubusercontent.com/EnkaNetwork/API-docs/master/store/gi/';
 const IMG_URL = 'https://enka.network/ui/';
 
 const DMG_PROPS = {
