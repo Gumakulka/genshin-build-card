@@ -90,9 +90,28 @@ function setHeroBanner(index) {
   heroBanner.replaceChildren(image, name);
 }
 
+function buildHeroParticles() {
+  const particles = el('div', 'hero-particles');
+  const symbols = ['✦', '✧', '·', '✦', '✧'];
+
+  for (let index = 0; index < 22; index += 1) {
+    const particle = el('span', '', symbols[index % symbols.length]);
+    particle.style.left = (Math.random() * 100).toFixed(2) + '%';
+    particle.style.animationDelay = (Math.random() * 9).toFixed(2) + 's';
+    particle.style.animationDuration = (7 + Math.random() * 7).toFixed(2) + 's';
+    particle.style.fontSize = (8 + Math.random() * 14).toFixed(1) + 'px';
+    particle.style.color = index % 4 === 0 ? 'var(--accent)' : 'var(--muted)';
+    particles.append(particle);
+  }
+
+  return particles;
+}
+
 function renderHero() {
   heroIcons.classList.add('hero-banner');
   heroIcons.replaceChildren();
+
+  hero.prepend(buildHeroParticles());
 
   heroBanner = el('div', 'hero-banner-card');
   heroIcons.append(heroBanner);
@@ -120,8 +139,8 @@ function renderHero() {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => heroBanner.classList.remove('hero-banner-enter'));
       });
-    }, 700);
-  }, 10000);
+    }, 500);
+  }, 4000);
 
   renderElementRow();
   renderSides();
