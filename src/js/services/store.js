@@ -60,13 +60,24 @@ function normIcon(value) {
 }
 
 function normalizeCostume(costume) {
-  if (!costume) return costume;
+  if (!costume) return null;
+
   return {
     ...costume,
     sideIconName: costume.sideIconName || normIcon(costume.SideIcon),
     icon: costume.icon || normIcon(costume.Icon),
     art: costume.art || normIcon(costume.Art)
   };
+}
+
+function normalizeCostumes(value) {
+  if (Array.isArray(value)) return value.map(normalizeCostume).filter(Boolean);
+
+  if (value && typeof value === 'object') {
+    return Object.entries(value).map(([id, costume]) => normalizeCostume({ ...costume, id })).filter(Boolean);
+  }
+
+  return [];
 }
 
 function normalizeAvatars(data) {
@@ -83,7 +94,7 @@ function normalizeAvatars(data) {
       Art: source.Art || normIcon(source.Art),
       Consts: source.Consts || [],
       Skills: source.Skills || [],
-      Costumes: (source.Costumes || []).map(normalizeCostume)
+      Costumes: normalizeCostumes(source.Costumes)
     };
 
     /* Aloy jest dostępna tylko na PlayStation, więc nie pokazujemy jej w menu postaci. */
@@ -101,6 +112,7 @@ function normalizePfps(data) {
   Object.keys(data || {}).forEach((id) => {
     const source = data[id];
     if (!source) return;
+
     result[id] = {
       ...source,
       iconPath: source.iconPath || normIcon(source.IconPath)
@@ -116,6 +128,7 @@ function normalizeNamecards(data) {
   Object.keys(data || {}).forEach((id) => {
     const source = data[id];
     if (!source) return;
+
     result[id] = {
       ...source,
       icon: source.icon || normIcon(source.Icon)
@@ -123,6 +136,15 @@ function normalizeNamecards(data) {
   });
 
   return result;
+}
+
+function emptyStore() {
+  return {
+    characters: {},
+    pfps: {},
+    namecards: {},
+    loc: {}
+  };
 }
 
 function loadStore() {
@@ -147,6 +169,10 @@ function loadStore() {
         namecards: normalizedNamecards,
         loc: locs || {}
       };
+    }).catch((error) => {
+      console.error('Could not load Enka store', error);
+      storePromise = null;
+      return emptyStore();
     });
   }
 
@@ -155,8 +181,10 @@ function loadStore() {
 
 function localized(hash, store) {
   if (hash === undefined || hash === null) return null;
+
   const loc = store.loc || {};
   const table = loc[state.lang] || loc.en || loc;
   const value = table ? table[String(hash)] : null;
+
   return typeof value === 'string' ? value : null;
 }
