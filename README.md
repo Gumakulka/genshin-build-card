@@ -10,8 +10,6 @@ Prosty projekt fanowski, w którym wpisujesz UID gracza z Genshin Impact i widzi
 2. Kliknij „Szukaj”.
 3. Kliknij postać, żeby zobaczyć jej szczegóły.
 
-Możesz też dodać UID do linku, np. `?uid=760720445`.
-
 ## Co znajdziesz
 
 - Profil gracza i jego postacie.
