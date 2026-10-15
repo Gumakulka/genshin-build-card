@@ -6,8 +6,8 @@ function createImage(iconName, alt, className) {
   const candidates = [];
 
   if (iconName.includes('_Side')) {
-    candidates.push(IMG_URL + iconName + '.png');
     candidates.push(IMG_URL + iconName.replace('_Side', '') + '.png');
+    candidates.push(IMG_URL + iconName + '.png');
   } else {
     candidates.push(IMG_URL + iconName + '.png');
     candidates.push(IMG_URL + iconName.replace('UI_AvatarIcon_', 'UI_AvatarIcon_Side_') + '.png');
@@ -40,9 +40,9 @@ function getCharacterIcon(character, costumeId) {
   const costume = character.Costumes && character.Costumes[costumeId];
   if (costume && costume.icon) return costume.icon;
 
-  /* Enka udostępnia ikony pod adresem https://enka.network/ui/[nazwa].png.
-     Ikona Side jest podstawową ikoną postaci w menu. */
-  return character.SideIconName;
+  /* Poprzedni format działających ikon Enki: UI_AvatarIcon_Navia.png.
+     Jeśli go nie ma, createImage próbuje wersji UI_AvatarIcon_Side_Navia.png. */
+  return character.SideIconName.replace('_Side', '');
 }
 
 function getCharacterName(character, store) {
