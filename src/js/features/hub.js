@@ -1,7 +1,4 @@
-/* Menu główne: nakładka otwierana kliknięciem w nazwę strony. Z niej wybierasz żywioł i widzisz
-   postacie tego żywiołu z danych Enki. Po kliknięciu postaci może pojawić się wskazówka buildu artefaktów.
-   Ten sam panel buildu pojawia się też w szczegółach postaci gracza, razem ze sprawdzeniem głównych statystyk.
-   Dane buildu to skrót zestawienia Game8 (wersja 7.1, postacie od A do Se). Pełny poradnik jest pod linkiem. */
+/* Panel narzędzi: żywioły, postacie, wskazówki buildów. Logo nie otwiera już tego panelu. */
 const HUB_ELEMENTS = ['Fire', 'Water', 'Grass', 'Electric', 'Ice', 'Wind', 'Rock'];
 const HUB_ELEMENT_NAMES = {
   Fire: 'Pyro', Water: 'Hydro', Grass: 'Dendro', Electric: 'Electro', Ice: 'Cryo', Wind: 'Anemo', Rock: 'Geo'
@@ -46,8 +43,6 @@ const HUB_SLOTS = [
   ['EQUIP_DRESS', 'Diadem logosu', 'Circlet']
 ];
 
-/* Format: [rola, zestawy artefaktów, główne statystyki (piaski|kielich|diadem), podstatystyki według ważności].
-   Skróty statystyk są w HUB_STATS. */
 const HUB_BUILDS = {
   Aino: ['Support', `Silken Moon's Serenade`, 'EM|EM|CR/CD/EM', 'EM,CR,CD,ER'],
   Albedo: ['Sub-DPS', 'Husk of Opulent Dreams', 'DF|ED|CR/CD', 'DF,CR,CD'],
@@ -61,29 +56,29 @@ const HUB_BUILDS = {
   Baizhu: ['Support', 'Deepwood Memories', 'HP/ER|HP|HP', 'ER,HP'],
   Barbara: ['Support', 'Ocean-Hued Clam', 'HP|HP|HP/HB', 'HP'],
   Beidou: ['Sub-DPS', 'Emblem of Severed Fate', 'AT/ER|ED/AT/HP|CR/CD', 'AT,CR,CD,ER'],
-  Bennett: ['Support', 'Noblesse Oblige', 'ER/AT|ED|CR/CD', 'ER,CR,CD,AT'],
+  Bennett: ['Support', 'Noblesse Oblige', 'ER/AT|ED|CR/CD', 'ER,AT,CR'],
   Candace: ['Sub-DPS', 'Scroll of the Hero of Cinder City', 'ER/HP|HP/ED|HP/CR/CD', 'HP,ER,CR,CD,EM'],
   Charlotte: ['Sub-DPS', 'Golden Troupe', 'AT/ER|AT/ED|CD', 'CD,AT,ER,CR'],
   Chasca: ['DPS', 'Obsidian Codex', 'AT|AT/ED|CD/CR', 'CD,CR,AT,EM'],
   Chevreuse: ['Support', 'Noblesse Oblige', 'HP/ER|HP|HP/HB', 'HP,ER'],
   Chiori: ['Sub-DPS', 'Golden Troupe', 'DF/AT|ED|CR/CD', 'CR,CD,DF,AT'],
-  Chongyun: ['Sub-DPS', 'Emblem of Severed Fate', 'AT/ER|ED|CR/CD', 'ER,CR,CD,AT,EM'],
+  Chongyun: ['Sub-DPS', 'Emblem of Severed Fate', 'AT/ER|ED|CR/CD', 'AT,CR,CD,ER'],
   Citlali: ['Support', 'Scroll of the Hero of Cinder City', 'EM|EM|EM', 'EM,ER'],
-  Clorinde: ['DPS', 'Fragment of Harmonic Whimsy', 'AT/EM|ED|CR/CD', 'CR,CD,ER,AT'],
-  Collei: ['Sub-DPS', 'Deepwood Memories', 'ER/AT/EM|ED|CR/CD', 'ER,CR,CD,AT,EM'],
+  Clorinde: ['DPS', 'Fragment of Harmonic Whimsy', 'AT/EM|ED|CR/CD', 'AT,CR,CD,ER'],
+  Collei: ['Sub-DPS', 'Deepwood Memories', 'ER/AT/EM|ED|CR/CD', 'ER,CR,CD,EM'],
   Columbina: ['Sub-DPS', 'Aubade of Morningstar and Moon', 'HP/ER|HP/ED|CR/CD', 'HP,ER,CR,CD,EM'],
   Cyno: ['DPS', 'Disenchantment in Deep Shadows', 'EM|ED|CR/CD', 'ER,CR,CD,EM,AT'],
   Dahlia: ['Support', 'Noblesse Oblige', 'HP/ER|HP|HP/CR', 'ER,HP'],
   Dehya: ['Sub-DPS', 'Scroll of the Hero of Cinder City', 'HP/EM|HP/EM|HP/EM', 'HP,EM'],
   Diluc: ['DPS', 'Crimson Witch of Flames', 'AT/EM|ED|CR/CD', 'CD,CR,AT,EM'],
   Diona: ['Support', 'Noblesse Oblige', 'ER/HP|HP|HB/HP', 'ER,HP'],
-  Dori: ['Support', 'Noblesse Oblige', 'ER/HP|HP|HP/HB', 'ER,HP,AT,CR'],
+  Dori: ['Support', 'Noblesse Oblige', 'ER/HP|HP|HB/HP', 'HP,ER,AT,CR'],
   Durin: ['Sub-DPS', 'A Day Carved from Rising Winds', 'AT|AT/ED|CD/CR', 'AT,EM,CR,CD'],
   Emilie: ['Sub-DPS', 'Unfinished Reverie', 'AT|ED|CR/CD', 'AT,CR,CD,ER'],
   Escoffier: ['Sub-DPS', 'Golden Troupe', 'AT/ER|ED/AT|CR/CD', 'CR,CD,AT,ER'],
   Eula: ['DPS', 'Pale Flame', 'AT|PD|CR/CD', 'ER,CD,CR,AT'],
   Faruzan: ['Support', 'Viridescent Venerer', 'ER|ED|CR/CD', 'ER,CR,CD'],
-  Fischl: ['Sub-DPS', 'Golden Troupe', 'AT/EM|ED|CR/CD', 'CR,CD,AT'],
+  Fischl: ['Sub-DPS', 'Golden Troupe', 'AT/EM|ED|CR/CD', 'AT,CR,CD'],
   Flins: ['DPS', `Night of the Sky's Unveiling`, 'AT|AT|CR/CD', 'AT,CR,CD,ER'],
   Freminet: ['DPS', 'Pale Flame', 'AT|PD|CR/CD', 'AT,CR,CD'],
   Furina: ['Sub-DPS', 'Golden Troupe', 'HP/ER|HP/ED|CR/CD', 'ER,CD,CR,HP,EM'],
@@ -94,7 +89,7 @@ const HUB_BUILDS = {
   'Hu Tao': ['DPS', 'Crimson Witch of Flames', 'HP|ED|CD/CR', 'CR,CD,HP,EM'],
   Iansan: ['Support', 'Scroll of the Hero of Cinder City', 'AT/ER|AT|AT', 'ER,AT'],
   Ifa: ['Support', 'Viridescent Venerer', 'EM|EM|EM', 'EM,ER'],
-  Illuga: ['Support', `Silken Moon's Serenade`, 'EM|EM|EM', 'EM,ER,DF'],
+  Illuga: ['Support', `Silken Moon's Serenade`, 'EM|EM|EM/CR/CD', 'EM,CR,CD,ER'],
   Ineffa: ['Sub-DPS', 'Aubade of Morningstar and Moon', 'AT/EM|AT/EM|CR/CD', 'CR,CD,AT,EM,ER'],
   Itto: ['DPS', 'Husk of Opulent Dreams', 'DF|ED|CR/CD', 'DF,CD,CR,ER'],
   Jahoda: ['Support', 'Viridescent Venerer', 'ER/AT|AT|AT/HB/CR', 'ER,AT,CR,CD,EM'],
@@ -103,7 +98,7 @@ const HUB_BUILDS = {
   Kaeya: ['DPS', 'Blizzard Strayer', 'AT/ER|ED|CD/CR', 'AT,CD,CR'],
   Kaveh: ['Support', 'Deepwood Memories', 'EM|EM|EM', 'ER,EM,CR,CD,AT'],
   Kazuha: ['Sub-DPS', 'Viridescent Venerer', 'EM/AT|EM/ED|EM/CR/CD', 'EM,ER,CD,CR,AT'],
-  Keqing: ['DPS', 'Thundering Fury', 'AT/EM|ED|CR/CD', 'CR,CD,AT,EM'],
+  Keqing: ['DPS', 'Thundering Fury', 'AT/EM|ED|CR/CD/EM', 'ER,EM,CR,CD'],
   Kinich: ['DPS', 'Obsidian Codex', 'AT|ED|CR/CD', 'CD,CR,AT,ER,EM'],
   Kirara: ['Support', 'Tenacity of the Millelith (2) + Vourukasha\'s Glow (2)', 'HP/ER|HP|HP', 'HP,ER'],
   Klee: ['DPS', 'A Day Carved from Rising Winds', 'AT|ED|CR/CD', 'CD,CR,AT,ER'],
@@ -113,12 +108,12 @@ const HUB_BUILDS = {
   Layla: ['Support', 'Tenacity of the Millelith', 'HP|HP/ED|HP/CR/CD', 'HP,CR,CD,ER'],
   Linnea: ['Sub-DPS', 'Aubade of Morningstar and Moon', 'DF|DF|CR/CD', 'CR,CD,DF,EM,ER'],
   Lisa: ['Sub-DPS', 'Gilded Dreams', 'AT/EM|ED/EM|CR/CD/EM', 'ER,EM,CR,CD'],
-  Lohen: ['DPS', 'A Day Carved from Rising Winds', 'AT|ED|CD/CR', 'CD,CR,AT,ER'],
-  Lynette: ['Support', 'Viridescent Venerer', 'EM/ER|EM/ED|EM/CR/CD', 'EM,ER,CR,CD,AT,HP'],
+  Lohen: ['DPS', 'A Day Carved from Rising Winds', 'AT|ED|CD/CR', 'CD,CR,AT,EM'],
+  Lynette: ['Support', 'Viridescent Venerer', 'EM/ER|EM/ED|EM/CR/CD', 'EM,ER,CD,AT,HP'],
   Lyney: ['DPS', 'Marechaussee Hunter', 'AT|ED|CD', 'CD,ER,CR,AT'],
   Mavuika: ['DPS', 'Obsidian Codex', 'AT/EM|ED|CR/CD', 'CD,CR,AT,EM'],
-  Mika: ['Support', 'Noblesse Oblige', 'ER/HP|HP|HP/HB/CR', 'ER,HP,CR'],
-  Mizuki: ['Support', 'Viridescent Venerer', 'EM/ER|EM|EM', 'EM,ER'],
+  Mika: ['Support', 'Noblesse Oblige', 'ER/HP|HP|HP/CR', 'ER,HP,CR'],
+  Mizuki: ['Support', 'Viridescent Venerer', 'EM/ER|EM|EM', 'ER,AT,EM'],
   Mona: ['Sub-DPS', 'Emblem of Severed Fate', 'AT|ED|CR/CD', 'ER,CD,CR,AT'],
   Mualani: ['DPS', 'Obsidian Codex', 'HP/EM|ED/HP|CD', 'CD,HP,EM,CR,ER'],
   Nahida: ['Sub-DPS', 'Deepwood Memories', 'EM|EM/ED|EM/CR/CD', 'EM,CR,CD,ER'],
@@ -127,17 +122,17 @@ const HUB_BUILDS = {
   Neuvillette: ['DPS', 'Marechaussee Hunter', 'HP|ED/HP|CR/CD', 'HP,CR,CD,ER,EM'],
   Nicole: ['Support', 'Celestial Gift', 'AT/ER|AT|AT', 'AT,ER'],
   Nilou: ['Support', 'Tenacity of the Millelith (2) + Vourukasha\'s Glow (2)', 'HP/ER|HP|HP', 'HP,ER,EM'],
-  Ningguang: ['DPS', 'Nighttime Whispers in the Echoing Woods', 'AT|ED|CR/CD', 'CR,CD,AT'],
-  Noelle: ['DPS', 'Marechaussee Hunter', 'DF|ED|CR/CD', 'DF,CD,CR,AT'],
+  Ningguang: ['DPS', 'Nighttime Whispers in the Echoing Woods', 'AT|ED|CR/CD', 'CD,CR,AT'],
+  Noelle: ['DPS', 'Marechaussee Hunter', 'DF|ED|CR/CD', 'DF,CD,CR,ER'],
   Odette: ['Sub-DPS', 'Heart of the Furnace', 'AT|AT|CR/CD', 'CD,CR,AT,EM'],
   Ororon: ['Sub-DPS', 'Scroll of the Hero of Cinder City', 'AT/ER|ED|CD/CR', 'AT,CR,CD,ER'],
   Prune: ['Sub-DPS', 'Viridescent Venerer', 'AT/ER|AT|AT', 'AT,ER'],
   Qiqi: ['Support', 'Disenchantment in Deep Shadows', 'AT/ER|AT|AT/HB', 'AT,ER'],
   Raiden: ['DPS', 'Emblem of Severed Fate', 'ER/AT|AT/ED|CR/CD', 'CD,CR,ER,AT'],
-  Razor: ['DPS', 'A Day Carved from Rising Winds', 'AT|ED|CD/CR', 'AT,CR,CD,ER'],
+  Razor: ['DPS', 'A Day Carved from Rising Winds', 'AT|ED|CD/CR', 'CD,CR,AT,EM'],
   Rosaria: ['Sub-DPS', 'Unfinished Reverie', 'EM/AT|ED|CR/CD', 'AT,CR,CD,EM'],
   Sandrone: ['DPS', 'Disenchantment in Deep Shadows', 'AT|AT|CD/CR', 'ER,CD,CR,AT,EM'],
-  Sara: ['Sub-DPS', 'Emblem of Severed Fate', 'ER/AT|ED|CR/CD', 'AT,ER,CR,CD'],
+  Sara: ['Sub-DPS', 'Emblem of Severed Fate', 'ER/AT|ED|CR/CD', 'CD,CR,ER,AT'],
   Sayu: ['Support', 'Viridescent Venerer', 'ER/EM|EM|EM', 'ER,AT,EM']
 };
 
@@ -287,7 +282,7 @@ function hubCharactersOf(element, store) {
 
 function hubHome() {
   hub.root.removeAttribute('data-element');
-  hub.title.textContent = hubText('Menu główne', 'Main menu');
+  hub.title.textContent = hubText('Narzędzia', 'Tools');
   hub.back.hidden = true;
   const wrapper = el('div');
   wrapper.append(el('p', 'hub-intro', hubText(
@@ -414,14 +409,11 @@ function closeHub() {
 }
 
 function buildHub() {
-  const brand = document.querySelector('.brand');
-  if (!brand) return;
-
   hub.root = el('div', 'hub');
   hub.root.setAttribute('role', 'dialog');
   hub.root.setAttribute('aria-modal', 'true');
   hub.root.setAttribute('aria-hidden', 'true');
-  hub.root.setAttribute('aria-label', 'Menu');
+  hub.root.setAttribute('aria-label', 'Narzędzia');
 
   const header = el('div', 'hub-header');
   hub.back = el('button', 'hub-back');
@@ -441,21 +433,8 @@ function buildHub() {
   });
   document.body.append(hub.root);
 
-  brand.setAttribute('role', 'button');
-  brand.setAttribute('tabindex', '0');
-  brand.setAttribute('aria-label', 'Menu');
-  brand.addEventListener('click', openHub);
-  brand.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      openHub();
-    }
-  });
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && hub.open) {
-      closeHub();
-      brand.focus();
-    }
+    if (event.key === 'Escape' && hub.open) closeHub();
   });
 
   languageHooks.push(() => {

@@ -1,4 +1,4 @@
-/* Menu główne: logo wraca na start, a osobny przycisk otwiera panel z narzędziami. */
+/* Menu opcji: logo wraca na start, a przycisk menu otwiera narzędzia. */
 const MENU_GITHUB_URL = 'https://github.com/Gumakulka/genshin-build-card';
 const MENU_STORAGE_PREFIXES = ['player-', 'offline-', 'history-'];
 const MENU_STORAGE_KEYS = ['recent', 'favorites'];
@@ -119,10 +119,10 @@ async function menuImportFavorites(file) {
 }
 
 const MENU_ITEMS = [
-  { id: 'tools', icon: 'layout-grid', pl: 'Narzędzia', en: 'Tools', run: () => hubGo({ type: 'home' }) },
-  { id: 'talents', icon: 'calculator', pl: 'Kalkulator talentów', en: 'Talent calculator', run: () => hubGo({ type: 'tool', id: 'talents' }) },
-  { id: 'map', icon: 'map', pl: 'Mapa', en: 'Map', run: () => mapDockOpen() },
-  { id: 'farm', icon: 'calendar-days', pl: 'Plan farmienia', en: 'Farming plan', run: () => farmOpen() },
+  { id: 'tools', icon: 'layout-grid', pl: 'Narzędzia', en: 'Tools', run: () => openHub() },
+  { id: 'talents', icon: 'calculator', pl: 'Kalkulator talentów', en: 'Talent calculator', run: () => { openHub(); hubGo({ type: 'tool', id: 'talents' }); } },
+  { id: 'map', icon: 'map', pl: 'Mapa', en: 'Map', run: () => { closeHub(); mapDockOpen(); } },
+  { id: 'farm', icon: 'calendar-days', pl: 'Plan farmienia', en: 'Farming plan', run: () => { closeHub(); farmOpen(); } },
   { id: 'sep1' },
   { id: 'favorites', icon: 'star', pl: 'Ulubieni gracze', en: 'Favorite players', run: () => menuScrollTo(favoritesBox), enabled: () => state.favorites.length > 0 },
   { id: 'recent', icon: 'history', pl: 'Ostatnio sprawdzani', en: 'Recently checked', run: () => menuScrollTo(recentBox), enabled: () => state.recent.length > 0 },
@@ -224,7 +224,7 @@ function buildMenu() {
   }
 
   document.addEventListener('click', (event) => {
-    if (menu.open && !menu.panel.contains(event.target) && event.target !== menu.button) setMenuOpen(false);
+    if (menu.open && !menu.panel.contains(event.target) && !menu.button.contains(event.target)) setMenuOpen(false);
   });
 
   document.addEventListener('keydown', (event) => {
