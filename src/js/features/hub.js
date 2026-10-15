@@ -1,5 +1,5 @@
-/* Menu główne: nakładka otwierana kliknięciem w nazwę strony. Z niej wybierasz żywioł, widzisz wszystkie
-   postacie tego żywiołu (z danych Enki), a po kliknięciu postaci polecany build artefaktów.
+/* Menu główne: nakładka otwierana kliknięciem w nazwę strony. Z niej wybierasz żywioł i widzisz
+   postacie tego żywiołu z danych Enki. Po kliknięciu postaci może pojawić się wskazówka buildu artefaktów.
    Ten sam panel buildu pojawia się też w szczegółach postaci gracza, razem ze sprawdzeniem głównych statystyk.
    Dane buildu to skrót zestawienia Game8 (wersja 7.1, postacie od A do Se). Pełny poradnik jest pod linkiem. */
 const HUB_ELEMENTS = ['Fire', 'Water', 'Grass', 'Electric', 'Ice', 'Wind', 'Rock'];
@@ -106,7 +106,7 @@ const HUB_BUILDS = {
   Keqing: ['DPS', 'Thundering Fury', 'AT/EM|ED|CR/CD', 'CR,CD,AT,EM'],
   Kinich: ['DPS', 'Obsidian Codex', 'AT|ED|CR/CD', 'CD,CR,AT,ER,EM'],
   Kirara: ['Support', 'Tenacity of the Millelith (2) + Vourukasha\'s Glow (2)', 'HP/ER|HP|HP', 'HP,ER'],
-  Klee: ['DPS', 'A Day Carved from Rising Winds', 'AT|ED|CR/CD', 'CD,CR,AT,EM'],
+  Klee: ['DPS', 'A Day Carved from Rising Winds', 'AT|ED|CR/CD', 'CD,CR,AT,ER'],
   Kokomi: ['Support', 'Ocean-Hued Clam', 'HP|ED|HB/HP', 'HP,ER,EM'],
   'Lan Yan': ['Support', 'Viridescent Venerer', 'AT/ER|AT|AT', 'AT,ER,EM'],
   Lauma: ['Support', 'Deepwood Memories', 'EM|EM|EM/CR/CD', 'EM,CR,CD,ER'],
@@ -291,8 +291,8 @@ function hubHome() {
   hub.back.hidden = true;
   const wrapper = el('div');
   wrapper.append(el('p', 'hub-intro', hubText(
-    'Wybierz żywioł, żeby zobaczyć wszystkie postacie i polecane buildy artefaktów.',
-    'Pick an element to see every character and recommended artifact builds.'
+    'Wybierz żywioł, żeby zobaczyć postacie z aktualnych danych Enka i dostępne wskazówki buildów artefaktów.',
+    'Pick an element to see characters from the current Enka data and available artifact-build guidance.'
   )));
   const grid = el('div', 'hub-elements');
   HUB_ELEMENTS.forEach((element, index) => {
