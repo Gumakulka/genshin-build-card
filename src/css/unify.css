@@ -1,31 +1,43 @@
-/* Spójny wygląd całej strony po ekranie startowym: te same powierzchnie, ramki, zaokrąglenia i kolor akcentu co w karcie postaci.
-   Ładowany jako ostatni, więc nadpisuje starsze reguły. */
+/* Spójny, wyrazisty wygląd całej strony po ekranie startowym: te same powierzchnie, gradientowe ramki, kolor akcentu żywiołu
+   i czcionka nagłówkowa co w karcie postaci. Ładowany jako ostatni, więc nadpisuje starsze reguły. */
 :root {
   --radius: 16px;
   --radius-sm: 10px;
-  --line: color-mix(in srgb, var(--accent) 26%, var(--border));
-  --surface: color-mix(in srgb, var(--card) 92%, transparent);
+  --line: color-mix(in srgb, var(--accent) 30%, var(--border));
   --surface-2: color-mix(in srgb, var(--card-2) 92%, transparent);
 }
 
-/* Nagłówki sekcji: akcent z lewej i cienka linia, która znika w prawo. */
+body {
+  background:
+    radial-gradient(900px 520px at 12% -8%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 62%),
+    radial-gradient(800px 480px at 100% 12%, var(--glow-2), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+#result > * + * {
+  margin-top: 22px;
+}
+
+/* Nagłówki sekcji */
 h3.section-title {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 34px 0 14px;
-  font-size: 0.9rem;
-  letter-spacing: 0.16em;
+  margin: 38px 0 14px;
+  font-size: 1.05rem;
+  letter-spacing: 0.14em;
   color: var(--fg);
 }
 
 h3.section-title::before {
   content: '';
   flex: none;
-  width: 4px;
-  height: 1.1em;
+  width: 9px;
+  height: 9px;
   background: var(--accent);
-  border-radius: 2px;
+  box-shadow: 0 0 12px var(--accent);
+  transform: rotate(45deg);
 }
 
 h3.section-title::after {
@@ -39,12 +51,15 @@ h3.section-title::after {
   animation: none;
 }
 
-/* Profil gracza */
+/* Profil gracza: duża karta z wizytówką */
 .profile {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.25);
+  min-height: 190px;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 75%, transparent), color-mix(in srgb, var(--accent) 6%, transparent) 45%, color-mix(in srgb, var(--accent) 40%, transparent)) border-box;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 0 50px color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
 .profile::before,
@@ -54,66 +69,109 @@ h3.section-title::after {
 }
 
 .banner {
-  opacity: 0.4;
-  -webkit-mask-image: linear-gradient(270deg, #000 25%, transparent 90%);
-  mask-image: linear-gradient(270deg, #000 25%, transparent 90%);
+  opacity: 0.9;
+  -webkit-mask-image: linear-gradient(270deg, #000 35%, transparent 95%);
+  mask-image: linear-gradient(270deg, #000 35%, transparent 95%);
 }
 
 .profile-body {
-  padding: 22px;
+  gap: 22px;
+  padding: 28px;
 }
 
 .profile-body img.avatar {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent), 0 8px 24px rgba(0, 0, 0, 0.35);
+  width: 120px;
+  height: 120px;
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 22%, transparent), 0 0 30px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .profile h2 {
-  font-size: 1.7rem;
+  font-size: 2.2rem;
   letter-spacing: 0.04em;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
 }
 
-/* Chipy z danymi konta i księgi postaci */
-.chip {
-  padding: 6px 12px;
-  background: var(--surface-2);
-  border-radius: var(--radius-sm);
+/* Dane konta i księgi postaci jako kafelki z dużą liczbą */
+.chips {
+  gap: 10px;
 }
 
-.chip .ico {
+.chips .chip {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 112px;
+  padding: 12px 16px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 14%, var(--card-2)), var(--card-2) 72%);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.chips .chip .ico {
+  width: 1.25em;
+  height: 1.25em;
+  margin-bottom: 4px;
   color: var(--accent);
 }
 
-.chip .chip-value {
+.chips .chip .chip-value {
+  order: 1;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  line-height: 1.1;
   color: var(--fg);
 }
 
-/* Lista postaci */
+.chips .chip .chip-label {
+  order: 2;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Lista postaci jako karty portretowe z tłem rzadkości */
 .characters {
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 16px;
 }
 
 .character {
-  padding: 14px 8px 12px;
-  border-width: 1px;
-  border-radius: var(--radius);
+  position: relative;
+  padding: 16px 8px 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--card-2), var(--card));
+  border: 1px solid var(--line);
+  border-radius: 18px;
 }
 
 .character.rarity-5 {
-  border-color: color-mix(in srgb, #e0a93b 55%, var(--border));
+  background: radial-gradient(120% 90% at 50% 0%, rgba(224, 169, 59, 0.42), transparent 62%), linear-gradient(180deg, #2a1f10, var(--card));
+  border-color: rgba(224, 169, 59, 0.6);
 }
 
 .character.rarity-4 {
-  border-color: color-mix(in srgb, #a67ad6 55%, var(--border));
+  background: radial-gradient(120% 90% at 50% 0%, rgba(166, 122, 214, 0.4), transparent 62%), linear-gradient(180deg, #221a2e, var(--card));
+  border-color: rgba(166, 122, 214, 0.6);
 }
 
 .character img {
-  border: 2px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  width: 92px;
+  height: 92px;
+  background: transparent;
+  border: 0;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.55));
+}
+
+.character .name {
+  margin-top: 6px;
+  font-family: var(--font-display);
+  letter-spacing: 0.03em;
 }
 
 .character.selected {
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), 0 8px 26px color-mix(in srgb, var(--accent) 28%, transparent);
+  box-shadow: 0 0 0 2px var(--accent), 0 12px 34px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .character-filter {
@@ -122,7 +180,7 @@ h3.section-title::after {
   border-radius: var(--radius-sm);
 }
 
-/* Panel szczegółów: sama otoczka znika, bo karta postaci ma własną ramkę, a panele pod nią mają swoje. */
+/* Szczegóły postaci: otoczka znika, a zakładki prowadzą przez części */
 .detail {
   padding: 0;
   background: transparent;
@@ -148,15 +206,59 @@ h3.section-title::after {
   gap: 16px;
 }
 
-.panel {
-  padding: 14px 16px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+.detail-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 16px 0 4px;
+  padding: 5px;
+  overflow-x: auto;
+  background: var(--card-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  scrollbar-width: none;
+}
+
+.detail-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.detail-tab {
+  flex: 1 0 auto;
+  min-height: 40px;
+  padding: 8px 18px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+}
+
+.detail-tab:hover {
+  color: var(--fg);
+}
+
+.detail-tab.active {
+  color: #15110b;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 70%, #fff), var(--accent));
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* Panele i karty artefaktów z gradientową ramką */
+.panel,
+.artifact-card {
+  background:
+    linear-gradient(var(--card-2), var(--card-2)) padding-box,
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 55%, transparent), color-mix(in srgb, var(--accent) 6%, transparent) 45%, color-mix(in srgb, var(--accent) 32%, transparent)) border-box;
+  border: 1px solid transparent;
   border-radius: var(--radius);
 }
 
-.panel:hover {
-  border-color: var(--line);
+.panel {
+  padding: 16px 18px;
 }
 
 .panel h5 {
@@ -175,11 +277,6 @@ h3.section-title::after {
   height: 6px;
   background: var(--accent);
   transform: rotate(45deg);
-}
-
-.artifact-card {
-  background: var(--surface-2);
-  border-radius: 14px;
 }
 
 .artifact-card.weakest {
@@ -207,12 +304,13 @@ h3.section-title::after {
 
 .action-button:hover,
 .rv-toggle:hover {
-  background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface-2));
   border-color: var(--accent);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
 .rv-toggle.on {
-  background: color-mix(in srgb, var(--accent) 22%, var(--surface-2));
+  background: color-mix(in srgb, var(--accent) 24%, var(--surface-2));
   border-color: var(--accent);
 }
 
@@ -220,7 +318,7 @@ h3.section-title::after {
 table.compare {
   width: 100%;
   overflow: hidden;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-collapse: separate;
   border-spacing: 0;
   border-radius: var(--radius-sm);
@@ -237,4 +335,38 @@ table.compare th {
 table.compare td.better {
   font-weight: 700;
   color: var(--accent);
+}
+
+@media (max-width: 760px) {
+  .profile-body {
+    padding: 20px 16px;
+  }
+
+  .profile-body img.avatar {
+    width: 96px;
+    height: 96px;
+  }
+
+  .profile h2 {
+    font-size: 1.7rem;
+  }
+
+  .characters {
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: 10px;
+  }
+
+  .character img {
+    width: 68px;
+    height: 68px;
+  }
+
+  .chips .chip {
+    min-width: 96px;
+    padding: 10px 12px;
+  }
+
+  .detail-tab {
+    padding: 8px 14px;
+  }
 }

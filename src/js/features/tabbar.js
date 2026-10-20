@@ -12,6 +12,7 @@ function tabbarSearch() {
 }
 
 function tabbarCard() {
+  if (typeof detailTabsShow === 'function') detailTabsShow('card');
   const target = result.querySelector('.sc') || result.querySelector('.characters');
   if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
