@@ -1,4 +1,7 @@
 /* Ostatnio sprawdzani i ulubieni gracze. */
+/* Ten sam limit co przy wczytywaniu ulubionych z pliku (MENU_MAX_IMPORT w menu.js), żeby dodanie jednego gracza nie kasowało reszty. */
+const FAVORITES_LIMIT = 200;
+
 function rememberPlayer(uid, nickname) {
   const before = state.recent.map((item) => item.uid);
   state.recent = [{ uid, nickname }].concat(state.recent.filter((item) => item.uid !== uid)).slice(0, 5);
@@ -42,7 +45,7 @@ function toggleFavorite(data) {
   if (isFavorite(uid)) {
     state.favorites = state.favorites.filter((item) => item.uid !== uid);
   } else {
-    state.favorites = state.favorites.concat({ uid, nickname: data.playerInfo.nickname }).slice(-12);
+    state.favorites = state.favorites.concat({ uid, nickname: data.playerInfo.nickname }).slice(-FAVORITES_LIMIT);
   }
   saveJsonSetting('favorites', state.favorites);
   renderFavorites();

@@ -1,4 +1,4 @@
-/* Profil gracza: nagłówek, statystyki konta, akcje, wizytówki i historia zmian. */
+/* Profil gracza: nagłówek, statystyki konta, akcje i historia zmian. */
 function updateUrl(uid) {
   try {
     history.replaceState(null, '', '?uid=' + uid);
@@ -80,20 +80,6 @@ function buildActions(data) {
   });
   actions.append(copy, favorite);
   return actions;
-}
-
-function buildNamecards(info, store) {
-  const ids = info.showNameCardIdList || [];
-  if (!ids.length) return null;
-  const wrapper = el('section');
-  wrapper.append(el('h3', 'section-title', t('namecards')));
-  const list = el('div', 'namecards');
-  ids.forEach((id) => {
-    const icon = getNamecardIcon(id, store);
-    if (icon) list.append(createImage(icon, 'Namecard ' + id, 'namecard'));
-  });
-  wrapper.append(list);
-  return wrapper;
 }
 
 function buildHistory() {

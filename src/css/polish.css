@@ -112,11 +112,12 @@ button.sc-talent.active {
   overscroll-behavior: contain;
 }
 
-/* Przełącznik widoku skróconego. */
+/* Przełącznik widoku skróconego: w prawym dolnym rogu lewej kolumny, żeby nie nachodził na długie imię postaci u góry.
+   Podpis gracza obok ma zapas miejsca i zawija się, gdy jest za długi. */
 .sc .sc-left > .sc-toggle {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  right: 14px;
+  bottom: 14px;
   z-index: 3;
   min-height: 32px;
   padding: 4px 12px;
@@ -133,6 +134,11 @@ button.sc-talent.active {
 
 .sc .sc-toggle:hover {
   border-color: var(--accent);
+}
+
+.sc .sc-player {
+  max-width: calc(100% - 150px);
+  overflow-wrap: anywhere;
 }
 
 .sc.compact .sc-stats,

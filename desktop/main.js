@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, shell } = require('electron');
+const { app, BrowserWindow, Menu, shell, session } = require('electron');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -193,6 +193,10 @@ if (!app.requestSingleInstanceLock()) {
 
   app.whenReady().then(async () => {
     Menu.setApplicationMenu(null);
+    // Program niczego nie potrzebuje od systemu (kamera, lokalizacja, powiadomienia), a w oknie działa mapa z cudzej strony,
+    // więc wszystkie prośby o uprawnienia są odrzucane.
+    session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => callback(false));
+    session.defaultSession.setPermissionCheckHandler(() => false);
     const localUrl = await startServer();
     mainWindow = createWindow(localUrl || HOSTED_URL);
   });

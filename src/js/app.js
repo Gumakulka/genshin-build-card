@@ -86,9 +86,6 @@ function render() {
   const history = buildHistory();
   if (history) result.append(history);
 
-  const namecards = buildNamecards(data.playerInfo, store);
-  if (namecards) result.append(namecards);
-
   const characters = buildCharacters(data, store);
   if (characters) result.append(characters);
 
