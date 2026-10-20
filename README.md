@@ -82,11 +82,13 @@ Strona nie ma kont ani logowania. Ulubieni, historia i zapisane dane graczy zost
 
 ### Informacje prawne
 
-> **Projekt fanowski.** Genshin Build Card jest niezależnym projektem fanów i <ins>nie jest powiązany z HoYoverse</ins> ani przez nie wspierany.
+> **Projekt fanowski.** Genshin Build Card to niezależny projekt fanowski, który tworzy jedna osoba (Gumakulka). <ins>Nie jest powiązany z HoYoverse</ins> ani przez nie wspierany.
 >
 > Genshin Impact, nazwy, postacie i wszystkie grafiki z gry są własnością HoYoverse. Dane graczy pochodzą z publicznego interfejsu [Enka.Network](https://enka.network/). Kod programu jest na licencji MIT, a logo należy do autora.
 >
 > Wpisany UID jest wysyłany do Enka.Network przez serwer pośredniczący projektu, żeby pobrać dane gracza. Projekt niczego o Tobie nie zapisuje. Korzystasz ze strony na własną odpowiedzialność.
+>
+> Strona powstaje w wolnym czasie i rozwija ją jedna osoba, więc mogą zdarzać się błędy. Jeśli coś nie działa, zgłoś to w zakładce [Issues](https://github.com/Gumakulka/genshin-build-card/issues) na GitHubie.
 
 ---
 
@@ -167,8 +169,10 @@ There are no accounts or logins. Favorites, history and saved player data stay i
 
 ### Legal notice
 
-> **Fan project.** Genshin Build Card is an independent fan project and is <ins>not affiliated with or endorsed by HoYoverse</ins>.
+> **Fan project.** Genshin Build Card is an independent fan project made by one person (Gumakulka). It is <ins>not affiliated with or endorsed by HoYoverse</ins>.
 >
 > Genshin Impact, its names, characters and all artwork from the game are the property of HoYoverse. Player data comes from the public [Enka.Network](https://enka.network/) interface. The program code is MIT licensed, and the logo belongs to its author.
 >
 > The UID you enter is sent to Enka.Network through the project's proxy server to fetch the player's data. The project does not store anything about you. You use the site at your own risk.
+>
+> The site is built in spare time by one person, so bugs can happen. If something does not work, report it under [Issues](https://github.com/Gumakulka/genshin-build-card/issues) on GitHub.
