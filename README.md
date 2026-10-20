@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://gi.yatta.moe/assets/UI/namecard/UI_NameCardPic_Furina_P.png" alt="Genshin Build Card" width="100%">
+  <img src="build/logo.jpg" alt="Logo Genshin Build Card" width="180">
 </p>
 
 <h1 align="center">Genshin Build Card</h1>
