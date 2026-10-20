@@ -35,6 +35,8 @@ if (errors.length) {
   process.exit(1);
 }
 console.log('Checked ' + jsFiles.length + ' JavaScript files, ' + jsonFiles.length + ' JSON file(s), and ' + refs.length + ' HTML references.');
-const regression = spawnSync(process.execPath, [join(root, 'scripts/data-regression.mjs')], { stdio: 'inherit', timeout: 60000 });
-if (regression.error) console.error(regression.error);
-if (regression.status !== 0) process.exit(1);
+for (const name of ['data-regression.mjs', 'ui-regression.mjs']) {
+  const regression = spawnSync(process.execPath, [join(root, 'scripts', name)], { stdio: 'inherit', timeout: 60000 });
+  if (regression.error) console.error(regression.error);
+  if (regression.status !== 0) process.exit(1);
+}
