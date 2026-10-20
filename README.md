@@ -1,12 +1,8 @@
 <p align="center">
-  <img src="https://gi.yatta.moe/assets/UI/namecard/UI_NameCardPic_Furina_P.png" alt="Genshin Build Card" width="100%">
+  <img src="build/readme-banner.webp" alt="Genshin Build Card" width="100%">
 </p>
 
 <h1 align="center">Genshin Build Card</h1>
-
-<p align="center">
-  <img src="https://gi.yatta.moe/assets/UI/UI_Buff_Element_Fire.png" alt="Fire" width="36"> <img src="https://gi.yatta.moe/assets/UI/UI_Buff_Element_Water.png" alt="Water" width="36"> <img src="https://gi.yatta.moe/assets/UI/UI_Buff_Element_Grass.png" alt="Grass" width="36"> <img src="https://gi.yatta.moe/assets/UI/UI_Buff_Element_Electric.png" alt="Electric" width="36"> <img src="https://gi.yatta.moe/assets/UI/UI_Buff_Element_Ice.png" alt="Ice" width="36"> <img src="https://gi.yatta.moe/assets/UI/UI_Buff_Element_Wind.png" alt="Wind" width="36"> <img src="https://gi.yatta.moe/assets/UI/UI_Buff_Element_Rock.png" alt="Rock" width="36">
-</p>
 
 <p align="center">
   <a href="#polski">Polski</a> &nbsp;·&nbsp; <a href="#english">English</a> &nbsp;·&nbsp; <a href="https://gumakulka.github.io/genshin-build-card/">gumakulka.github.io/genshin-build-card</a>
