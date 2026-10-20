@@ -448,10 +448,6 @@
   color: var(--accent);
 }
 
-.sc + .codex .codex-banner {
-  display: none;
-}
-
 @media (max-width: 920px) {
   .sc {
     grid-template-columns: 1fr;

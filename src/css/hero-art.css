@@ -1,0 +1,36 @@
+/* Grafika postaci w tle strony startowej. */
+.hero {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero-art {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+  -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent);
+  mask-image: linear-gradient(180deg, #000 45%, transparent);
+}
+
+.hero-art.ready {
+  opacity: 0.3;
+}
+
+:root[data-theme='light'] .hero-art.ready {
+  opacity: 0.18;
+}
+
+.hero-art-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+}
+
+.hero-art-img.missing {
+  display: none;
+}

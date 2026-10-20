@@ -1,4 +1,4 @@
-/* Księga postaci: baner z wizytówką, dane z Project Amber, talenty z realnymi mnożnikami, konstelacje i brakujące materiały.
+/* Księga postaci: dane z Project Amber, talenty z realnymi mnożnikami, konstelacje i brakujące materiały.
    Wszystkie teksty trafiają do strony przez textContent, a znaczniki opisów są zamieniane na bezpieczne klasy. Ładowany po app.js. */
 const CODEX_MAX_LEVEL = 15;
 const CODEX_TARGET_LEVEL = 10;
@@ -124,26 +124,14 @@ function codexMissing(data, details, entries) {
   return { ascension, talents };
 }
 
-function codexBanner(data) {
-  const banner = el('div', 'codex-banner');
-  banner.dataset.element = data.element || '';
-  banner.append(codexImage(data.namecard ? codexNamecardUrls(data.namecard.icon) : [], '', 'codex-banner-img'));
-  const caption = el('div', 'codex-banner-caption');
-  caption.append(el('div', 'codex-banner-title', data.title || data.name));
-  if (data.constellation) caption.append(el('div', 'codex-banner-sub', data.constellation));
-  banner.append(caption, el('div', 'codex-banner-line'));
-  return banner;
-}
-
+/* Region, urodziny i ulubiona potrawa. */
 function codexInfo(data) {
   const row = el('div', 'chips codex-info');
   const place = data.native || data.region;
-  const voices = [data.cv && data.cv.jp ? data.cv.jp + ' (JP)' : '', data.cv && data.cv.en ? data.cv.en + ' (EN)' : ''].filter(Boolean).join(' · ');
   const birthday = codexBirthday(data.birthday);
 
   if (place) row.append(codexChip('map-pin', codexText('Region', 'Region'), place));
   if (birthday) row.append(codexChip('cake', codexText('Urodziny', 'Birthday'), birthday));
-  if (voices) row.append(codexChip('mic', codexText('Głos', 'Voice'), voices));
   if (data.food && data.food.name) {
     const food = codexChip('utensils', codexText('Potrawa', 'Special dish'), data.food.name);
     food.prepend(codexIcon(data.food.icon, data.food.name, 'codex-food-icon'));
@@ -200,7 +188,7 @@ function codexConstellations(data, unlocked) {
       button.classList.add('active');
       const description = el('div', 'codex-desc');
       description.append(codexMarkup(entry.description));
-      detail.replaceChildren(el('div', 'codex-const-name', 'C' + (index + 1) + ' · ' + entry.name), description);
+      detail.replaceChildren(el('div', 'codex-const-name', 'C' + (index + 1) + ' \u00b7 ' + entry.name), description);
     });
     buttons.push(button);
     row.append(button);
@@ -220,7 +208,7 @@ function codexMaterials(group, data) {
     const item = data.items[id] || { name: id, icon: '' };
     const cell = el('div', 'codex-mat');
     cell.title = item.name;
-    cell.append(codexIcon(item.icon, item.name), el('span', 'codex-mat-count', '×' + codexNumber(group.items[id])));
+    cell.append(codexIcon(item.icon, item.name), el('span', 'codex-mat-count', '\u00d7' + codexNumber(group.items[id])));
     grid.append(cell);
   });
   wrapper.append(grid);
@@ -269,7 +257,7 @@ function codexRender(box, data, details, character) {
   link.rel = 'noopener noreferrer';
   source.append(document.createTextNode(codexText('Opisy i grafiki: ', 'Descriptions and art: ')), link);
 
-  box.replaceChildren(codexBanner(data), codexInfo(data), grid, source);
+  box.replaceChildren(codexInfo(data), grid, source);
 }
 
 function buildCodexPanel(details, character) {
