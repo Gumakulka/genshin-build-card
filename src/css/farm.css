@@ -1,0 +1,332 @@
+/* Plan farmienia: okno na środku ekranu (na telefonie wysuwa się od dołu), z kartą „dziś”, kafelkami serii i tabelą tygodnia.
+   Kolory, ramki i animacje są takie same jak w reszcie strony. */
+body.farm-open {
+  overflow: hidden;
+}
+
+.farm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: radial-gradient(900px 520px at 50% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%), rgba(0, 0, 0, 0.62);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+
+.farm-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease;
+}
+
+.farm-dialog {
+  display: grid;
+  gap: 14px;
+  width: min(760px, 100%);
+  max-height: calc(100dvh - 32px);
+  padding: 22px 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 70%, transparent), color-mix(in srgb, var(--accent) 6%, transparent) 45%, color-mix(in srgb, var(--accent) 38%, transparent)) border-box;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), 0 0 60px color-mix(in srgb, var(--accent) 14%, transparent);
+  transform: translateY(18px) scale(0.98);
+  transition: transform 0.4s var(--ease, ease);
+}
+
+.farm-overlay.open .farm-dialog {
+  transform: none;
+}
+
+.farm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.farm-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+.farm-title .ico {
+  width: 1.2em;
+  height: 1.2em;
+  color: var(--accent);
+  filter: drop-shadow(0 0 8px var(--accent));
+}
+
+.farm-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 16px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg);
+  cursor: pointer;
+  background: var(--card-2);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: 999px;
+}
+
+.farm-close:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.farm-close:focus-visible,
+.farm-server select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.farm-subtitle {
+  margin: -6px 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.farm-server {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.farm-server .ico {
+  color: var(--accent);
+}
+
+.farm-server select {
+  min-height: 40px;
+  padding: 8px 12px;
+  font: inherit;
+  color: var(--fg);
+  cursor: pointer;
+  background: var(--card-2);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: 10px;
+}
+
+.farm-server select:hover {
+  border-color: var(--accent);
+}
+
+.farm-today-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, var(--card-2)), var(--card-2) 70%);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border));
+  border-radius: 16px;
+}
+
+.farm-today-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.farm-today-head .ico {
+  flex: none;
+  width: 2em;
+  height: 2em;
+  color: var(--accent);
+  filter: drop-shadow(0 0 10px var(--accent));
+}
+
+.farm-today-day {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  text-transform: capitalize;
+}
+
+.farm-today-sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.farm-chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+  gap: 8px;
+}
+
+.farm-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: 12px;
+}
+
+.farm-chip small {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.farm-chip b {
+  font-size: 15px;
+  color: var(--accent);
+}
+
+.farm-scroll {
+  overflow-x: auto;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border));
+  border-radius: 14px;
+}
+
+.farm-table {
+  width: 100%;
+  font-size: 14px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.farm-table th,
+.farm-table td {
+  padding: 10px 14px;
+  text-align: center;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+
+.farm-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.farm-table th {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--card-2);
+}
+
+.farm-table th:first-child,
+.farm-table td.farm-region {
+  position: sticky;
+  left: 0;
+  text-align: left;
+}
+
+.farm-table td.farm-region {
+  font-weight: 700;
+  background: var(--card);
+}
+
+.farm-table th.farm-today {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, var(--card-2));
+}
+
+.farm-table td.farm-today {
+  font-weight: 700;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.farm-table tbody tr:hover td:not(.farm-region) {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.farm-badge {
+  display: block;
+  width: max-content;
+  margin: 3px auto 0;
+  padding: 1px 8px;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: #15110b;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+.farm-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.farm-dialog .guide-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .farm-overlay.open .farm-today-card {
+    animation: fx-rise 0.5s var(--ease, ease) backwards;
+  }
+
+  .farm-overlay.open .farm-chip {
+    animation: fx-pop 0.5s ease backwards;
+    animation-delay: calc(var(--i, 0) * 50ms + 150ms);
+  }
+
+  .farm-overlay.open .farm-table tr {
+    animation: fx-rise 0.45s var(--ease, ease) backwards;
+    animation-delay: calc(var(--i, 0) * 45ms + 250ms);
+  }
+
+  .farm-overlay.open .farm-badge {
+    animation: fx-glow 2.6s ease-in-out 0.8s infinite;
+  }
+}
+
+@media (max-width: 760px) {
+  .farm-overlay {
+    place-items: end center;
+    padding: 0;
+  }
+
+  .farm-dialog {
+    max-height: 90dvh;
+    padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+    border-radius: 20px 20px 0 0;
+    transform: translateY(40px);
+  }
+
+  .farm-title {
+    font-size: 1.2rem;
+  }
+
+  .farm-table th,
+  .farm-table td {
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+
+  .farm-chips {
+    grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+  }
+}
