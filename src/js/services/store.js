@@ -1,160 +1,144 @@
-/* Dane statyczne Enki: postacie, awatary, wizytówki i nazwy. */
+/* Dane statyczne Enki. Błąd pamięci podręcznej nie blokuje pobierania z sieci. */
 let storePromise = null;
-
 const STORE_CACHE_NAME = 'genshin-store-v2';
 const STORE_CACHE_MAX_AGE = 24 * 60 * 60 * 1000;
+const STORE_TIMEOUT_MS = 15000;
+const STORE_ID = /^\d{1,12}$/;
+
+function storeRecord(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+async function storeNetwork(url) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), STORE_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, { signal: controller.signal, credentials: 'omit' });
+    const body = await response.arrayBuffer();
+    return new Response(body, { status: response.status, statusText: response.statusText, headers: response.headers });
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 async function cachedFetch(url) {
-  if (typeof caches === 'undefined') return fetch(url);
-
-  const cache = await caches.open(STORE_CACHE_NAME);
-  const cached = await cache.match(url);
-
+  let cache = null;
+  let cached = null;
+  try {
+    if (typeof caches !== 'undefined') {
+      cache = await caches.open(STORE_CACHE_NAME);
+      cached = await cache.match(url);
+    }
+  } catch (error) {
+    console.warn('Store cache unavailable:', error);
+  }
   if (cached) {
     const fetchedAt = Number(cached.headers.get('x-fetched-at') || 0);
-    const fresh = fetchedAt && Date.now() - fetchedAt < STORE_CACHE_MAX_AGE;
-
-    if (fresh) return cached;
-
-    try {
-      const response = await fetch(url);
-      if (response.ok) {
-        const copy = response.clone();
-        const headers = new Headers(copy.headers);
-        headers.set('x-fetched-at', String(Date.now()));
-        await cache.put(url, new Response(copy.body, { status: copy.status, statusText: copy.statusText, headers }));
-        return response;
-      }
-    } catch (error) {
-      console.warn('Store refresh failed, using cached data:', url, error);
-    }
-
-    return cached;
+    if (fetchedAt > 0 && Date.now() - fetchedAt < STORE_CACHE_MAX_AGE) return cached;
   }
-
-  const response = await fetch(url);
-  if (response.ok) {
-    const headers = new Headers(response.headers);
-    headers.set('x-fetched-at', String(Date.now()));
-    await cache.put(url, new Response(response.clone().body, { status: response.status, statusText: response.statusText, headers }));
+  let response;
+  try {
+    response = await storeNetwork(url);
+  } catch (error) {
+    if (cached) return cached;
+    throw error;
+  }
+  if (!response.ok) return cached || response;
+  if (cache) {
+    try {
+      const copy = response.clone();
+      const headers = new Headers(copy.headers);
+      headers.set('x-fetched-at', String(Date.now()));
+      await cache.put(url, new Response(copy.body, { status: copy.status, statusText: copy.statusText, headers }));
+    } catch (error) {
+      console.warn('Store cache write skipped:', error);
+    }
   }
   return response;
 }
 
-function fetchJson(name) {
-  return cachedFetch(STORE_URL + name)
-    .then((response) => {
-      if (!response.ok) throw new Error('HTTP ' + response.status);
-      return response.json();
-    })
-    .catch((error) => {
-      console.error('Could not load ' + name, error);
-      return null;
-    });
+async function fetchJson(name) {
+  try {
+    const response = await cachedFetch(STORE_URL + name);
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const data = await response.json();
+    return storeRecord(data) ? data : null;
+  } catch (error) {
+    console.error('Could not load ' + name, error);
+    return null;
+  }
 }
 
 function normIcon(value) {
   if (typeof value !== 'string') return '';
-  return value.replace(/^\/ui\//i, '').replace(/\.(png|jpe?g|webp)$/i, '');
+  const name = value.replace(/^\/ui\//i, '').replace(/\.(png|jpe?g|webp)$/i, '');
+  return /^[A-Za-z0-9_]{1,120}$/.test(name) ? name : '';
 }
 
 function normalizeCostume(costume) {
-  if (!costume || typeof costume !== 'object') return null;
-
-  return {
-    ...costume,
-    sideIconName: normIcon(costume.sideIconName || costume.SideIcon),
-    icon: normIcon(costume.icon || costume.Icon),
-    art: normIcon(costume.art || costume.Art)
-  };
+  if (!storeRecord(costume)) return null;
+  return { ...costume, sideIconName: normIcon(costume.sideIconName || costume.SideIcon), icon: normIcon(costume.icon || costume.Icon), art: normIcon(costume.art || costume.Art) };
 }
 
 function normalizeCostumes(value) {
-  const result = {};
-
+  const result = Object.create(null);
   if (Array.isArray(value)) {
     value.forEach((costume, index) => {
+      const id = String(costume && costume.id !== undefined ? costume.id : index);
       const normalized = normalizeCostume(costume);
-      if (normalized) result[costume && costume.id !== undefined ? costume.id : index] = normalized;
+      if (STORE_ID.test(id) && normalized) result[id] = normalized;
     });
-  } else if (value && typeof value === 'object') {
+  } else if (storeRecord(value)) {
     Object.keys(value).forEach((id) => {
+      if (!STORE_ID.test(id)) return;
       const normalized = normalizeCostume(value[id]);
       if (normalized) result[id] = normalized;
     });
   }
-
   return result;
 }
 
 function normalizeAvatars(data) {
-  const characters = {};
-
-  Object.keys(data || {}).forEach((id) => {
+  const characters = Object.create(null);
+  Object.keys(storeRecord(data) ? data : {}).forEach((id) => {
     const source = data[id];
-    if (!source || String(id).includes('-')) return;
-
-    const character = {
-      ...source,
-      SideIconName: normIcon(source.SideIconName || source.SideIcon),
-      Icon: normIcon(source.Icon || source.icon),
-      Art: normIcon(source.Art || source.art),
-      Consts: source.Consts || [],
-      Skills: source.Skills || [],
-      Costumes: normalizeCostumes(source.Costumes)
-    };
-
-    if (String(id) === '10000062') delete character.NameTextMapHash;
+    if (!STORE_ID.test(id) || !storeRecord(source)) return;
+    const character = { ...source, SideIconName: normIcon(source.SideIconName || source.SideIcon), Icon: normIcon(source.Icon || source.icon), Art: normIcon(source.Art || source.art), Consts: source.Consts || [], Skills: source.Skills || [], Costumes: normalizeCostumes(source.Costumes) };
+    if (id === '10000062') delete character.NameTextMapHash;
     characters[id] = character;
   });
-
   return characters;
 }
 
 function normalizePfps(data) {
-  const result = {};
-
-  Object.keys(data || {}).forEach((id) => {
+  const result = Object.create(null);
+  Object.keys(storeRecord(data) ? data : {}).forEach((id) => {
     const source = data[id];
-    if (!source) return;
-    result[id] = { ...source, iconPath: normIcon(source.iconPath || source.IconPath) };
+    if (STORE_ID.test(id) && storeRecord(source)) result[id] = { ...source, iconPath: normIcon(source.iconPath || source.IconPath) };
   });
-
   return result;
 }
 
 function normalizeNamecards(data) {
-  const result = {};
-
-  Object.keys(data || {}).forEach((id) => {
+  const result = Object.create(null);
+  Object.keys(storeRecord(data) ? data : {}).forEach((id) => {
     const source = data[id];
-    if (!source) return;
-    result[id] = { ...source, icon: normIcon(source.icon || source.Icon) };
+    if (STORE_ID.test(id) && storeRecord(source)) result[id] = { ...source, icon: normIcon(source.icon || source.Icon) };
   });
-
   return result;
 }
 
 function emptyStore() {
-  return { characters: {}, pfps: {}, namecards: {}, loc: {} };
+  return { characters: Object.create(null), pfps: Object.create(null), namecards: Object.create(null), loc: {} };
 }
 
 function loadStore() {
   if (!storePromise) {
-    storePromise = Promise.all([
-      fetchJson('avatars.json'),
-      fetchJson('pfps.json'),
-      fetchJson('namecards.json'),
-      fetchJson('locs.json')
-    ]).then(([avatars, pfps, namecards, locs]) => {
+    storePromise = Promise.all(['avatars.json', 'pfps.json', 'namecards.json', 'locs.json'].map(fetchJson)).then(([avatars, pfps, namecards, locs]) => {
       const characters = normalizeAvatars(avatars);
       const normalizedPfps = normalizePfps(pfps);
       const normalizedNamecards = normalizeNamecards(namecards);
-
-      if (!Object.keys(characters).length || !Object.keys(normalizedPfps).length || !Object.keys(normalizedNamecards).length) {
-        storePromise = null;
-      }
-
+      if (!Object.keys(characters).length || !Object.keys(normalizedPfps).length || !Object.keys(normalizedNamecards).length || !locs) storePromise = null;
       return { characters, pfps: normalizedPfps, namecards: normalizedNamecards, loc: locs || {} };
     }).catch((error) => {
       console.error('Could not load Enka store', error);
@@ -162,16 +146,14 @@ function loadStore() {
       return emptyStore();
     });
   }
-
   return storePromise;
 }
 
 function localized(hash, store) {
   if (hash === undefined || hash === null) return null;
-
   const loc = store.loc || {};
   const table = loc[state.lang] || loc.en || loc;
-  const value = table ? table[String(hash)] : null;
-
+  const key = String(hash);
+  const value = table && Object.prototype.hasOwnProperty.call(table, key) ? table[key] : null;
   return typeof value === 'string' ? value : null;
 }
