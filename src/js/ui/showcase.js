@@ -1,6 +1,8 @@
 /* Karta postaci w stylu gabloty: grafika postaci, konstelacje, talenty, broń, statystyki i artefakty w jednym widoku.
-   Kolor całej strony zależy od żywiołu otwartej postaci. Dane z Enki, uzupełniane później grafikami z Project Amber. Ładowany po codex.js. */
+   Kolor całej strony zależy od żywiołu otwartej postaci. Dane z Enki, uzupełniane później grafikami z Project Amber.
+   Konstelacje i talenty są przyciskami: dotknięcie pokazuje opis, bo na telefonie nie ma dymków po najechaniu. Ładowany po codex.js. */
 const SHOWCASE_SPLASH = IMG_URL + 'UI_Gacha_AvatarImg_';
+const SHOWCASE_COMPACT_KEY = 'compact';
 const SHOWCASE_ELEMENTS = ['Fire', 'Water', 'Grass', 'Electric', 'Ice', 'Wind', 'Rock'];
 const SHOWCASE_PROPS = {
   FIGHT_PROP_HP: 'HP',
@@ -20,6 +22,12 @@ const SHOWCASE_PROPS = {
 
 function showcaseText(pl, en) {
   return state.lang === 'pl' ? pl : en;
+}
+
+function showcaseCompact() {
+  const saved = loadSetting(SHOWCASE_COMPACT_KEY, '');
+  if (saved) return saved === '1';
+  return Boolean(window.matchMedia && window.matchMedia('(max-width: 760px)').matches);
 }
 
 function showcaseProp(prop) {
@@ -63,13 +71,59 @@ function showcaseHeader(details, character, store, data, refs) {
   return head;
 }
 
+function showcaseButton(className, label, info, refs) {
+  const node = el('button', className);
+  node.type = 'button';
+  node.title = label;
+  node.setAttribute('aria-label', label);
+  node.info = info;
+  node.addEventListener('click', () => showcaseShowInfo(refs, node));
+  return node;
+}
+
+function showcaseShowInfo(refs, node) {
+  const wasActive = node.classList.contains('active');
+  refs.consts.concat(refs.talents).forEach((other) => other.classList.remove('active'));
+
+  if (wasActive) {
+    refs.info.hidden = true;
+    return;
+  }
+
+  node.classList.add('active');
+  const info = node.info || {};
+  const head = el('div', 'sc-info-head');
+  head.append(el('strong', '', info.title || ''), el('span', 'sc-info-meta', info.meta || ''));
+  const body = el('div', 'sc-info-body');
+
+  if (info.rows && info.rows.length) {
+    const table = el('div', 'sc-info-rows');
+    info.rows.forEach(([label, value]) => {
+      const row = el('div', 'sc-info-row');
+      row.append(el('span', '', label), el('b', '', value));
+      table.append(row);
+    });
+    body.append(table);
+  }
+
+  if (info.text) {
+    const text = el('div', 'sc-info-text');
+    text.append(codexMarkup(info.text));
+    body.append(text);
+  }
+
+  refs.info.replaceChildren(head, body);
+  refs.info.hidden = false;
+}
+
 function showcaseConsts(unlocked, refs) {
   const column = el('div', 'sc-consts');
   refs.consts = [];
   for (let index = 0; index < 6; index += 1) {
-    const node = el('span', 'sc-const' + (index < unlocked ? ' on' : ''));
-    node.title = 'C' + (index + 1);
-    node.append(icon(index < unlocked ? 'sparkles' : 'lock'));
+    const open = index < unlocked;
+    const status = open ? showcaseText('odblokowana', 'unlocked') : showcaseText('zablokowana', 'locked');
+    const node = showcaseButton('sc-const' + (open ? ' on' : ''), 'C' + (index + 1) + ' (' + status + ')', { title: 'C' + (index + 1), meta: status, text: '', rows: [] }, refs);
+    node.append(icon(open ? 'sparkles' : 'lock'));
     refs.consts.push(node);
     column.append(node);
   }
@@ -88,8 +142,8 @@ function showcaseTalents(details, character, refs) {
     const base = Number(levels[id]);
     if (!Number.isFinite(base)) return;
     const bonus = Number(extra[proud[id]]) || 0;
-    const node = el('span', 'sc-talent' + (bonus ? ' boosted' : ''));
-    node.title = 'Lv. ' + (base + bonus) + (bonus ? ' (' + base + '+' + bonus + ')' : '');
+    const label = 'Lv. ' + (base + bonus) + (bonus ? ' (' + base + '+' + bonus + ')' : '');
+    const node = showcaseButton('sc-talent' + (bonus ? ' boosted' : ''), label, { title: showcaseText('Talent', 'Talent'), meta: label, text: '', rows: [] }, refs);
     node.append(el('span', 'sc-talent-level', String(base + bonus)));
     refs.talents.push(node);
     column.append(node);
@@ -161,12 +215,49 @@ function showcaseSets(items, store) {
   return box;
 }
 
+/* Liczba kropek to szacunek, z ilu ulepszeń składa się podstatystyka (wartość podzielona przez największe możliwe ulepszenie). */
+function showcasePips(prop, value) {
+  const max = typeof MAX_ROLLS !== 'undefined' ? MAX_ROLLS[prop] : 0;
+  const box = el('span', 'sc-pips');
+  if (!max) return box;
+  const count = Math.max(1, Math.min(6, Math.ceil(Number(value) / max - 0.02)));
+  box.title = '\u2248 ' + count + showcaseText(' ulepszeń', ' rolls');
+  for (let index = 0; index < count; index += 1) box.append(el('i'));
+  return box;
+}
+
+function showcaseCritValue(items) {
+  let total = 0;
+  getArtifacts(items).forEach((item) => {
+    (item.flat.reliquarySubstats || []).forEach((raw) => {
+      const stat = statLine(raw);
+      if (!stat) return;
+      if (stat.prop === 'FIGHT_PROP_CRITICAL') total += 2 * Number(stat.value);
+      else if (stat.prop === 'FIGHT_PROP_CRITICAL_HURT') total += Number(stat.value);
+    });
+  });
+  return total;
+}
+
 function showcaseArtifacts(items) {
   const wrapper = el('div', 'sc-arts');
+  const pieces = getArtifacts(items);
+  const scores = pieces.map((item) => artifactRv(item.flat));
+  const top = Math.max(...scores);
+  const bottom = Math.min(...scores);
+  const ranked = pieces.length >= 3 && top > bottom;
 
-  getArtifacts(items).forEach((item) => {
+  pieces.forEach((item, position) => {
     const flat = item.flat;
     const row = el('div', 'sc-art');
+    if (ranked && scores[position] === top) {
+      row.classList.add('best');
+      row.append(el('span', 'sc-tag', showcaseText('Najlepszy', 'Best')));
+    } else if (ranked && scores[position] === bottom) {
+      row.classList.add('weak');
+      row.append(el('span', 'sc-tag', showcaseText('Do poprawy', 'Weakest')));
+    }
+
     const left = el('div', 'sc-art-left');
     const picture = el('div', 'sc-art-icon');
     picture.append(createImage(flat.icon, 'Artifact', 'sc-art-img'), el('span', 'sc-art-level', '+' + (item.reliquary && item.reliquary.level ? item.reliquary.level - 1 : 0)));
@@ -176,7 +267,7 @@ function showcaseArtifacts(items) {
     if (main && main.prop) {
       left.append(el('div', 'sc-main-value', formatStat(main.prop, main.value)), el('div', 'sc-main-label', showcaseProp(main.prop)));
     }
-    left.append(el('div', 'sc-stars', '★'.repeat(flat.rankLevel || 5)), el('div', 'sc-rv', 'RV ' + artifactRv(flat).toFixed(0) + '%'));
+    left.append(el('div', 'sc-stars', '\u2605'.repeat(flat.rankLevel || 5)), el('div', 'sc-rv', 'RV ' + scores[position].toFixed(0) + '%'));
 
     const subs = el('div', 'sc-subs');
     (flat.reliquarySubstats || []).forEach((raw) => {
@@ -184,7 +275,9 @@ function showcaseArtifacts(items) {
       if (!stat || !stat.prop) return;
       const crit = stat.prop === 'FIGHT_PROP_CRITICAL' || stat.prop === 'FIGHT_PROP_CRITICAL_HURT';
       const cell = el('div', 'sc-sub' + (crit ? ' crit' : ''));
-      cell.append(el('span', 'sc-sub-label', showcaseProp(stat.prop)), el('span', 'sc-sub-value', '+' + formatStat(stat.prop, stat.value)));
+      const label = el('span', 'sc-sub-label', showcaseProp(stat.prop));
+      label.append(showcasePips(stat.prop, stat.value));
+      cell.append(label, el('span', 'sc-sub-value', '+' + formatStat(stat.prop, stat.value)));
       subs.append(cell);
     });
 
@@ -207,15 +300,38 @@ function buildShowcase(details, character, data, store) {
   art.append(codexImage(urls, '', 'sc-splash-img'));
   const bottom = el('div', 'sc-bottom');
   bottom.append(showcaseConsts((details.talentIdList || []).length, refs), showcaseTalents(details, character, refs));
-  const player = el('div', 'sc-player', (data.playerInfo.nickname || '') + ' · ' + data.uid);
+  const player = el('div', 'sc-player', (data.playerInfo.nickname || '') + ' \u00b7 ' + data.uid);
   left.append(art, showcaseHeader(details, character, store, data, refs), bottom, player);
 
   const middle = el('div', 'sc-mid');
   const weapon = showcaseWeapon(items, store);
   if (weapon) middle.append(weapon);
-  middle.append(showcaseStats(details), showcaseSets(items, store));
+  const critValue = el('div', 'sc-cv');
+  critValue.title = showcaseText('2 \u00d7 CRIT Rate + CRIT DMG z podstatystyk artefakt\u00f3w', '2 \u00d7 CRIT Rate + CRIT DMG from artifact substats');
+  critValue.append(el('span', '', 'Crit Value'), el('b', '', showcaseCritValue(items).toFixed(1)));
+  middle.append(showcaseStats(details), showcaseSets(items, store), critValue);
 
-  card.append(refs.background, left, middle, showcaseArtifacts(items));
+  refs.info = el('div', 'sc-info');
+  refs.info.hidden = true;
+  refs.info.setAttribute('aria-live', 'polite');
+
+  const toggle = el('button', 'sc-toggle');
+  toggle.type = 'button';
+  const applyCompact = (compact) => {
+    card.classList.toggle('compact', compact);
+    toggle.textContent = compact ? showcaseText('Pełny widok', 'Full view') : showcaseText('Widok skrócony', 'Compact view');
+    toggle.setAttribute('aria-pressed', String(compact));
+  };
+  applyCompact(showcaseCompact());
+  toggle.addEventListener('click', () => {
+    const next = !card.classList.contains('compact');
+    saveSetting(SHOWCASE_COMPACT_KEY, next ? '1' : '0');
+    applyCompact(next);
+  });
+  left.append(toggle);
+
+  card.append(refs.background, left, middle, showcaseArtifacts(items), refs.info);
+  card.setAttribute('aria-label', getCharacterName(character, store));
   return { card, refs };
 }
 
@@ -230,14 +346,31 @@ function showcaseEnrich(built, details, character) {
     data.constellations.slice(0, 6).forEach((entry, index) => {
       const node = built.refs.consts[index];
       if (!node) return;
+      const locked = index >= unlocked;
       node.title = 'C' + (index + 1) + ': ' + entry.name;
+      node.setAttribute('aria-label', node.title);
+      node.info = {
+        title: 'C' + (index + 1) + ' \u00b7 ' + entry.name,
+        meta: locked ? showcaseText('zablokowana', 'locked') : showcaseText('odblokowana', 'unlocked'),
+        text: entry.description,
+        rows: []
+      };
       node.replaceChildren(codexIcon(entry.icon, entry.name));
-      if (index >= unlocked) node.classList.add('locked');
+      if (locked) node.classList.add('locked');
     });
 
     codexLevels(data, details, character).slice(0, 3).forEach((entry, index) => {
       const node = built.refs.talents[index];
-      if (node) node.prepend(codexIcon(entry.talent.icon, entry.talent.name));
+      if (!node) return;
+      node.prepend(codexIcon(entry.talent.icon, entry.talent.name));
+      const total = entry.base === null ? null : Math.min(CODEX_MAX_LEVEL, entry.base + entry.bonus);
+      node.setAttribute('aria-label', entry.talent.name + (total === null ? '' : ' Lv. ' + total));
+      node.info = {
+        title: entry.talent.name,
+        meta: total === null ? '' : 'Lv. ' + total,
+        text: entry.talent.description,
+        rows: total === null ? [] : codexRows(entry.talent, total)
+      };
     });
   });
 }

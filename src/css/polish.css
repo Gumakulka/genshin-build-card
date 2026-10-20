@@ -1,4 +1,4 @@
-/* Drobne poprawki wyglądu po wydaniu karty postaci. */
+/* Poprawki wyglądu po wydaniu karty postaci: link, interaktywne ikony, panel opisu, szkielet ładowania, dolny pasek. */
 .codex-source a {
   font-weight: 600;
   color: var(--accent);
@@ -12,8 +12,358 @@
   text-decoration-color: currentColor;
 }
 
-.codex-source a:focus-visible {
+.codex-source a:focus-visible,
+.sc button:focus-visible,
+.tabbar-item:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 3px;
+  border-radius: 6px;
+}
+
+.sc .codex-elem {
+  color: #fff;
+}
+
+.sc .codex-key {
+  color: var(--accent);
+}
+
+/* Konstelacje i talenty są teraz przyciskami. */
+button.sc-const,
+button.sc-talent {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+button.sc-const:hover,
+button.sc-talent:hover {
+  transform: scale(1.08);
+}
+
+button.sc-const.active,
+button.sc-talent.active {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent), 0 0 16px var(--accent);
+}
+
+.sc-info {
+  grid-column: 1 / -1;
+  padding: 12px 18px 16px;
+  background: rgba(0, 0, 0, 0.5);
+  border-top: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.sc-info[hidden] {
+  display: none;
+}
+
+.sc-info-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.sc-info-head strong {
+  color: var(--accent);
+}
+
+.sc-info-meta {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sc-info-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 8px 24px;
+}
+
+.sc-info-body:not(:has(.sc-info-rows)) {
+  grid-template-columns: 1fr;
+}
+
+.sc-info-rows {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.sc-info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
+}
+
+.sc-info-text {
+  max-height: 220px;
+  overflow: auto;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: pre-line;
+  overscroll-behavior: contain;
+}
+
+/* Przełącznik widoku skróconego. */
+.sc .sc-left > .sc-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  min-height: 32px;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+}
+
+.sc .sc-toggle:hover {
+  border-color: var(--accent);
+}
+
+.sc.compact .sc-stats,
+.sc.compact .sc-sets,
+.sc.compact .sc-cv {
+  display: none;
+}
+
+.sc.compact .sc-left {
+  min-height: 330px;
+}
+
+.sc.compact {
+  min-height: 330px;
+}
+
+/* Najlepszy i najsłabszy artefakt, kropki ulepszeń, Crit Value. */
+.sc-art {
+  position: relative;
+}
+
+.sc-art.best {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.sc-art.weak {
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.sc-tag {
+  position: absolute;
+  top: -8px;
+  right: 10px;
+  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #15110b;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+.sc-art.weak .sc-tag {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.sc-pips {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.sc-pips i {
+  width: 4px;
+  height: 4px;
+  background: var(--accent);
+  border-radius: 50%;
+  opacity: 0.85;
+}
+
+.sc-cv {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.sc-cv b {
+  font-size: 16px;
+  color: var(--accent);
+}
+
+/* Szkielet ładowania. */
+.loading-skeleton {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.loading-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.skeleton {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.sk {
+  background: linear-gradient(90deg, var(--card-2) 25%, color-mix(in srgb, var(--accent) 14%, var(--card-2)) 50%, var(--card-2) 75%);
+  background-size: 200% 100%;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+}
+
+.sk-profile {
+  height: 110px;
+}
+
+.sk-row {
+  height: 54px;
+}
+
+.sk-card {
+  height: 300px;
+}
+
+@keyframes sk-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk {
+    animation: none;
+  }
+
+  button.sc-const:hover,
+  button.sc-talent:hover {
+    transform: none;
+  }
+}
+
+/* Podpowiedź o przesuwaniu palcem ma sens tylko na ekranach dotykowych. */
+@media (hover: hover) and (pointer: fine) {
+  .swipe-hint {
+    display: none;
+  }
+}
+
+/* Dolny pasek nawigacji tylko na telefonie. */
+.tabbar {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  body.has-tabbar {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .tabbar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+    background: color-mix(in srgb, var(--card) 88%, transparent);
+    border-top: 1px solid var(--border);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+
+  body.typing .tabbar {
+    display: none;
+  }
+
+  .tabbar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 56px;
+    padding: 4px 2px;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    background: none;
+    border: 0;
+    border-radius: 12px;
+  }
+
+  .tabbar-item:active:not(:disabled) {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+
+  .tabbar-item:disabled {
+    opacity: 0.4;
+  }
+
+  .tabbar-item .ico {
+    width: 22px;
+    height: 22px;
+  }
+
+  .sc-const,
+  .sc-talent {
+    width: 44px;
+    height: 44px;
+  }
+
+  .sc-art {
+    grid-template-columns: 76px 1fr;
+    gap: 8px;
+  }
+
+  .sc-subs {
+    gap: 6px 10px;
+  }
+
+  .sc-name {
+    font-size: 1.4rem;
+  }
+
+  .sc-info {
+    padding: 12px;
+  }
+
+  .sc-info-body {
+    grid-template-columns: 1fr;
+  }
+
+  .sc .sc-left > .sc-toggle {
+    min-height: 36px;
+  }
 }
