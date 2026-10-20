@@ -1,26 +1,46 @@
-/* Grafika postaci w tle strony startowej. */
-.hero {
+/* Baner z grafiką postaci na stronie startowej: leży pod tytułem, nad formularzem, a nazwa postaci jest na dole banera. */
+.hero-banner.has-art {
   position: relative;
-  isolation: isolate;
+  justify-content: flex-end;
+  width: min(760px, 100%);
+  min-height: 260px;
+  margin-right: auto;
+  margin-left: auto;
+  padding: 16px 16px 14px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--el, var(--accent)) 45%, var(--border));
+  border-radius: 18px;
+  box-shadow: 0 16px 44px color-mix(in srgb, var(--el, var(--accent)) 22%, transparent);
+}
+
+.hero-banner.has-art > :not(.hero-art) {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-banner.has-art .hero-banner-bar {
+  margin-top: 12px;
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .hero-art {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.9s ease;
-  -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent);
-  mask-image: linear-gradient(180deg, #000 45%, transparent);
 }
 
 .hero-art.ready {
-  opacity: 0.3;
+  opacity: 1;
 }
 
-:root[data-theme='light'] .hero-art.ready {
-  opacity: 0.18;
+.hero-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(11, 11, 15, 0) 30%, rgba(11, 11, 15, 0.88));
 }
 
 .hero-art-img {

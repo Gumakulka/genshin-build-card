@@ -1,5 +1,6 @@
-/* Strona startowa z grafiką: tło z pełną grafiką prezentowanej postaci, a kolor całej strony zgodny z jej żywiołem.
-   Grafika pochodzi z Enki. Gdy jej nie ma, tło po prostu się nie pokazuje. Ładowany po showcase.js. */
+/* Strona startowa z grafiką: pod tytułem jest baner z pełną grafiką prezentowanej postaci, a kolor całej strony zgodny z jej żywiołem.
+   Baner leży w zwykłym układzie strony, więc logo go nie zasłania. Grafika pochodzi z Enki. Gdy jej nie ma, baner wygląda jak dotychczas.
+   Ładowany po showcase.js. */
 const HERO_ART_BASE = IMG_URL + 'UI_Gacha_AvatarImg_';
 
 function heroArtName(icon) {
@@ -29,9 +30,12 @@ setHeroBanner = function () {
 
   const entry = heroCurrent();
   const name = heroArtName(entry.icon);
-  const old = hero.querySelector('.hero-art');
+  const old = heroIcons.querySelector('.hero-art');
   if (old) old.remove();
-  if (name && heroArtAllowed()) hero.prepend(heroArtLayer(name));
+
+  const show = Boolean(name) && heroArtAllowed();
+  heroIcons.classList.toggle('has-art', show);
+  if (show) heroIcons.prepend(heroArtLayer(name));
 
   if (!hero.hidden) showcaseSetElement(entry.element);
 };
