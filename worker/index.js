@@ -7,10 +7,12 @@ const GAME8_MAX_HTML = 6000000;
 const MIN_BUILDS = 20;
 const BUILDS_TTL_MS = 60 * 60 * 1000;
 const AVATARS_TTL_MS = 6 * 60 * 60 * 1000;
+const CHARACTER_TTL_MS = 6 * 60 * 60 * 1000;
 
 const YATTA = "https://gi.yatta.moe/api/v2/";
 const YATTA_LANGS = new Set(["en", "pl", "de", "fr", "es", "ru", "jp", "chs", "cht", "kr", "id", "pt", "th", "tr", "vi", "it"]);
 const AVATAR_EXCLUDE = new Set(["10000117", "10000118", "10000005"]);
+const ICON_NAME = /^[A-Za-z0-9_]{1,80}$/;
 
 const BASE_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
@@ -22,6 +24,7 @@ const BASE_HEADERS = {
 
 const BUILDS_HEADERS = { ...BASE_HEADERS, "Cache-Control": "public, max-age=3600" };
 const AVATARS_HEADERS = { ...BASE_HEADERS, "Cache-Control": "public, max-age=21600" };
+const CHARACTER_HEADERS = { ...BASE_HEADERS, "Cache-Control": "public, max-age=21600" };
 
 const KNOWN_SETS = [
   "Gilded Dreams", "Wanderer's Troupe", "Blizzard Strayer", "Noblesse Oblige", "Fragment of Harmonic Whimsy",
@@ -39,6 +42,7 @@ const KNOWN_SETS = [
   "Prayers for Wisdom", "Prayers for Illumination", "Prayers for Destiny", "Prayers to Springtime"
 ];
 
+/* Pamięć podręczna w obrębie jednej instancji Workera. Działa też na workers.dev, gdzie Cache API nie działa. */
 const memo = new Map();
 
 function memoGet(key, ttl) {
@@ -48,7 +52,7 @@ function memoGet(key, ttl) {
 
 function memoSet(key, body) {
   memo.set(key, { time: Date.now(), body });
-  if (memo.size > 30) memo.delete(memo.keys().next().value);
+  if (memo.size > 80) memo.delete(memo.keys().next().value);
 }
 
 function isAllowedOrigin(origin) {
@@ -59,15 +63,16 @@ function jsonResponse(body, status, extra) {
   return new Response(JSON.stringify(body), { status, headers: { ...BASE_HEADERS, ...extra } });
 }
 
+const HTML_ENTITIES = { nbsp: " ", amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", rsquo: "'", lsquo: "'" };
+
 function decodeEntities(text) {
   return text
-    .replace(/&nbsp;/g, " ")
-    .replace(/&/g, "&")
-    .replace(/</g, "<")
-    .replace(/>/g, ">")
-    .replace(/"/g, '"')
-    .replace(/&#x27;|&#39;|&rsquo;|&lsquo;/g, "'")
-    .replace(/&#(\d+);/g, (match, code) => String.fromCharCode(Number(code)))
+    .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, name) => {
+      const key = name.toLowerCase();
+      if (key.startsWith("#x")) return String.fromCharCode(parseInt(key.slice(2), 16));
+      if (key.startsWith("#")) return String.fromCharCode(Number(key.slice(1)));
+      return Object.prototype.hasOwnProperty.call(HTML_ENTITIES, key) ? HTML_ENTITIES[key] : match;
+    })
     .replace(/[\u2018\u2019]/g, "'");
 }
 
@@ -169,6 +174,8 @@ function parseLine(line) {
   return { name, entry: [role, extractSets(desc), mains, subs] };
 }
 
+/* Limit żądań: używa bindingu Rate Limiting (RATE_LIMITER), jeśli został dodany do Workera.
+   Bez bindingu limit jest wyłączony, bo Cache API nie działa na domenie workers.dev. */
 async function allowed(env, request, route) {
   if (!env || !env.RATE_LIMITER || typeof env.RATE_LIMITER.limit !== "function") return true;
 
@@ -294,6 +301,190 @@ async function handleAvatars(url, cors, ctx) {
   }
 }
 
+function safeText(value, max) {
+  return typeof value === "string" ? value.slice(0, max) : "";
+}
+
+function safeIcon(value) {
+  return typeof value === "string" && ICON_NAME.test(value) ? value : "";
+}
+
+function safeNumber(value) {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function slimCost(items) {
+  const cost = {};
+
+  if (items && typeof items === "object") {
+    Object.keys(items).forEach((id) => {
+      if (/^\d{1,9}$/.test(id) && Number.isFinite(items[id])) cost[id] = items[id];
+    });
+  }
+
+  return cost;
+}
+
+function trimParams(params) {
+  const list = Array.isArray(params) ? params.slice(0, 25).map(safeNumber) : [];
+
+  while (list.length && list[list.length - 1] === 0) list.pop();
+
+  return list;
+}
+
+function slimTalent(key, talent) {
+  if (!talent || typeof talent !== "object") return null;
+
+  const promote = talent.promote && typeof talent.promote === "object" ? talent.promote : null;
+  const linked = talent.linkedConstellations && Array.isArray(talent.linkedConstellations.prop) ? talent.linkedConstellations.prop : [];
+  const result = {
+    key: String(key),
+    skillId: safeNumber(talent.skillId),
+    name: safeText(talent.name, 120),
+    description: safeText(talent.description, 3000),
+    icon: safeIcon(talent.icon),
+    active: Boolean(promote),
+    links: linked.slice(0, 6).map((entry) => safeNumber(entry && entry.id)),
+    labels: [],
+    levels: {},
+    cooldown: safeNumber(talent.cooldown),
+    energy: safeNumber(talent.cost)
+  };
+
+  if (promote) {
+    const keys = Object.keys(promote).filter((level) => /^\d{1,2}$/.test(level));
+    const first = keys.length ? promote[keys[0]] : null;
+
+    if (first && Array.isArray(first.description)) {
+      result.labels = first.description
+        .filter((line) => typeof line === "string" && line.includes("|"))
+        .slice(0, 24)
+        .map((line) => line.slice(0, 200));
+    }
+
+    keys.forEach((level) => {
+      const entry = promote[level];
+      if (!entry || typeof entry !== "object") return;
+      result.levels[level] = { p: trimParams(entry.params), c: slimCost(entry.costItems), m: safeNumber(entry.coinCost) };
+    });
+  }
+
+  return result;
+}
+
+function slimConstellation(key, entry) {
+  if (!entry || typeof entry !== "object") return null;
+
+  const extra = entry.extraData && entry.extraData.addTalentExtraLevel;
+
+  return {
+    index: Number(key) || 0,
+    name: safeText(entry.name, 160),
+    description: safeText(entry.description, 1500),
+    icon: safeIcon(entry.icon),
+    extra: extra && typeof extra === "object" ? { index: safeNumber(extra.talentIndex), level: safeNumber(extra.extraLevel) } : null
+  };
+}
+
+function slimItems(items) {
+  const result = {};
+
+  if (items && typeof items === "object") {
+    Object.keys(items).slice(0, 80).forEach((id) => {
+      const item = items[id];
+      if (!/^\d{1,9}$/.test(id) || !item || typeof item !== "object") return;
+      result[id] = { name: safeText(item.name, 80), rank: safeNumber(item.rank), icon: safeIcon(item.icon) };
+    });
+  }
+
+  return result;
+}
+
+function slimCharacter(raw) {
+  const data = raw && raw.data;
+
+  if (!data || typeof data !== "object" || !Number.isFinite(data.id)) return null;
+
+  const fetter = data.fetter && typeof data.fetter === "object" ? data.fetter : {};
+  const other = data.other && typeof data.other === "object" ? data.other : {};
+  const card = other.nameCard && typeof other.nameCard === "object" ? other.nameCard : null;
+  const food = other.specialFood && typeof other.specialFood === "object" ? other.specialFood : null;
+  const cv = fetter.cv && typeof fetter.cv === "object" ? fetter.cv : {};
+  const promote = data.upgrade && Array.isArray(data.upgrade.promote) ? data.upgrade.promote : [];
+  const talents = Object.keys(data.talent || {}).map((key) => slimTalent(key, data.talent[key])).filter(Boolean);
+  const constellations = Object.keys(data.constellation || {})
+    .map((key) => slimConstellation(key, data.constellation[key]))
+    .filter(Boolean)
+    .sort((a, b) => a.index - b.index);
+
+  return {
+    id: data.id,
+    name: safeText(data.name, 80),
+    rank: safeNumber(data.rank),
+    element: safeText(data.element, 20),
+    weaponType: safeText(data.weaponType, 40),
+    region: safeText(data.region, 40),
+    birthday: Array.isArray(data.birthday) && data.birthday.length === 2 ? [safeNumber(data.birthday[0]), safeNumber(data.birthday[1])] : null,
+    title: safeText(fetter.title, 120),
+    detail: safeText(fetter.detail, 800),
+    constellation: safeText(fetter.constellation, 120),
+    native: safeText(fetter.native, 80),
+    cv: { en: safeText(cv.EN, 80), jp: safeText(cv.JP, 80), kr: safeText(cv.KR, 80), chs: safeText(cv.CHS, 80) },
+    namecard: card ? { name: safeText(card.name, 120), icon: safeIcon(card.icon) } : null,
+    food: food ? { name: safeText(food.name, 120), rank: safeNumber(food.rank), icon: safeIcon(food.icon) } : null,
+    talents,
+    constellations,
+    items: slimItems(data.items),
+    promote: promote.slice(0, 7).map((step) => ({
+      level: safeNumber(step && step.promoteLevel),
+      max: safeNumber(step && step.unlockMaxLevel),
+      c: slimCost(step && step.costItems),
+      m: safeNumber(step && step.coinCost)
+    }))
+  };
+}
+
+async function handleCharacter(id, url, cors) {
+  const requested = url.searchParams.get("lang");
+  const lang = YATTA_LANGS.has(requested) ? requested : "en";
+  const memoKey = "character-" + lang + "-" + id;
+
+  const memoHit = memoGet(memoKey, CHARACTER_TTL_MS);
+  if (memoHit) return new Response(memoHit, { status: 200, headers: { ...CHARACTER_HEADERS, ...cors } });
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
+
+  try {
+    const upstream = await fetch(YATTA + lang + "/avatar/" + id, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; genshin-build-card/1.0)", "Accept": "application/json" },
+      signal: controller.signal
+    });
+
+    if (upstream.status === 404) return jsonResponse({ error: "Not found" }, 404, cors);
+    if (!upstream.ok) return jsonResponse({ error: "Upstream status " + upstream.status }, 502, cors);
+
+    const raw = await upstream.json();
+
+    if (raw && raw.response === 404) return jsonResponse({ error: "Not found" }, 404, cors);
+
+    const slim = slimCharacter(raw);
+
+    if (!slim) return jsonResponse({ error: "Unexpected data" }, 502, cors);
+
+    const body = JSON.stringify(slim);
+
+    memoSet(memoKey, body);
+
+    return new Response(body, { status: 200, headers: { ...CHARACTER_HEADERS, ...cors } });
+  } catch (error) {
+    return jsonResponse({ error: "Upstream unavailable" }, 502, cors);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function handleUid(id, cors) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
@@ -304,6 +495,7 @@ async function handleUid(id, cors) {
       signal: controller.signal
     });
 
+    /* Kody błędów Enki (np. 400, 404, 424, 429) przekazujemy dalej, bo aplikacja pokazuje dla nich osobne komunikaty. */
     const contentType = upstream.headers.get("content-type") || "";
 
     if (!contentType.includes("application/json")) {
@@ -354,6 +546,13 @@ export default {
     if (url.pathname === "/avatars") {
       if (!(await allowed(env, request, "avatars"))) return tooManyRequests(cors);
       return handleAvatars(url, cors, ctx);
+    }
+
+    const characterMatch = url.pathname.match(/^\/character\/(\d{5,9})$/);
+
+    if (characterMatch) {
+      if (!(await allowed(env, request, "character"))) return tooManyRequests(cors);
+      return handleCharacter(characterMatch[1], url, cors);
     }
 
     const match = url.pathname.match(/^\/uid\/(\d{9})$/);
