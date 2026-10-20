@@ -1,0 +1,240 @@
+/* Spójny wygląd całej strony po ekranie startowym: te same powierzchnie, ramki, zaokrąglenia i kolor akcentu co w karcie postaci.
+   Ładowany jako ostatni, więc nadpisuje starsze reguły. */
+:root {
+  --radius: 16px;
+  --radius-sm: 10px;
+  --line: color-mix(in srgb, var(--accent) 26%, var(--border));
+  --surface: color-mix(in srgb, var(--card) 92%, transparent);
+  --surface-2: color-mix(in srgb, var(--card-2) 92%, transparent);
+}
+
+/* Nagłówki sekcji: akcent z lewej i cienka linia, która znika w prawo. */
+h3.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 34px 0 14px;
+  font-size: 0.9rem;
+  letter-spacing: 0.16em;
+  color: var(--fg);
+}
+
+h3.section-title::before {
+  content: '';
+  flex: none;
+  width: 4px;
+  height: 1.1em;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+h3.section-title::after {
+  flex: 1;
+  width: auto;
+  height: 1px;
+  margin: 0;
+  background: linear-gradient(90deg, var(--line), transparent);
+  border-radius: 0;
+  transform: none;
+  animation: none;
+}
+
+/* Profil gracza */
+.profile {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.25);
+}
+
+.profile::before,
+.detail::before,
+.detail::after {
+  display: none;
+}
+
+.banner {
+  opacity: 0.4;
+  -webkit-mask-image: linear-gradient(270deg, #000 25%, transparent 90%);
+  mask-image: linear-gradient(270deg, #000 25%, transparent 90%);
+}
+
+.profile-body {
+  padding: 22px;
+}
+
+.profile-body img.avatar {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent), 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.profile h2 {
+  font-size: 1.7rem;
+  letter-spacing: 0.04em;
+}
+
+/* Chipy z danymi konta i księgi postaci */
+.chip {
+  padding: 6px 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+
+.chip .ico {
+  color: var(--accent);
+}
+
+.chip .chip-value {
+  color: var(--fg);
+}
+
+/* Lista postaci */
+.characters {
+  gap: 14px;
+}
+
+.character {
+  padding: 14px 8px 12px;
+  border-width: 1px;
+  border-radius: var(--radius);
+}
+
+.character.rarity-5 {
+  border-color: color-mix(in srgb, #e0a93b 55%, var(--border));
+}
+
+.character.rarity-4 {
+  border-color: color-mix(in srgb, #a67ad6 55%, var(--border));
+}
+
+.character img {
+  border: 2px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+
+.character.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 8px 26px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.character-filter {
+  width: 100%;
+  margin-bottom: 12px;
+  border-radius: var(--radius-sm);
+}
+
+/* Panel szczegółów: sama otoczka znika, bo karta postaci ma własną ramkę, a panele pod nią mają swoje. */
+.detail {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.detail-head {
+  padding: 4px 2px 0;
+}
+
+.detail-head img {
+  width: 56px;
+  height: 56px;
+}
+
+.detail-head h4 {
+  font-size: 1.4rem;
+  letter-spacing: 0.04em;
+}
+
+.detail-grid {
+  gap: 16px;
+}
+
+.panel {
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.panel:hover {
+  border-color: var(--line);
+}
+
+.panel h5 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  color: var(--fg);
+}
+
+.panel h5::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  transform: rotate(45deg);
+}
+
+.artifact-card {
+  background: var(--surface-2);
+  border-radius: 14px;
+}
+
+.artifact-card.weakest {
+  border-style: dashed;
+  border-color: var(--accent);
+}
+
+.guide {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* Przyciski */
+.action-button,
+.rv-toggle {
+  padding: 8px 16px;
+  font-weight: 600;
+  color: var(--fg);
+  cursor: pointer;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.action-button:hover,
+.rv-toggle:hover {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+  border-color: var(--accent);
+}
+
+.rv-toggle.on {
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface-2));
+  border-color: var(--accent);
+}
+
+/* Porównanie graczy */
+table.compare {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: var(--radius-sm);
+}
+
+table.compare th {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--surface-2);
+}
+
+table.compare td.better {
+  font-weight: 700;
+  color: var(--accent);
+}

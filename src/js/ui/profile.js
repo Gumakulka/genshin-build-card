@@ -43,26 +43,26 @@ function buildProfile(data, store) {
 function buildChips(data) {
   const info = data.playerInfo;
   const chips = el('section', 'chips');
-  chips.append(chip('🆔', 'UID', data.uid));
-  if (data.region) chips.append(chip('🌐', t('region'), data.region));
-  chips.append(chip('🎖️', t('adventureRank'), info.level));
-  chips.append(chip('🌍', t('worldLevel'), info.worldLevel));
-  chips.append(chip('🏆', t('achievements'), info.finishAchievementNum));
+  chips.append(codexChip('fingerprint', 'UID', data.uid));
+  if (data.region) chips.append(codexChip('globe', t('region'), data.region));
+  chips.append(codexChip('medal', t('adventureRank'), info.level));
+  chips.append(codexChip('earth', t('worldLevel'), info.worldLevel));
+  chips.append(codexChip('trophy', t('achievements'), info.finishAchievementNum));
   if (info.towerFloorIndex) {
     let abyss = info.towerFloorIndex + '-' + info.towerLevelIndex;
-    if (info.towerStarIndex) abyss += ' · ⭐ ' + info.towerStarIndex;
-    chips.append(chip('🌀', t('abyss'), abyss));
+    if (info.towerStarIndex) abyss += ' · ★ ' + info.towerStarIndex;
+    chips.append(codexChip('tornado', t('abyss'), abyss));
   }
   if (info.stygianIndex) {
     let stygian = String(info.stygianIndex);
     if (info.stygianSeconds) stygian += ' · ' + info.stygianSeconds + ' s';
-    chips.append(chip('⚔️', t('stygian'), stygian));
+    chips.append(codexChip('swords', t('stygian'), stygian));
   }
-  if (info.fetterCount) chips.append(chip('🤝', t('maxFriendship'), info.fetterCount));
+  if (info.fetterCount) chips.append(codexChip('handshake', t('maxFriendship'), info.fetterCount));
 
   Object.keys(info).forEach((key) => {
     if (HANDLED_KEYS.includes(key) || typeof info[key] === 'object') return;
-    chips.append(chip('🔹', key, info[key]));
+    chips.append(codexChip('circle-dot', key, info[key]));
   });
   return chips;
 }
@@ -112,7 +112,7 @@ function buildHistory() {
   }
   const chips = el('div', 'chips');
   diff.changes.forEach((change) => {
-    chips.append(chip('📈', t(change.label), change.from + ' → ' + change.to));
+    chips.append(codexChip('trending-up', t(change.label), change.from + ' → ' + change.to));
   });
   wrapper.append(chips);
   return wrapper;
