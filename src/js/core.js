@@ -85,14 +85,31 @@ function propName(prop) {
   return PROP_NAMES[state.lang][prop] || prop;
 }
 
+/* Wskaźnik ładowania. Przy wyszukiwaniu gracza pod kółkiem widać też szkielet profilu i karty, przy krótkich ładowaniach tylko kółko. */
 function loadingNode(text) {
   const box = document.createElement('div');
-  box.className = 'loading';
+  box.className = 'loading loading-skeleton';
   box.setAttribute('role', 'status');
+
+  const line = document.createElement('div');
+  line.className = 'loading-line';
   const spinner = document.createElement('span');
   spinner.className = 'spinner';
   spinner.setAttribute('aria-hidden', 'true');
-  box.append(spinner, document.createTextNode(text));
+  line.append(spinner, document.createTextNode(text));
+  box.append(line);
+
+  if (text === t('loading')) {
+    const skeleton = document.createElement('div');
+    skeleton.className = 'skeleton';
+    skeleton.setAttribute('aria-hidden', 'true');
+    ['sk-profile', 'sk-row', 'sk-card'].forEach((name) => {
+      const block = document.createElement('div');
+      block.className = 'sk ' + name;
+      skeleton.append(block);
+    });
+    box.append(skeleton);
+  }
   return box;
 }
 

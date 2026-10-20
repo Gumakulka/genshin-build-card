@@ -2,9 +2,76 @@
 const FETCH_TIMEOUT_MS = 15000;
 const MIN_TTL_S = 15;
 const MAX_TTL_S = 3600;
+const CACHE_KEEP = 10;
+const CACHE_MIN_KEEP = 3;
+/* Klucz zaczyna się od „player-”, więc „Wyczyść zapisane dane” w menu usuwa go razem z resztą. */
+const CACHE_INDEX = 'player-index';
 
 function hasPlayerInfo(data) {
   return Boolean(data) && typeof data === 'object' && Boolean(data.playerInfo) && typeof data.playerInfo === 'object';
+}
+
+/* Pamięć przeglądarki ma limit, więc trzymamy dane tylko ostatnich graczy. Indeks zapisuje kolejność od najnowszego. */
+function cacheDrop(list) {
+  list.forEach((uid) => {
+    removeKey('player-' + uid);
+    removeKey('offline-' + uid);
+  });
+}
+
+function cacheTouch(uid) {
+  const list = sanitizeList(loadJsonSetting(CACHE_INDEX, []), []).filter((item) => typeof item === 'string' && item !== uid);
+  list.unshift(uid);
+  cacheDrop(list.splice(CACHE_KEEP));
+  saveJsonSetting(CACHE_INDEX, list);
+}
+
+/* Jednorazowe sprzątanie wpisów zapisanych przed wprowadzeniem indeksu. */
+function cacheMigrate() {
+  try {
+    if (localStorage.getItem(CACHE_INDEX) !== null) return;
+    const found = {};
+
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const match = /^(?:player|offline)-(\d{9})$/.exec(localStorage.key(i) || '');
+      if (!match) continue;
+      let stamp = 0;
+      try {
+        const item = JSON.parse(localStorage.getItem(match[0]));
+        stamp = Number(item && (item.savedAt || item.expires)) || 0;
+      } catch (error) {
+        stamp = 0;
+      }
+      found[match[1]] = Math.max(found[match[1]] || 0, stamp);
+    }
+
+    const ordered = Object.keys(found).sort((a, b) => found[b] - found[a]);
+    cacheDrop(ordered.splice(CACHE_KEEP));
+    saveJsonSetting(CACHE_INDEX, ordered);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+/* Zapis z jedną ponowną próbą: gdy zabraknie miejsca, zostawiamy tylko kilku ostatnich graczy. */
+function storeEntry(uid, key, payload) {
+  cacheTouch(uid);
+  const text = JSON.stringify(payload);
+
+  try {
+    localStorage.setItem(key, text);
+    return;
+  } catch (error) {
+    const list = sanitizeList(loadJsonSetting(CACHE_INDEX, []), []);
+    cacheDrop(list.splice(CACHE_MIN_KEEP));
+    saveJsonSetting(CACHE_INDEX, list);
+  }
+
+  try {
+    localStorage.setItem(key, text);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 function getCache(uid) {
@@ -24,14 +91,10 @@ function getCache(uid) {
 }
 
 function setCache(uid, data) {
-  try {
-    const requested = Number(data.ttl);
-    const seconds = Number.isFinite(requested) ? requested : 60;
-    const ttl = Math.min(MAX_TTL_S, Math.max(MIN_TTL_S, seconds)) * 1000;
-    localStorage.setItem('player-' + uid, JSON.stringify({ expires: Date.now() + ttl, data }));
-  } catch (error) {
-    console.error(error);
-  }
+  const requested = Number(data.ttl);
+  const seconds = Number.isFinite(requested) ? requested : 60;
+  const ttl = Math.min(MAX_TTL_S, Math.max(MIN_TTL_S, seconds)) * 1000;
+  storeEntry(uid, 'player-' + uid, { expires: Date.now() + ttl, data });
 }
 
 async function fetchPlayer(uid) {
@@ -69,11 +132,7 @@ async function fetchPlayer(uid) {
 }
 
 function saveOffline(uid, data) {
-  try {
-    localStorage.setItem('offline-' + uid, JSON.stringify({ savedAt: Date.now(), data }));
-  } catch (error) {
-    console.error(error);
-  }
+  storeEntry(uid, 'offline-' + uid, { savedAt: Date.now(), data });
 }
 
 function loadOffline(uid) {
@@ -123,3 +182,5 @@ function updateHistory(uid, info) {
   }
   return { previous, changes };
 }
+
+cacheMigrate();
