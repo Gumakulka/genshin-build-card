@@ -5,13 +5,7 @@
 <h1 align="center">Genshin Build Card</h1>
 
 <p align="center">
-  <a href="https://gumakulka.github.io/genshin-build-card/"><img src="https://img.shields.io/badge/Wersja%20web-telefon%20%C2%B7%20komputer-E8C872?style=for-the-badge&labelColor=16161D" alt="Wersja web: telefon i komputer"></a>
-  <a href="https://github.com/Gumakulka/genshin-build-card/releases/latest"><img src="https://img.shields.io/badge/Windows-.exe%20do%20pobrania-5B8DEF?style=for-the-badge&labelColor=16161D" alt="Windows: plik .exe do pobrania"></a>
-  <img src="https://img.shields.io/badge/PL%20%C2%B7%20EN-jasny%20i%20ciemny%20motyw-9B6BFF?style=for-the-badge&labelColor=16161D" alt="PL i EN, jasny i ciemny motyw">
-</p>
-
-<p align="center">
-  <a href="#polski"><b>Polski</b></a> &nbsp;·&nbsp; <a href="#english"><b>English</b></a>
+  <a href="#polski"><b>Polski</b></a> &nbsp;·&nbsp; <a href="#english"><b>English</b></a> &nbsp;·&nbsp; <a href="https://gumakulka.github.io/genshin-build-card/">gumakulka.github.io/genshin-build-card</a>
 </p>
 
 ---
@@ -20,13 +14,11 @@
 
 Genshin Build Card to strona, na której wpisujesz UID gracza z Genshin Impact i od razu widzisz jego profil oraz postacie z gabloty: statystyki, talenty, broń i artefakty. Nie trzeba się logować.
 
-> [!IMPORTANT]
-> **Jest wersja webowa, z której możesz korzystać wszędzie: na telefonie, tablecie i komputerze.** <ins>Nic nie musisz instalować</ins>, wystarczy przeglądarka. Otwórz: **[gumakulka.github.io/genshin-build-card](https://gumakulka.github.io/genshin-build-card/)**
+> ❗ **Ważne.** Jest wersja webowa, z której możesz korzystać wszędzie: na telefonie, tablecie i komputerze. <ins>Nic nie musisz instalować</ins>, wystarczy przeglądarka. Otwórz: **[gumakulka.github.io/genshin-build-card](https://gumakulka.github.io/genshin-build-card/)**
 
-> [!TIP]
-> **Jest też aplikacja na komputer z Windowsem.** Pobierasz jeden plik `.exe`, uruchamiasz go i działa w osobnym oknie, bez przeglądarki. Znajdziesz go w zakładce **[Wydania (Releases)](https://github.com/Gumakulka/genshin-build-card/releases/latest)**.
+> 💡 **Wskazówka.** Jest też aplikacja na komputer z Windowsem. Pobierasz jeden plik `.exe`, uruchamiasz go i działa w osobnym oknie, bez przeglądarki. Znajdziesz go w zakładce **[Wydania (Releases)](https://github.com/Gumakulka/genshin-build-card/releases/latest)**.
 
-### Dwie wersje, ten sam program
+### Dwie wersje
 
 | | **Wersja webowa** | **Aplikacja na Windowsa** |
 |---|---|---|
@@ -34,9 +26,9 @@ Genshin Build Card to strona, na której wpisujesz UID gracza z Genshin Impact i
 | **Instalacja** | Niepotrzebna | Niepotrzebna, uruchamiasz plik `.exe` |
 | **Jak zacząć** | Otwórz link powyżej | Pobierz plik z zakładki Wydania |
 | **Co jest potrzebne** | Internet | Internet, ok. 300 MB miejsca na dysku |
+| **Aktualność** | Zawsze najnowsza | Taka, jak w chwili wydania, więc może być starsza niż strona |
 
-> [!WARNING]
-> Windows SmartScreen może przy pierwszym uruchomieniu pokazać ostrzeżenie, bo plik `.exe` nie jest podpisany certyfikatem. Wybierz **Więcej informacji**, a potem **Uruchom mimo to**.
+> ⚠️ **Uwaga.** Windows SmartScreen może przy pierwszym uruchomieniu pokazać ostrzeżenie, bo plik `.exe` nie jest podpisany certyfikatem. Wybierz **Więcej informacji**, a potem **Uruchom mimo to**.
 
 ---
 
@@ -46,8 +38,7 @@ Genshin Build Card to strona, na której wpisujesz UID gracza z Genshin Impact i
 2. Wybierz postać z listy. Pod listą otworzy się jej karta ze wszystkim, co ma na sobie.
 3. Chcesz wrócić do tego gracza później? Dodaj go do ulubionych albo skopiuj link. Numer możesz też dopisać do adresu strony, na przykład `?uid=760720445`.
 
-> [!CAUTION]
-> **Nigdy nie podawaj nikomu hasła do konta gry.** Ta strona potrzebuje tylko UID, czyli numeru gracza. Jeśli ktokolwiek prosi o hasło, to nie jest ta strona.
+> 🚫 **Bezpieczeństwo.** **Nigdy nie podawaj nikomu hasła do konta gry.** Ta strona potrzebuje tylko UID, czyli numeru gracza. Jeśli ktokolwiek prosi o hasło, to nie jest ta strona.
 
 ### Karta postaci
 
@@ -59,7 +50,7 @@ Jeśli karta jest dla Ciebie za długa, włącz „Widok skrócony”. Chowa naj
 
 - **RV** mówi, ile „najlepszych ulepszeń” mają wybrane podstatystyki. <ins>100% to jedno maksymalne ulepszenie.</ins> Domyślnie liczy się szansa i obrażenia krytyczne oraz ATK%, a wybór możesz zmienić na stronie. Artefakty poniżej pięciu gwiazdek nie są liczone.
 - **Crit Value (CV)** to prosta miara krytyków: dwukrotna szansa krytyczna plus obrażenia krytyczne, policzone z podstatystyk artefaktów. Im więcej, tym lepiej.
-- Na karcie opisany jest najlepszy artefakt oraz ten, który warto poprawić w pierwszej kolejności.
+- Na karcie oznaczony jest najlepszy artefakt oraz ten, który warto poprawić w pierwszej kolejności.
 - Kropki przy podstatystykach to szacunek, z ilu ulepszeń powstała dana wartość.
 - Pod kartą są też cele dla postaci. Domyślnie to 70% szansy krytycznej, 140% obrażeń krytycznych i 100% regeneracji energii, ale wpiszesz własne.
 
@@ -84,8 +75,7 @@ Strona nie ma kont ani logowania. Ulubieni, historia i zapisane dane graczy zost
 
 ### Czego nie zobaczysz
 
-> [!NOTE]
-> Szczegóły postaci są widoczne <ins>tylko wtedy, gdy gracz ma publiczną gablotę w grze</ins>.
+> ℹ️ **Dobrze wiedzieć.** Szczegóły postaci są widoczne <ins>tylko wtedy, gdy gracz ma publiczną gablotę w grze</ins>.
 
 - Listy znajomych, bo gra nie udostępnia jej publicznie.
 - Zmian z gry od razu. Pojawiają się na stronie z opóźnieniem.
@@ -96,7 +86,7 @@ Strona nie ma kont ani logowania. Ulubieni, historia i zapisane dane graczy zost
 >
 > Genshin Impact, nazwy, postacie i wszystkie grafiki z gry są własnością HoYoverse. Dane graczy pochodzą z publicznego interfejsu [Enka.Network](https://enka.network/). Kod programu jest na licencji MIT, a logo należy do autora.
 >
-> Korzystasz ze strony na własną odpowiedzialność. Twoje dane nie są nigdzie wysyłane poza zapytaniem o gracza o podany UID.
+> Wpisany UID jest wysyłany do Enka.Network przez serwer pośredniczący projektu, żeby pobrać dane gracza. Projekt niczego o Tobie nie zapisuje. Korzystasz ze strony na własną odpowiedzialność.
 
 ---
 
@@ -110,7 +100,7 @@ Genshin Build Card is a website where you enter a Genshin Impact player's UID an
 > [!TIP]
 > **There is also an app for Windows computers.** Download a single `.exe` file, run it, and it opens in its own window with no browser. You will find it under **[Releases](https://github.com/Gumakulka/genshin-build-card/releases/latest)**.
 
-### Two versions, one program
+### Two versions
 
 | | **Web version** | **Windows app** |
 |---|---|---|
@@ -118,6 +108,7 @@ Genshin Build Card is a website where you enter a Genshin Impact player's UID an
 | **Installation** | Not needed | Not needed, you run the `.exe` file |
 | **How to start** | Open the link above | Download the file from Releases |
 | **What you need** | Internet | Internet, about 300 MB of disk space |
+| **How current it is** | Always the latest | As of the release date, so it can be older than the website |
 
 > [!WARNING]
 > Windows SmartScreen may show a warning the first time you run it, because the `.exe` file is not signed with a certificate. Choose **More info**, then **Run anyway**.
@@ -143,7 +134,7 @@ If the card feels too long, turn on "Compact view". It hides the longest stat li
 
 - **RV** tells you how many "best upgrades" the chosen substats have. <ins>100% equals one maximum upgrade.</ins> By default it counts CRIT Rate, CRIT DMG and ATK%, and you can change that on the page. Artifacts below five stars are not counted.
 - **Crit Value (CV)** is a simple measure of crits: twice the CRIT Rate plus CRIT DMG, taken from the artifact substats. The higher, the better.
-- The card labels the best artifact and the one most worth improving first.
+- The card marks the best artifact and the one most worth improving first.
 - The dots next to a substat estimate how many upgrades the value is made of.
 - Below the card there are also targets for the character. By default they are 70% CRIT Rate, 140% CRIT DMG and 100% Energy Recharge, and you can enter your own.
 
@@ -180,4 +171,4 @@ There are no accounts or logins. Favorites, history and saved player data stay i
 >
 > Genshin Impact, its names, characters and all artwork from the game are the property of HoYoverse. Player data comes from the public [Enka.Network](https://enka.network/) interface. The program code is MIT licensed, and the logo belongs to its author.
 >
-> You use the site at your own risk. Your data is not sent anywhere except the request for the player with the UID you enter.
+> The UID you enter is sent to Enka.Network through the project's proxy server to fetch the player's data. The project does not store anything about you. You use the site at your own risk.
