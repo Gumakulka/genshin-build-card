@@ -14,10 +14,12 @@
 
 Genshin Build Card to strona, na której wpisujesz UID gracza z Genshin Impact i od razu widzisz jego profil oraz postacie z gabloty: statystyki, talenty, broń i artefakty. Nie trzeba się logować.
 
-> [!IMPORTANT]
+> **Ważne**
+>
 > **Jest wersja webowa, z której możesz korzystać wszędzie: na telefonie, tablecie i komputerze.** <ins>Nic nie musisz instalować</ins>, wystarczy przeglądarka. Otwórz: **[gumakulka.github.io/genshin-build-card](https://gumakulka.github.io/genshin-build-card/)**
 
-> [!TIP]
+> **Wskazówka**
+>
 > **Jest też aplikacja na komputery z Windowsem.** Pobierasz jeden plik `.exe`, uruchamiasz go i działa w osobnym oknie, bez przeglądarki. Znajdziesz go w zakładce **[Wydania (Releases)](https://github.com/Gumakulka/genshin-build-card/releases/latest)**.
 
 ### Dwie wersje
@@ -30,7 +32,8 @@ Genshin Build Card to strona, na której wpisujesz UID gracza z Genshin Impact i
 | **Co jest potrzebne** | Internet | Internet, ok. 300 MB miejsca na dysku |
 | **Aktualność** | Zawsze najnowsza | Taka, jak w chwili wydania, więc może być starsza niż strona |
 
-> [!WARNING]
+> **Ostrzeżenie**
+>
 > Windows SmartScreen może przy pierwszym uruchomieniu pokazać ostrzeżenie, bo plik `.exe` nie jest podpisany certyfikatem. Wybierz **Więcej informacji**, a potem **Uruchom mimo to**.
 
 ---
@@ -41,7 +44,8 @@ Genshin Build Card to strona, na której wpisujesz UID gracza z Genshin Impact i
 2. Wybierz postać z listy. Pod listą otworzy się jej karta ze wszystkim, co ma na sobie.
 3. Chcesz wrócić do tego gracza później? Dodaj go do ulubionych albo skopiuj link. Numer możesz też dopisać do adresu strony, na przykład `?uid=760720445`.
 
-> [!CAUTION]
+> **Przestroga**
+>
 > **Nigdy nie podawaj nikomu hasła do konta gry.** Ta strona potrzebuje tylko UID, czyli numeru gracza. Jeśli ktokolwiek prosi o hasło, to nie jest ta strona.
 
 ### Karta postaci
@@ -79,7 +83,8 @@ Strona nie ma kont ani logowania. Ulubieni, historia i zapisane dane graczy zost
 
 ### Czego nie zobaczysz
 
-> [!NOTE]
+> **Uwaga**
+>
 > Szczegóły postaci są widoczne <ins>tylko wtedy, gdy gracz ma publiczną gablotę w grze</ins>.
 
 - Listy znajomych, bo gra nie udostępnia jej publicznie.
